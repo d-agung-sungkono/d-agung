@@ -1,36 +1,10 @@
-import { systems } from '../../data/systems'
+import Hero from '@/components/home/Hero'
+import { systems } from '@/data/systems'
 
 export default function SiteHomePage() {
   const featuredSystem = systems.find((system) => system.featured)
+  const selectedSystem =
+    systems.find((system) => !system.featured) ?? systems[0] ?? null
 
-  return (
-    <>
-      <header>
-        <p>D Agung</p>
-      </header>
-
-      <main>
-        <h1>Building systems that stay useful as they grow.</h1>
-        <p>
-          Personal platform for documenting modular product work, architectural
-          decisions, and operational thinking.
-        </p>
-
-        <section aria-labelledby="current-build">
-          <h2 id="current-build">Current Build</h2>
-          {featuredSystem ? (
-            <article>
-              <h3>{featuredSystem.title}</h3>
-              <p>{featuredSystem.summary}</p>
-              <p>
-                Status: {featuredSystem.status} • Year: {featuredSystem.year}
-              </p>
-            </article>
-          ) : (
-            <p>No featured system yet.</p>
-          )}
-        </section>
-      </main>
-    </>
-  )
+  return <Hero featuredSystem={featuredSystem ?? null} selectedSystem={selectedSystem} />
 }
