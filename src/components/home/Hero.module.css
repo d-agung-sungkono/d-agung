@@ -1,6 +1,6 @@
 .hero {
   display: grid;
-  grid-template-columns: 5fr 4fr 3fr;
+  grid-template-columns: 5fr 5fr 2fr;
   gap: clamp(2rem, 3.2vw, 4rem);
   align-items: start;
   padding: clamp(1.75rem, 3.5vw, 4rem);
@@ -141,15 +141,16 @@
 }
 
 .centerColumn {
+  grid-column: 2;
+  justify-self: end;
+  width: 80%;
   position: relative;
   margin: 0;
   min-height: clamp(480px, 72vh, 800px);
   border: 1px solid rgba(17, 17, 17, 0.22);
   border-radius: 18px;
   overflow: hidden;
-  background:
-    radial-gradient(circle at 56% 20%, rgba(255, 255, 255, 0.5), transparent 56%),
-    linear-gradient(180deg, rgba(247, 247, 247, 0.96) 0%, rgba(231, 231, 231, 0.96) 100%);
+  background: linear-gradient(180deg, rgba(237, 237, 237, 0.9), rgba(210, 210, 210, 0.92));
   box-shadow: 0 24px 36px rgba(6, 6, 6, 0.12);
 }
 
@@ -159,22 +160,36 @@
   left: 0;
   right: 0;
   bottom: 0;
-  height: 44%;
-  background: linear-gradient(to bottom, rgba(255, 255, 255, 0), rgba(10, 10, 10, 0.32));
+  height: 46%;
+  background: linear-gradient(to bottom, rgba(255, 255, 255, 0), rgba(8, 8, 8, 0.42));
   pointer-events: none;
 }
 
-.portraitPlaceholder {
-  height: 100%;
-  display: grid;
-  place-items: center;
-  color: rgba(30, 30, 30, 0.56);
-  text-transform: uppercase;
-  letter-spacing: 0.13em;
-  font-size: 0.72rem;
+.portraitMedia {
+  position: absolute;
+  inset: 0;
+}
+
+.portraitImage {
+  object-fit: cover;
+  object-position: center 24%;
+  filter: saturate(0.76) contrast(1.03) brightness(0.98);
+  transform: scale(1.01);
+}
+
+.portraitMedia::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at 54% 20%, rgba(255, 255, 255, 0.22), transparent 58%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(0, 0, 0, 0.06));
+  pointer-events: none;
+  z-index: 1;
 }
 
 .rightColumn {
+  grid-column: 3;
   position: relative;
   display: flex;
   justify-content: flex-end;
@@ -188,7 +203,7 @@
 
 .railNav {
   position: relative;
-  width: min(100%, 235px);
+  width: min(100%, 260px);
   padding-left: 1rem;
   padding-top: 0.15rem;
 }
@@ -301,6 +316,12 @@
     grid-template-columns: 1fr 1fr;
   }
 
+  .centerColumn {
+    grid-column: 1 / -1;
+    justify-self: stretch;
+    width: 100%;
+  }
+
   .rightColumn {
     grid-column: 1 / -1;
     border-top: 1px solid rgba(17, 17, 17, 0.14);
@@ -341,6 +362,9 @@
   }
 
   .centerColumn {
+    grid-column: auto;
+    justify-self: stretch;
+    width: 100%;
     min-height: 360px;
     border-radius: 14px;
   }

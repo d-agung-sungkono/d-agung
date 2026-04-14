@@ -1,3 +1,5 @@
+import Image from 'next/image'
+
 import type { SystemItem } from '@/types/system'
 
 import styles from './Hero.module.css'
@@ -97,8 +99,18 @@ export default function Hero({ featuredSystem, selectedSystem }: HeroProps) {
         <SystemSummary title="Selected System" system={selectedSystem} />
       </div>
 
-      <figure className={styles.centerColumn} aria-label="Featured visual placeholder">
-        <div className={styles.portraitPlaceholder}>Portrait Placeholder</div>
+      <figure className={styles.centerColumn} aria-label="Featured portrait">
+        <div className={styles.portraitMedia}>
+          <Image
+            src="/agung-profesional.png"
+            alt="Portrait editorial placeholder"
+            fill
+            unoptimized
+            priority
+            className={styles.portraitImage}
+            sizes="(max-width: 760px) 100vw, (max-width: 1100px) 50vw, 35vw"
+          />
+        </div>
       </figure>
 
       <aside className={styles.rightColumn}>
