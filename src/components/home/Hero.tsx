@@ -11,32 +11,57 @@ type RailItem = {
   label: string
   sublabel: string
   href: string
+  isActive?: boolean
 }
 
 const railItems: RailItem[] = [
-  { label: 'ACTIVE', sublabel: 'Current Focus', href: '/' },
+  { label: 'ACTIVE', sublabel: 'Current Focus', href: '/', isActive: true },
   { label: 'SYSTEMS', sublabel: 'Built Platforms', href: '/systems' },
   { label: 'THINKING', sublabel: 'Architecture Notes', href: '/thinking' },
   { label: 'PROOF', sublabel: 'Execution Artifacts', href: '/proof' },
   { label: 'OFF CODE', sublabel: 'Outside Engineering', href: '/off-code' },
 ]
 
+function getVersionText(system: SystemItem): string {
+  if (system.status === 'done') return 'v1.0 stable'
+  if (system.status === 'in-progress') return 'v0.9 active'
+  return 'v0.3 concept'
+}
+
 function SystemSummary({
   title,
   system,
+  variant = 'default',
 }: {
   title: string
   system: SystemItem | null
+  variant?: 'default' | 'currentBuild'
 }) {
+  const isCurrentBuild = variant === 'currentBuild'
+
   return (
-    <section className={styles.systemSection} aria-label={title}>
+    <section
+      className={`${styles.systemSection} ${isCurrentBuild ? styles.currentBuildCard : ''}`}
+      aria-label={title}
+    >
       <h2 className={styles.sectionTitle}>{title}</h2>
       {system ? (
         <article>
           <h3 className={styles.systemTitle}>{system.title}</h3>
-          <p className={styles.systemMeta}>
-            {system.status} · {system.year}
-          </p>
+          {isCurrentBuild ? (
+            <p className={styles.systemMeta}>
+              <span className={styles.statusIndicator} aria-hidden="true" />
+              <span>{system.status}</span>
+              <span className={styles.metaDivider}>·</span>
+              <span>{system.year}</span>
+              <span className={styles.metaDivider}>·</span>
+              <span className={styles.versionText}>{getVersionText(system)}</span>
+            </p>
+          ) : (
+            <p className={styles.systemMeta}>
+              {system.status} · {system.year}
+            </p>
+          )}
           <p className={styles.systemSummary}>{system.summary}</p>
         </article>
       ) : (
@@ -64,7 +89,11 @@ export default function Hero({ featuredSystem, selectedSystem }: HeroProps) {
           </p>
         </header>
 
-        <SystemSummary title="Current Build" system={featuredSystem} />
+        <SystemSummary
+          title="Current Build"
+          system={featuredSystem}
+          variant="currentBuild"
+        />
         <SystemSummary title="Selected System" system={selectedSystem} />
       </div>
 
@@ -73,11 +102,18 @@ export default function Hero({ featuredSystem, selectedSystem }: HeroProps) {
       </figure>
 
       <aside className={styles.rightColumn}>
-        <nav aria-label="Primary">
+        <nav className={styles.railNav} aria-label="Primary">
           <ul className={styles.railList}>
             {railItems.map((item) => (
-              <li key={item.label} className={styles.railItem}>
-                <a href={item.href} className={styles.railLink}>
+              <li
+                key={item.label}
+                className={`${styles.railItem} ${item.isActive ? styles.railItemActive : ''}`}
+              >
+                <a
+                  href={item.href}
+                  className={`${styles.railLink} ${item.isActive ? styles.railLinkActive : ''}`}
+                  aria-current={item.isActive ? 'page' : undefined}
+                >
                   <span className={styles.railLabel}>{item.label}</span>
                   <span className={styles.railSubLabel}>{item.sublabel}</span>
                 </a>

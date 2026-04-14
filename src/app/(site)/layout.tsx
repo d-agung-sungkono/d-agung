@@ -5,14 +5,5 @@ type SiteLayoutProps = {
 }
 
 export default function SiteLayout({ children }: SiteLayoutProps) {
-  return (
-    <>
-      <header>
-        Public Header
-      </header>
-      <main>
-        {children}
-      </main>
-    </>
-  )
+  return <main>{children}</main>
 }

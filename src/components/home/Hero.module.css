@@ -1,37 +1,47 @@
 .hero {
   display: grid;
   grid-template-columns: 5fr 4fr 3fr;
-  gap: clamp(1.5rem, 2.5vw, 3rem);
+  gap: clamp(2rem, 3.2vw, 4rem);
   align-items: start;
-  padding: clamp(1.25rem, 3vw, 3rem);
+  padding: clamp(1.75rem, 3.5vw, 4rem);
 }
 
 .leftColumn {
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
+  gap: 2.1rem;
 }
 
 .intro {
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
+  gap: 0.9rem;
 }
 
 .identity,
 .role {
   margin: 0;
   text-transform: uppercase;
-  letter-spacing: 0.08em;
-  font-size: 0.75rem;
+  letter-spacing: 0.12em;
+  font-size: 0.72rem;
   line-height: 1.3;
 }
 
+.identity {
+  font-weight: 600;
+}
+
+.role {
+  color: rgba(17, 17, 17, 0.65);
+}
+
 .headline {
-  margin: 0.25rem 0;
-  font-size: clamp(2rem, 5vw, 4rem);
-  line-height: 0.95;
+  margin: 0.35rem 0 0.15rem;
+  font-size: clamp(2.4rem, 5.7vw, 4.8rem);
+  line-height: 0.88;
+  letter-spacing: -0.025em;
   text-transform: uppercase;
+  max-width: 13ch;
 }
 
 .headline span {
@@ -40,56 +50,107 @@
 
 .supportingText {
   margin: 0;
-  max-width: 40ch;
-  font-size: 1rem;
-  line-height: 1.6;
+  max-width: 44ch;
+  color: rgba(17, 17, 17, 0.72);
+  font-size: 0.98rem;
+  line-height: 1.75;
 }
 
 .systemSection {
-  padding-top: 0.75rem;
-  border-top: 1px solid currentColor;
+  padding-top: 1rem;
+  border-top: 1px solid rgba(17, 17, 17, 0.16);
+}
+
+.currentBuildCard {
+  padding: 1.15rem 1.2rem 1.25rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 14px;
+  background:
+    radial-gradient(circle at 12% 12%, rgba(255, 255, 255, 0.18), transparent 44%),
+    linear-gradient(150deg, #141414 0%, #111111 55%, #1d1d1d 100%);
+  color: #f3f3f3;
+  box-shadow: 0 14px 28px rgba(5, 5, 5, 0.22);
+}
+
+.currentBuildCard .sectionTitle {
+  color: rgba(255, 255, 255, 0.74);
+}
+
+.currentBuildCard .systemMeta,
+.currentBuildCard .systemSummary {
+  color: rgba(248, 248, 248, 0.85);
 }
 
 .sectionTitle {
-  margin: 0 0 0.5rem;
-  font-size: 0.75rem;
+  margin: 0 0 0.65rem;
+  font-size: 0.68rem;
   text-transform: uppercase;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.12em;
+  color: rgba(17, 17, 17, 0.62);
 }
 
 .systemTitle {
   margin: 0;
-  font-size: 1.1rem;
+  font-size: 1.16rem;
   line-height: 1.3;
+  letter-spacing: -0.01em;
 }
 
 .systemMeta {
-  margin: 0.25rem 0 0;
-  font-size: 0.85rem;
+  margin: 0.45rem 0 0;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  font-size: 0.73rem;
   text-transform: uppercase;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.08em;
+  color: rgba(17, 17, 17, 0.7);
+}
+
+.statusIndicator {
+  width: 0.42rem;
+  height: 0.42rem;
+  border-radius: 999px;
+  background: #56d087;
+  box-shadow: 0 0 0 4px rgba(86, 208, 135, 0.15);
+}
+
+.metaDivider {
+  color: rgba(17, 17, 17, 0.48);
+}
+
+.currentBuildCard .metaDivider {
+  color: rgba(255, 255, 255, 0.45);
+}
+
+.versionText {
+  color: rgba(255, 255, 255, 0.74);
 }
 
 .systemSummary {
-  margin: 0.5rem 0 0;
-  line-height: 1.6;
+  margin: 0.65rem 0 0;
+  line-height: 1.65;
 }
 
 .emptyState {
   margin: 0;
   font-size: 0.95rem;
-  line-height: 1.5;
+  line-height: 1.6;
+  color: rgba(17, 17, 17, 0.68);
 }
 
 .centerColumn {
   position: relative;
   margin: 0;
-  min-height: clamp(420px, 70vh, 760px);
-  border: 1px solid currentColor;
+  min-height: clamp(480px, 72vh, 800px);
+  border: 1px solid rgba(17, 17, 17, 0.22);
+  border-radius: 18px;
   overflow: hidden;
   background:
-    radial-gradient(circle at 50% 20%, rgba(255, 255, 255, 0.2), transparent 60%),
-    linear-gradient(180deg, rgba(255, 255, 255, 0.08), rgba(0, 0, 0, 0.06));
+    radial-gradient(circle at 56% 20%, rgba(255, 255, 255, 0.5), transparent 56%),
+    linear-gradient(180deg, rgba(247, 247, 247, 0.96) 0%, rgba(231, 231, 231, 0.96) 100%);
+  box-shadow: 0 24px 36px rgba(6, 6, 6, 0.12);
 }
 
 .centerColumn::after {
@@ -98,8 +159,8 @@
   left: 0;
   right: 0;
   bottom: 0;
-  height: 40%;
-  background: linear-gradient(to bottom, rgba(255, 255, 255, 0), rgba(0, 0, 0, 0.25));
+  height: 44%;
+  background: linear-gradient(to bottom, rgba(255, 255, 255, 0), rgba(10, 10, 10, 0.32));
   pointer-events: none;
 }
 
@@ -107,14 +168,45 @@
   height: 100%;
   display: grid;
   place-items: center;
+  color: rgba(30, 30, 30, 0.56);
   text-transform: uppercase;
-  letter-spacing: 0.1em;
-  font-size: 0.75rem;
+  letter-spacing: 0.13em;
+  font-size: 0.72rem;
 }
 
 .rightColumn {
+  position: relative;
+  display: flex;
+  justify-content: flex-end;
+  padding-left: 0.4rem;
+  padding-top: clamp(1.1rem, 2.2vw, 2rem);
+}
+
+.rightColumn::before {
+  display: none;
+}
+
+.railNav {
+  position: relative;
+  width: min(100%, 235px);
   padding-left: 1rem;
-  border-left: 1px solid currentColor;
+  padding-top: 0.15rem;
+}
+
+.railNav::before {
+  content: '';
+  position: absolute;
+  top: 0.3rem;
+  bottom: 0.3rem;
+  left: 0;
+  width: 1px;
+  background: linear-gradient(
+    to bottom,
+    rgba(17, 17, 17, 0.06),
+    rgba(17, 17, 17, 0.16) 18%,
+    rgba(17, 17, 17, 0.12) 82%,
+    rgba(17, 17, 17, 0.04)
+  );
 }
 
 .railList {
@@ -124,27 +216,84 @@
 }
 
 .railItem + .railItem {
-  margin-top: 1rem;
+  margin-top: 0.75rem;
 }
 
 .railLink {
+  position: relative;
   display: block;
-  color: inherit;
+  color: rgba(17, 17, 17, 0.72);
   text-decoration: none;
+  padding: 0.62rem 0.65rem 0.6rem 0.78rem;
+  border: 1px solid rgba(17, 17, 17, 0.16);
+  border-radius: 8px;
+  transition:
+    color 180ms ease,
+    transform 180ms ease,
+    border-color 180ms ease;
+}
+
+.railLink::before {
+  content: '';
+  position: absolute;
+  left: 0.32rem;
+  top: 0.73rem;
+  width: 0.38rem;
+  height: 0.38rem;
+  border: 1px solid rgba(17, 17, 17, 0.3);
+  border-radius: 999px;
+  background:
+    radial-gradient(circle at 50% 50%, rgba(17, 17, 17, 0.28) 0 38%, transparent 42%);
+  transition:
+    transform 180ms ease,
+    background-color 180ms ease,
+    border-color 180ms ease;
+}
+
+.railLink:hover {
+  color: rgba(17, 17, 17, 0.92);
+  transform: translateX(1px);
+  border-color: rgba(17, 17, 17, 0.28);
+}
+
+.railLink:hover::before {
+  border-color: rgba(17, 17, 17, 0.5);
+  background:
+    radial-gradient(circle at 50% 50%, rgba(17, 17, 17, 0.42) 0 42%, transparent 46%);
+}
+
+.railLinkActive {
+  color: rgba(17, 17, 17, 0.95);
+  border-color: rgba(17, 17, 17, 0.36);
+}
+
+.railLinkActive::before {
+  border-color: rgba(17, 17, 17, 0.72);
+  background:
+    radial-gradient(circle at 50% 50%, rgba(17, 17, 17, 0.86) 0 44%, transparent 48%);
+  transform: scale(1.03);
 }
 
 .railLabel {
   display: block;
-  font-size: 0.78rem;
+  font-size: 0.68rem;
+  font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.15em;
+  padding-left: 0.75rem;
 }
 
 .railSubLabel {
   display: block;
-  margin-top: 0.2rem;
-  font-size: 0.92rem;
-  line-height: 1.4;
+  margin-top: 0.18rem;
+  font-size: 0.81rem;
+  line-height: 1.55;
+  color: rgba(17, 17, 17, 0.44);
+  padding-left: 0.75rem;
+}
+
+.railItemActive .railSubLabel {
+  color: rgba(17, 17, 17, 0.58);
 }
 
 @media (max-width: 1100px) {
@@ -154,16 +303,29 @@
 
   .rightColumn {
     grid-column: 1 / -1;
-    border-left: 0;
-    border-top: 1px solid currentColor;
+    border-top: 1px solid rgba(17, 17, 17, 0.14);
     padding-left: 0;
-    padding-top: 1rem;
+    padding-top: 1.25rem;
+    justify-content: flex-start;
+  }
+
+  .rightColumn::before {
+    display: none;
+  }
+
+  .railNav {
+    width: 100%;
+    padding-left: 0;
+  }
+
+  .railNav::before {
+    display: none;
   }
 
   .railList {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 0.75rem 1.25rem;
+    gap: 0.95rem 1.35rem;
   }
 
   .railItem + .railItem {
@@ -174,10 +336,13 @@
 @media (max-width: 760px) {
   .hero {
     grid-template-columns: 1fr;
+    gap: 1.45rem;
+    padding: 1.2rem;
   }
 
   .centerColumn {
     min-height: 360px;
+    border-radius: 14px;
   }
 
   .railList {
