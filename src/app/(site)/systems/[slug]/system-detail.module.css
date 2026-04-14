@@ -1,0 +1,149 @@
+.page {
+  max-width: 980px;
+  margin: 0 auto;
+  padding: clamp(1.4rem, 3vw, 3rem);
+}
+
+.header {
+  max-width: 72ch;
+  padding-bottom: clamp(1.2rem, 2.5vw, 2rem);
+  border-bottom: 1px solid rgba(17, 17, 17, 0.14);
+}
+
+.kicker {
+  margin: 0;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgba(17, 17, 17, 0.72);
+}
+
+.title {
+  margin: 0.65rem 0 0;
+  font-size: clamp(2rem, 4.3vw, 3.3rem);
+  line-height: 0.97;
+  letter-spacing: -0.022em;
+  text-wrap: balance;
+}
+
+.meta {
+  margin-top: 1rem;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.11em;
+  color: rgba(17, 17, 17, 0.62);
+}
+
+.status {
+  font-weight: 600;
+}
+
+.dot {
+  color: rgba(17, 17, 17, 0.4);
+}
+
+.year {
+  color: rgba(17, 17, 17, 0.74);
+}
+
+.block {
+  margin-top: clamp(1.4rem, 3vw, 2.4rem);
+  max-width: 76ch;
+}
+
+.sectionTitle {
+  margin: 0;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgba(17, 17, 17, 0.62);
+}
+
+.body {
+  margin: 0.7rem 0 0;
+  font-size: clamp(1rem, 1.2vw, 1.08rem);
+  line-height: 1.78;
+  color: rgba(17, 17, 17, 0.76);
+}
+
+.ctaWrap {
+  margin: 0.95rem 0 0;
+}
+
+.ctaLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.78rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.11em;
+  color: rgba(17, 17, 17, 0.82);
+  text-decoration: none;
+  border-bottom: 1px solid rgba(17, 17, 17, 0.34);
+  padding-bottom: 0.22rem;
+  transition: color 180ms ease, border-color 180ms ease, transform 180ms ease;
+}
+
+.ctaLink::after {
+  content: '↗';
+  font-size: 0.74rem;
+  line-height: 1;
+}
+
+.ctaLink:hover {
+  color: rgba(17, 17, 17, 0.95);
+  border-bottom-color: rgba(17, 17, 17, 0.62);
+  transform: translateX(1px);
+}
+
+.showcaseList {
+  margin-top: 0.9rem;
+  display: grid;
+  gap: clamp(1rem, 2.3vw, 1.6rem);
+}
+
+.showcaseFigure {
+  margin: 0;
+}
+
+.showcaseMedia {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  border-radius: 10px;
+  border: 1px solid rgba(17, 17, 17, 0.12);
+  background: rgba(17, 17, 17, 0.03);
+}
+
+.showcaseImage {
+  object-fit: cover;
+}
+
+.caption {
+  margin: 0.55rem 0 0;
+  font-size: 0.77rem;
+  line-height: 1.5;
+  color: rgba(17, 17, 17, 0.52);
+}
+
+@media (max-width: 760px) {
+  .page {
+    padding: 1rem;
+  }
+
+  .header {
+    padding-bottom: 1.1rem;
+  }
+
+  .block {
+    margin-top: 1.2rem;
+  }
+}

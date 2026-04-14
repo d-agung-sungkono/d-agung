@@ -1,5 +1,11 @@
 export type SystemStatus = 'idea' | 'exploring' | ' running' | 'in-progress' | 'done'
 
+export type SystemImage = {
+  src: string
+  alt: string
+  caption?: string
+}
+
 export type SystemItem = {
   slug: string
   title: string
@@ -7,4 +13,7 @@ export type SystemItem = {
   status: SystemStatus
   year: string
   featured?: boolean
+  productUrl?: string
+  productLabel?: string
+  images?: SystemImage[]
 }

@@ -9,6 +9,8 @@ export const systems: SystemItem[] = [
     status: 'in-progress',
     year: '2025',
     featured: true,
+    productUrl: 'https://warungkit.id',
+    productLabel: 'Visit WarungKit',
   },
   {
     slug: 'fasih-form-gear',
@@ -17,6 +19,18 @@ export const systems: SystemItem[] = [
       'Configurable form engine for national-scale surveys with validation rules, branching logic, and stable submission pipelines.',
     status: 'done',
     year: '2023',
+    images: [
+      {
+        src: '/images/fasih-1.png',
+        alt: 'Fasih Form Gear instrument workspace',
+        caption: 'Configurable instrument workspace for large-scale survey operations.',
+      },
+      {
+        src: '/images/fasih-2.png',
+        alt: 'Fasih Form Gear review and validation flow',
+        caption: 'Validation and review flow used before field rollout.',
+      },
+    ],
   },
   {
     slug: 'sadewa',
