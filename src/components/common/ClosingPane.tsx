@@ -3,6 +3,8 @@ import Link from 'next/link'
 import styles from './ClosingPane.module.css'
 
 export default function ClosingPane() {
+  const year = new Date().getFullYear()
+
   return (
     <section className={styles.section} aria-label="Closing statement">
       <div className={styles.panel}>
@@ -79,6 +81,7 @@ export default function ClosingPane() {
           </ul>
         </nav>
       </div>
+      <p className={styles.copyright}>© {year} D.Agung Sungkono. All rights reserved.</p>
     </section>
   )
 }
