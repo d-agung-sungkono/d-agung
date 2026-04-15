@@ -98,6 +98,13 @@
   color: rgba(17, 17, 17, 0.72);
 }
 
+.note {
+  margin: 1rem 0 0;
+  font-size: 0.78rem;
+  letter-spacing: 0.02em;
+  color: rgba(17, 17, 17, 0.5);
+}
+
 @media (max-width: 760px) {
   .page {
     padding: 1rem;

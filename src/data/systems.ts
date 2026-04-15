@@ -2,42 +2,28 @@ import type { SystemItem } from '../types/system'
 
 export const systems: SystemItem[] = [
   {
-    slug: 'warungkit',
-    title: 'WarungKit',
+    slug: 'umkm-kit',
+    title: 'UMKM Kit',
     summary:
-      'Modular business engine for UMKM operations, covering catalog, order flow, and lightweight reporting.',
+      'Modular business engine for UMKM operations, designed to adapt to real workflows - not force them into rigid tools.',
     status: 'in-progress',
-    year: '2025',
+    year: '2026',
     featured: true,
-    productUrl: 'https://warungkit.id',
-    productLabel: 'Visit WarungKit',
   },
   {
     slug: 'fasih-form-gear',
-    title: 'Fasih Form Gear',
+    title: 'Form Gear - FASIH',
     summary:
       'Configurable form engine for national-scale surveys with validation rules, branching logic, and stable submission pipelines.',
     status: 'done',
-    year: '2023',
-    images: [
-      {
-        src: '/images/fasih-1.png',
-        alt: 'Fasih Form Gear instrument workspace',
-        caption: 'Configurable instrument workspace for large-scale survey operations.',
-      },
-      {
-        src: '/images/fasih-2.png',
-        alt: 'Fasih Form Gear review and validation flow',
-        caption: 'Validation and review flow used before field rollout.',
-      },
-    ],
+    year: '2022',
   },
   {
-    slug: 'sadewa',
-    title: 'Sadewa',
+    slug: 'quality-gate-qg',
+    title: 'QG Systems',
     summary:
-      'Self-assessment platform for statistical quality assurance, designed to standardize scoring and evidence tracking.',
-    status: 'done',
-    year: '2024',
+      'Quality assurance system used across dozens of surveys and national census workflows, designed to enforce consistent evaluation and validation at scale. Originally built as a monolithic system, still actively used across production workflows.',
+    status: 'running',
+    year: '2023',
   },
 ]

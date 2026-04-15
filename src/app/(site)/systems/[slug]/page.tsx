@@ -1,4 +1,3 @@
-import Image from 'next/image'
 import { notFound } from 'next/navigation'
 
 import { systems } from '@/data/systems'
@@ -7,41 +6,47 @@ import styles from './system-detail.module.css'
 
 type SystemDetailContent = {
   problem: string
-  solution: string
-  impact: string
+  solution?: string
+  impact?: string
   architecture?: string
+  proof?: Array<
+    | { type: 'link'; label: string; href: string }
+    | { type: 'text'; label: string }
+  >
 }
 
 const detailContentBySlug: Record<string, SystemDetailContent> = {
-  warungkit: {
+  'umkm-kit': {
     problem:
-      'UMKM operations were fragmented across chat, spreadsheets, and disconnected tools, causing delays in fulfillment, unclear stock positions, and low confidence in daily decisions.',
-    solution:
-      'WarungKit was structured as a modular business engine: shared core entities for catalog and orders, clear process boundaries, and lightweight reporting designed for teams with limited operational overhead.',
-    impact:
-      'Daily workflows became more predictable, order processing moved faster, and operational visibility improved through one consistent source of truth across core business activities.',
-    architecture:
-      'Modular domain boundaries with explicit data flow between catalog, ordering, and reporting modules. This keeps features evolvable without forcing full rewrites.',
+      'Many UMKM workflows are still fragmented - managing catalog, orders, and reporting across separate tools, often manually. Existing solutions tend to be either too generic or misaligned with how businesses actually operate, leading to inconsistent implementations and limited long-term usefulness. The goal is to build a more grounded, plug-and-play system that adapts to specific operational needs - with stronger data structure, clearer system boundaries, and discipline in how workflows evolve over time.',
   },
   'fasih-form-gear': {
     problem:
       'Large survey programs needed configurable form behavior at scale, but manual instrument updates and inconsistent validation rules created quality and rollout risks.',
     solution:
-      'Fasih Form Gear introduced a configuration-driven form engine with central schema controls, branching logic, and reusable validation definitions for survey instruments.',
+      'Form Gear - FASIH introduced a configuration-driven form engine with central schema controls, branching logic, and reusable validation definitions for survey instruments.',
     impact:
       'Instrument rollout cycles shortened, validation consistency increased across teams, and large-scale data collection became more stable under changing field requirements.',
     architecture:
       'Schema-first form definitions, rule-based validation, and a submission pipeline designed for predictable processing under high-volume survey workloads.',
+    proof: [
+      {
+        type: 'link',
+        label: 'Open source: github.com/bps-statistics/form-gear',
+        href: 'https://github.com/bps-statistics/form-gear',
+      },
+      { type: 'text', label: 'Top 3 winner - Solidhack 2022' },
+    ],
   },
-  sadewa: {
+  'quality-gate-qg': {
     problem:
-      'Quality assurance assessments were hard to standardize, with scoring rules interpreted differently and supporting evidence scattered across teams.',
+      'Quality controls across survey and census workflows were inconsistent between teams, creating uneven evaluation quality and slow validation cycles.',
     solution:
-      'Sadewa centralized self-assessment workflows with structured scoring criteria, guided evaluation steps, and evidence-linked records for auditability.',
+      'QG Systems centralized evaluation criteria, validation checkpoints, and evidence tracking into one operational QA flow used by multiple production teams.',
     impact:
-      'Assessment quality became more consistent, review cycles were easier to coordinate, and teams gained clearer visibility into quality gaps and follow-up priorities.',
+      'The platform has been used across dozens of survey and census executions, improving consistency, shortening review loops, and sustaining long-term production usage.',
     architecture:
-      'Structured scoring model, evidence attachment flow, and review-state transitions designed to preserve traceability from input through final assessment output.',
+      'Originally built as a monolithic system, then hardened through production operations to remain stable under repeated high-volume QA workflows.',
   },
 }
 
@@ -70,7 +75,18 @@ export default async function SystemDetailPage({
     <main className={styles.page}>
       <header className={styles.header}>
         <p className={styles.kicker}>System</p>
-        <h1 className={styles.title}>{system.title}</h1>
+        <h1
+          className={styles.title}
+        >
+          {system.slug === 'umkm-kit' ? (
+            <>
+              <span title="Brand name is still tentative.">{system.title}</span>
+              *
+            </>
+          ) : (
+            system.title
+          )}
+        </h1>
         <div className={styles.meta}>
           <span className={styles.status}>{formatStatus(system.status)}</span>
           <span className={styles.dot} aria-hidden="true">
@@ -106,45 +122,44 @@ export default async function SystemDetailPage({
         <p className={styles.body}>{detailContent?.problem}</p>
       </section>
 
-      <section className={styles.block} aria-labelledby="solution">
-        <h2 id="solution" className={styles.sectionTitle}>
-          Solution
-        </h2>
-        <p className={styles.body}>{detailContent?.solution}</p>
-      </section>
-
-      {system.images && system.images.length > 0 ? (
-        <section className={styles.block} aria-labelledby="showcase">
-          <h2 id="showcase" className={styles.sectionTitle}>
-            Showcase
+      {detailContent?.solution ? (
+        <section className={styles.block} aria-labelledby="solution">
+          <h2 id="solution" className={styles.sectionTitle}>
+            Solution
           </h2>
-          <div className={styles.showcaseList}>
-            {system.images.map((image) => (
-              <figure key={image.src} className={styles.showcaseFigure}>
-                <div className={styles.showcaseMedia}>
-                  <Image
-                    src={image.src}
-                    alt={image.alt}
-                    fill
-                    className={styles.showcaseImage}
-                    sizes="(max-width: 760px) 100vw, 980px"
-                  />
-                </div>
-                {image.caption ? (
-                  <figcaption className={styles.caption}>{image.caption}</figcaption>
-                ) : null}
-              </figure>
-            ))}
-          </div>
+          <p className={styles.body}>{detailContent.solution}</p>
         </section>
       ) : null}
 
-      <section className={styles.block} aria-labelledby="impact">
-        <h2 id="impact" className={styles.sectionTitle}>
-          Impact
-        </h2>
-        <p className={styles.body}>{detailContent?.impact}</p>
-      </section>
+      {detailContent?.proof && detailContent.proof.length > 0 ? (
+        <section className={styles.block} aria-labelledby="proof">
+          <h2 id="proof" className={styles.sectionTitle}>
+            Proof
+          </h2>
+          <ul>
+            {detailContent.proof.map((item) => (
+              <li key={item.label} className={styles.body}>
+                {item.type === 'link' ? (
+                  <a href={item.href} className={styles.ctaLink} target="_blank" rel="noopener noreferrer">
+                    {item.label}
+                  </a>
+                ) : (
+                  item.label
+                )}
+              </li>
+            ))}
+          </ul>
+        </section>
+      ) : null}
+
+      {detailContent?.impact ? (
+        <section className={styles.block} aria-labelledby="impact">
+          <h2 id="impact" className={styles.sectionTitle}>
+            Impact
+          </h2>
+          <p className={styles.body}>{detailContent.impact}</p>
+        </section>
+      ) : null}
 
       {detailContent?.architecture ? (
         <section className={styles.block} aria-labelledby="architecture">

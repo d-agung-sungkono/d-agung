@@ -41,12 +41,26 @@ export default function SystemsPage() {
                   ) : null}
                 </div>
 
-                <h2 className={styles.systemTitle}>{system.title}</h2>
+                <h2
+                  className={styles.systemTitle}
+                >
+                  {system.slug === 'umkm-kit' ? (
+                    <>
+                      <span title="Brand name is still tentative.">{system.title}</span>
+                      *
+                    </>
+                  ) : (
+                    system.title
+                  )}
+                </h2>
                 <p className={styles.summary}>{system.summary}</p>
               </Link>
             </li>
           ))}
         </ul>
+        <p className={styles.note}>
+          Selected systems shown. More production systems will be added.
+        </p>
       </section>
     </main>
   )

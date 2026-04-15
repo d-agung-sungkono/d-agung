@@ -1,4 +1,4 @@
-export type SystemStatus = 'idea' | 'exploring' | ' running' | 'in-progress' | 'done'
+export type SystemStatus = 'idea' | 'exploring' | 'in-progress' | 'running' | 'done'
 
 export type SystemImage = {
   src: string

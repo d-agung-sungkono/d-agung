@@ -24,10 +24,11 @@ const railItems: RailItem[] = [
   { label: 'OFF CODE', sublabel: 'Outside Engineering', href: '/off-code' },
 ]
 
-function getVersionText(system: SystemItem): string {
-  if (system.status === 'done') return 'v1.0 stable'
-  if (system.status === 'in-progress') return 'v0.9 active'
-  return 'v0.3 concept'
+function getStageText(system: SystemItem): string {
+  if (system.status === 'running') return 'active use'
+  if (system.status === 'done') return 'stable release'
+  if (system.status === 'in-progress') return 'pre-mvp'
+  return 'early exploration'
 }
 
 function SystemSummary({
@@ -49,7 +50,18 @@ function SystemSummary({
       <h2 className={styles.sectionTitle}>{title}</h2>
       {system ? (
         <article>
-          <h3 className={styles.systemTitle}>{system.title}</h3>
+          <h3
+            className={styles.systemTitle}
+          >
+            {system.slug === 'umkm-kit' ? (
+              <>
+                <span title="Brand name is still tentative.">{system.title}</span>
+                *
+              </>
+            ) : (
+              system.title
+            )}
+          </h3>
           {isCurrentBuild ? (
             <p className={styles.systemMeta}>
               <span className={styles.statusIndicator} aria-hidden="true" />
@@ -57,7 +69,7 @@ function SystemSummary({
               <span className={styles.metaDivider}>·</span>
               <span>{system.year}</span>
               <span className={styles.metaDivider}>·</span>
-              <span className={styles.versionText}>{getVersionText(system)}</span>
+              <span className={styles.versionText}>{getStageText(system)}</span>
             </p>
           ) : (
             <p className={styles.systemMeta}>
