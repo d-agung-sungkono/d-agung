@@ -14,8 +14,30 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://d-agung.com"),
   title: "D.Agung Sungkono",
   description: "Software Engineer building systems that scale.",
+  openGraph: {
+    title: "D.Agung Sungkono",
+    description: "Software Engineer building systems that scale.",
+    url: "/",
+    siteName: "D.Agung Sungkono",
+    type: "website",
+    images: [
+      {
+        url: "/agung-portrait.jpg",
+        width: 1200,
+        height: 630,
+        alt: "D.Agung Sungkono",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "D.Agung Sungkono",
+    description: "Software Engineer building systems that scale.",
+    images: ["/agung-portrait.jpg"],
+  },
 };
 
 export default function RootLayout({

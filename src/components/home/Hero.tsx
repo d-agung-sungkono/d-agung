@@ -90,7 +90,7 @@ export default function Hero({ featuredSystem, selectedSystem }: HeroProps) {
     <section className={styles.hero} aria-label="Homepage hero">
       <div className={styles.leftColumn}>
         <header className={styles.intro}>
-          <p className={styles.identity}>D. Agung Sungkono</p>
+          <p className={styles.identity}>D.Agung Sungkono</p>
           <p className={styles.role}>Software Engineer</p>
           <h1 className={styles.headline}>
             <span>Building systems</span>
