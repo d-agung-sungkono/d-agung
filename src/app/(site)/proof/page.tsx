@@ -18,13 +18,13 @@ const credentials = [
     title: 'Google Project Management Certificate',
     issuer: 'Google',
     label: 'View Certificate',
-    href: 'https://www.coursera.org/professional-certificates/google-project-management',
+    href: 'https://www.coursera.org/account/accomplishments/professional-cert/5SKTSMPC3S6E?utm_source=link&utm_medium=certificate&utm_content=cert_image&utm_campaign=pdf_header_button&utm_product=prof',
   },
   {
     title: 'Meta Front-End Developer Specialization',
     issuer: 'Meta',
     label: 'View Credential',
-    href: 'https://www.coursera.org/professional-certificates/meta-front-end-developer',
+    href: 'https://www.coursera.org/account/accomplishments/professional-cert/JETVPEZJCDCW',
   },
 ]
 
@@ -34,11 +34,10 @@ export default function ProofPage() {
       <header className={styles.header}>
         <p className={styles.kicker}>Proof</p>
         <h1 className={styles.title}>
-          Built systems are only meaningful when they work at scale.
+          Systems only matter when they survive real-world scale.
         </h1>
         <p className={styles.intro}>
-          This page reflects the impact, scale, and experience behind the
-          systems.
+          A snapshot of the scale, impact, and real-world usage behind the systems I’ve built.
         </p>
       </header>
 
