@@ -1,41 +1,26 @@
-import Link from 'next/link'
-
-import { writings } from '@/data/writings'
-
 import styles from './thinking.module.css'
-
-function formatDate(value: string): string {
-  return new Intl.DateTimeFormat('en-US', {
-    year: 'numeric',
-    month: 'short',
-    day: '2-digit',
-  }).format(new Date(value))
-}
 
 export default function ThinkingPage() {
   return (
     <main className={styles.page}>
       <header className={styles.header}>
         <p className={styles.kicker}>Thinking</p>
-        <h1 className={styles.title}>How systems are designed, tested, and evolved in the real world.</h1>
+        <h1 className={styles.title}>Writing in progress.</h1>
         <p className={styles.intro}>
-          Writing focused on architecture decisions, tradeoffs under constraints,
-          and practical system thinking beyond theory.
+          I&apos;ll be sharing thoughts on system design, architecture decisions,
+          and lessons from building real systems.
         </p>
       </header>
-
-      <section aria-label="Thinking articles">
-        <ul className={styles.list}>
-          {writings.map((writing) => (
-            <li key={writing.slug} className={styles.item}>
-              <Link href={`/thinking/${writing.slug}`} className={styles.link}>
-                <p className={styles.meta}>{formatDate(writing.publishedAt)}</p>
-                <h2 className={styles.itemTitle}>{writing.title}</h2>
-                <p className={styles.excerpt}>{writing.excerpt}</p>
-              </Link>
-            </li>
-          ))}
-        </ul>
+      <section
+        aria-label="Thinking status"
+        style={{
+          maxWidth: '74ch',
+          marginTop: '1.2rem',
+          borderTop: '1px solid rgba(17, 17, 17, 0.14)',
+          paddingTop: '1.1rem',
+        }}
+      >
+        <p className={styles.meta}>First articles coming soon.</p>
       </section>
     </main>
   )
