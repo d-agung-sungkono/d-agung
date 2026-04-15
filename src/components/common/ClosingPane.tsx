@@ -43,7 +43,7 @@ export default function ClosingPane() {
             Modular architecture, real-world systems, and products designed to
             last.
           </p>
-          <a href="mailto:your@email.com" className={styles.primaryLink}>
+          <a href="mailto:das.agung13@gmail.com" className={styles.primaryLink}>
             Work with me
           </a>
         </div>
@@ -52,17 +52,27 @@ export default function ClosingPane() {
           <p className={styles.label}>Connect</p>
           <ul className={styles.linkList}>
             <li>
-              <a href="#" className={styles.link}>
+              <a
+                href="https://www.linkedin.com/in/d-agung-sungkono/"
+                className={styles.link}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
                 LinkedIn
               </a>
             </li>
             <li>
-              <a href="#" className={styles.link}>
+              <a
+                href="https://github.com/d-agung-sungkono"
+                className={styles.link}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
                 GitHub
               </a>
             </li>
             <li>
-              <a href="mailto:your@email.com" className={styles.link}>
+              <a href="mailto:das.agung13@gmail.com" className={styles.link}>
                 Email
               </a>
             </li>
