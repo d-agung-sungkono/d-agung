@@ -114,7 +114,7 @@ export default function Hero({ featuredSystem, selectedSystem }: HeroProps) {
       <figure className={styles.centerColumn} aria-label="Featured portrait">
         <div className={styles.portraitMedia}>
           <Image
-            src="/agung-profesional.png"
+            src="/agung-portrait.jpg"
             alt="Portrait editorial placeholder"
             fill
             unoptimized
