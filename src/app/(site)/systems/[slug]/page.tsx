@@ -48,6 +48,16 @@ const detailContentBySlug: Record<string, SystemDetailContent> = {
     architecture:
       'Originally built as a monolithic system, then hardened through production operations to remain stable under repeated high-volume QA workflows.',
   },
+  laviumhub: {
+    problem:
+      'Small laundry businesses often rely on manual updates for customer information, machine availability, and delivery estimates. This creates slow response time and inconsistent service communication.',
+    solution:
+      'LaviumHub provides a practical UMKM landing page where customers can see available service types, check whether machines are currently in use, and estimate delivery pricing in one flow.',
+    impact:
+      'The platform gives the owner team a clearer operational touchpoint with customers, reducing repetitive manual explanations and improving service transparency.',
+    architecture:
+      'A focused, lightweight web experience designed around core operational widgets: service catalog, machine occupancy status, and delivery cost estimator.',
+  },
 }
 
 function formatStatus(status: string): string {

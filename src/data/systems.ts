@@ -28,4 +28,14 @@ export const systems: SystemItem[] = [
     status: 'running',
     year: '2023',
   },
+  {
+    slug: 'laviumhub',
+    title: 'LaviumHub',
+    summary:
+      'UMKM laundry landing page with service catalog, machine usage monitoring, and delivery cost checking.',
+    status: 'running',
+    year: '2025',
+    productUrl: 'https://laviumhub.netlify.app',
+    productLabel: 'Visit LaviumHub',
+  },
 ]
