@@ -98,6 +98,28 @@
   color: rgba(17, 17, 17, 0.72);
 }
 
+.externalWrap {
+  margin: 0 0 clamp(1.1rem, 2.2vw, 1.7rem);
+  padding: 0 0.1rem;
+}
+
+.externalLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.73rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: rgba(17, 17, 17, 0.7);
+  text-decoration: none;
+  transition: color 180ms ease, transform 180ms ease;
+}
+
+.externalLink:hover {
+  color: rgba(17, 17, 17, 0.95);
+  transform: translateX(1px);
+}
+
 .note {
   margin: 1rem 0 0;
   font-size: 0.78rem;

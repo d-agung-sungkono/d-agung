@@ -3,12 +3,14 @@ import type { SystemItem } from '../types/system'
 export const systems: SystemItem[] = [
   {
     slug: 'umkm-kit',
-    title: 'UMKM Kit',
+    title: 'WarungKit',
     summary:
-      'Modular business engine for UMKM operations, designed to adapt to real workflows - not force them into rigid tools.',
+      'Modular business engine for UMKM workflows.',
     status: 'in-progress',
     year: '2026',
     featured: true,
+    productUrl: 'https://warungkit.netlify.app',
+    productLabel: 'Visit WarungKit',
   },
   {
     slug: 'fasih-form-gear',

@@ -41,6 +41,8 @@ function SystemSummary({
   variant?: 'default' | 'currentBuild'
 }) {
   const isCurrentBuild = variant === 'currentBuild'
+  const hasProductUrl = Boolean(system?.productUrl)
+  const isExternalUrl = /^https?:\/\//.test(system?.productUrl ?? '')
 
   return (
     <section
@@ -50,18 +52,7 @@ function SystemSummary({
       <h2 className={styles.sectionTitle}>{title}</h2>
       {system ? (
         <article>
-          <h3
-            className={styles.systemTitle}
-          >
-            {system.slug === 'umkm-kit' ? (
-              <>
-                <span title="Brand name is still tentative.">{system.title}</span>
-                *
-              </>
-            ) : (
-              system.title
-            )}
-          </h3>
+          <h3 className={styles.systemTitle}>{system.title}</h3>
           {isCurrentBuild ? (
             <p className={styles.systemMeta}>
               <span className={styles.statusIndicator} aria-hidden="true" />
@@ -77,6 +68,18 @@ function SystemSummary({
             </p>
           )}
           <p className={styles.systemSummary}>{system.summary}</p>
+          {hasProductUrl ? (
+            <p className={styles.systemCtaWrap}>
+              <a
+                href={system.productUrl}
+                className={styles.systemCta}
+                target={isExternalUrl ? '_blank' : undefined}
+                rel={isExternalUrl ? 'noopener noreferrer' : undefined}
+              >
+                {system.productLabel ?? 'Visit Product'} <span aria-hidden="true">↗</span>
+              </a>
+            </p>
+          ) : null}
         </article>
       ) : (
         <p className={styles.emptyState}>No system selected.</p>

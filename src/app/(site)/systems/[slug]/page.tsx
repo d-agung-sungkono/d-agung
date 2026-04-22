@@ -75,18 +75,7 @@ export default async function SystemDetailPage({
     <main className={styles.page}>
       <header className={styles.header}>
         <p className={styles.kicker}>System</p>
-        <h1
-          className={styles.title}
-        >
-          {system.slug === 'umkm-kit' ? (
-            <>
-              <span title="Brand name is still tentative.">{system.title}</span>
-              *
-            </>
-          ) : (
-            system.title
-          )}
-        </h1>
+        <h1 className={styles.title}>{system.title}</h1>
         <div className={styles.meta}>
           <span className={styles.status}>{formatStatus(system.status)}</span>
           <span className={styles.dot} aria-hidden="true">

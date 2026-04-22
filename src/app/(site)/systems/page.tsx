@@ -41,20 +41,21 @@ export default function SystemsPage() {
                   ) : null}
                 </div>
 
-                <h2
-                  className={styles.systemTitle}
-                >
-                  {system.slug === 'umkm-kit' ? (
-                    <>
-                      <span title="Brand name is still tentative.">{system.title}</span>
-                      *
-                    </>
-                  ) : (
-                    system.title
-                  )}
-                </h2>
+                <h2 className={styles.systemTitle}>{system.title}</h2>
                 <p className={styles.summary}>{system.summary}</p>
               </Link>
+              {system.productUrl ? (
+                <p className={styles.externalWrap}>
+                  <a
+                    href={system.productUrl}
+                    className={styles.externalLink}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    {system.productLabel ?? 'Visit Product'} <span aria-hidden="true">↗</span>
+                  </a>
+                </p>
+              ) : null}
             </li>
           ))}
         </ul>
