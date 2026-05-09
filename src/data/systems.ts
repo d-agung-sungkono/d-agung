@@ -6,7 +6,7 @@ export const systems: SystemItem[] = [
     title: 'WarungKit',
     summary:
       'Modular business engine for UMKM workflows.',
-    status: 'in-progress',
+    status: 'running',
     year: '2026',
     featured: true,
     productUrl: 'https://warungkit.netlify.app',
