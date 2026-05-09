@@ -1,0 +1,137 @@
+.page {
+  max-width: 1240px;
+  margin: 0 auto;
+  padding: clamp(1.4rem, 3vw, 3rem);
+}
+
+.section {
+  min-height: 70vh;
+}
+
+.intro {
+  max-width: 76ch;
+  border-top: 1px solid rgba(17, 17, 17, 0.14);
+  padding-top: clamp(1.3rem, 3vw, 2rem);
+}
+
+.kicker {
+  margin: 0;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgba(17, 17, 17, 0.72);
+}
+
+.title {
+  margin: 0.62rem 0 0;
+  font-size: clamp(2.05rem, 4.6vw, 4.2rem);
+  line-height: 0.94;
+  letter-spacing: -0.03em;
+  text-wrap: balance;
+}
+
+.subtext {
+  margin: 1rem 0 0;
+  max-width: 60ch;
+  font-size: 1rem;
+  line-height: 1.72;
+  color: rgba(17, 17, 17, 0.7);
+}
+
+.stats {
+  margin-top: 1.2rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.stat {
+  font-size: 0.72rem;
+  letter-spacing: 0.11em;
+  text-transform: uppercase;
+  color: rgba(17, 17, 17, 0.62);
+}
+
+.dot {
+  color: rgba(17, 17, 17, 0.35);
+}
+
+.mapSpotlight {
+  margin-top: clamp(1.5rem, 3vw, 2.4rem);
+}
+
+.overseas {
+  margin-top: clamp(1.5rem, 2.8vw, 2.2rem);
+  border-top: 1px solid rgba(17, 17, 17, 0.14);
+  padding-top: 0.9rem;
+}
+
+.overseasTitle {
+  margin: 0;
+  font-size: 0.85rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgba(17, 17, 17, 0.72);
+}
+
+.overseasList {
+  list-style: none;
+  margin: 0.8rem 0 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0 1.1rem;
+}
+
+.overseasItem {
+  padding: 0.8rem 0;
+  border-bottom: 1px solid rgba(17, 17, 17, 0.1);
+}
+
+.countryRow {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  margin: 0;
+}
+
+.country {
+  font-size: 1.02rem;
+  color: rgba(17, 17, 17, 0.92);
+}
+
+.city {
+  margin-left: 0.3rem;
+  color: rgba(17, 17, 17, 0.58);
+}
+
+.year {
+  font-size: 0.8rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(17, 17, 17, 0.58);
+}
+
+.note {
+  margin: 0.45rem 0 0;
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: rgba(17, 17, 17, 0.72);
+}
+
+@media (max-width: 940px) {
+  .overseasList {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 760px) {
+  .page {
+    padding: 1rem;
+  }
+
+  .title {
+    line-height: 1;
+  }
+}
