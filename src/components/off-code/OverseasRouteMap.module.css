@@ -3,31 +3,37 @@
   border: 1px solid rgba(17, 17, 17, 0.1);
   border-radius: 12px;
   overflow: hidden;
-  background: rgba(255, 255, 255, 0.75);
+  background:
+    radial-gradient(circle at 18% 8%, rgba(17, 17, 17, 0.05), transparent 42%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.92), rgba(248, 248, 248, 0.9));
 }
 
 .map {
   width: 100%;
+  min-height: 220px;
   display: block;
 }
 
-.bg {
-  fill: rgba(17, 17, 17, 0.03);
+.geo {
+  fill: rgba(17, 17, 17, 0.08);
+  stroke: rgba(17, 17, 17, 0.2);
+  stroke-width: 0.35;
+  outline: none;
 }
 
 .routeSoft {
-  fill: none;
   stroke: rgba(86, 208, 135, 0.42);
-  stroke-width: 0.55;
+  stroke-width: 1.2;
   stroke-linecap: round;
+  fill: none;
 }
 
 .routeMain {
-  fill: none;
-  stroke: url(#routeFade);
-  stroke-width: 0.95;
+  stroke: rgba(86, 208, 135, 0.95);
+  stroke-width: 1.35;
   stroke-linecap: round;
-  stroke-dasharray: 2.1 1.9;
+  stroke-dasharray: 4 3;
+  fill: none;
 }
 
 .dot {
@@ -36,8 +42,8 @@
 
 .ring {
   fill: none;
-  stroke: rgba(17, 17, 17, 0.2);
-  stroke-width: 0.3;
+  stroke: rgba(17, 17, 17, 0.24);
+  stroke-width: 0.7;
 }
 
 .legend {

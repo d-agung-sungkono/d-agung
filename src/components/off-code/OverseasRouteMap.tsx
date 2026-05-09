@@ -1,34 +1,53 @@
+'use client'
+
+import {
+  ComposableMap,
+  Geographies,
+  Geography,
+  Line,
+  Marker,
+} from 'react-simple-maps'
+
 import styles from './OverseasRouteMap.module.css'
 
+const geoUrl = 'https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json'
+
 const stops = [
-  { label: 'Jakarta', x: 36, y: 68 },
-  { label: 'Singapore', x: 42, y: 60 },
-  { label: 'Oslo', x: 78, y: 20 },
+  { label: 'Jakarta', coordinates: [106.8456, -6.2088] as [number, number] },
+  { label: 'Singapore', coordinates: [103.8198, 1.3521] as [number, number] },
+  { label: 'Oslo', coordinates: [10.7522, 59.9139] as [number, number] },
 ]
 
 export default function OverseasRouteMap() {
   return (
     <div className={styles.wrap} aria-label="Overseas travel route visualization">
-      <svg viewBox="0 0 100 80" className={styles.map} role="img" aria-hidden="true">
-        <defs>
-          <linearGradient id="routeFade" x1="0%" y1="100%" x2="100%" y2="0%">
-            <stop offset="0%" stopColor="rgba(86, 208, 135, 0.32)" />
-            <stop offset="100%" stopColor="rgba(86, 208, 135, 0.9)" />
-          </linearGradient>
-        </defs>
+      <ComposableMap projection="geoNaturalEarth1" className={styles.map}>
+        <Geographies geography={geoUrl}>
+          {({ geographies }) =>
+            geographies.map((geo) => (
+              <Geography key={geo.rsmKey} geography={geo} className={styles.geo} />
+            ))
+          }
+        </Geographies>
 
-        <rect x="0" y="0" width="100" height="80" className={styles.bg} />
-
-        <path d="M 36 68 Q 39 64, 42 60" className={styles.routeSoft} />
-        <path d="M 42 60 Q 56 40, 78 20" className={styles.routeMain} />
+        <Line
+          from={stops[0].coordinates}
+          to={stops[1].coordinates}
+          className={styles.routeSoft}
+        />
+        <Line
+          from={stops[1].coordinates}
+          to={stops[2].coordinates}
+          className={styles.routeMain}
+        />
 
         {stops.map((stop) => (
-          <g key={stop.label}>
-            <circle cx={stop.x} cy={stop.y} r="1.6" className={styles.dot} />
-            <circle cx={stop.x} cy={stop.y} r="3.2" className={styles.ring} />
-          </g>
+          <Marker key={stop.label} coordinates={stop.coordinates}>
+            <circle r={3.5} className={styles.ring} />
+            <circle r={1.8} className={styles.dot} />
+          </Marker>
         ))}
-      </svg>
+      </ComposableMap>
 
       <div className={styles.legend}>
         <p className={styles.label}>Overseas Path</p>
