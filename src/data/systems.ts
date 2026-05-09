@@ -5,7 +5,7 @@ export const systems: SystemItem[] = [
     slug: 'umkm-kit',
     title: 'WarungKit',
     summary:
-      'Modular business engine for UMKM workflows.',
+      'A practical operating layer for UMKM: catalog, orders, and daily flow in one place.',
     status: 'running',
     year: '2026',
     featured: true,

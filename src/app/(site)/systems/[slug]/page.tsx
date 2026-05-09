@@ -18,7 +18,13 @@ type SystemDetailContent = {
 const detailContentBySlug: Record<string, SystemDetailContent> = {
   'umkm-kit': {
     problem:
-      'Many UMKM workflows are still fragmented - managing catalog, orders, and reporting across separate tools, often manually. Existing solutions tend to be either too generic or misaligned with how businesses actually operate, leading to inconsistent implementations and limited long-term usefulness. The goal is to build a more grounded, plug-and-play system that adapts to specific operational needs - with stronger data structure, clearer system boundaries, and discipline in how workflows evolve over time.',
+      'There are two recurring friction points in UMKM operations. First, when too many features are introduced at once and paid from day one, teams often feel overwhelmed and end up paying for capabilities they do not actually use. Second, when businesses start from traditional or separated workflows, migration becomes heavy: catalog, orders, and reporting stay fragmented across chat, spreadsheets, and manual notes.',
+    solution:
+      'WarungKit is designed to grow with the user. It starts from a focused core, then expands progressively through modules that can be adopted step by step, so teams can move from traditional workflows without operational shock or feature overload.',
+    architecture:
+      'WarungKit is currently built as a monolithic fullstack application on Next.js, with Supabase as the primary database layer. This is the foundation: a stable base to move fast during launch, while keeping a clear path toward modular boundaries as usage deepens across different UMKM contexts.',
+    impact:
+      'From this foundation, rollout will continue in practical increments: keep shipping useful modules, grow with real user behavior, and sustain long-term fit for daily UMKM operations.',
   },
   'fasih-form-gear': {
     problem:
@@ -61,6 +67,7 @@ const detailContentBySlug: Record<string, SystemDetailContent> = {
 }
 
 function formatStatus(status: string): string {
+  if (status.trim() === 'running') return 'launching'
   return status.trim().replace('-', ' ')
 }
 

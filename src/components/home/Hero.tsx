@@ -1,4 +1,5 @@
 import Image from 'next/image'
+import Link from 'next/link'
 
 import type { SystemItem } from '@/types/system'
 
@@ -25,7 +26,7 @@ const railItems: RailItem[] = [
 ]
 
 function getStageText(system: SystemItem): string {
-  if (system.status === 'running') return 'active use'
+  if (system.status === 'running') return 'launching'
   if (system.status === 'done') return 'stable release'
   if (system.status === 'in-progress') return 'pre-mvp'
   return 'early exploration'
@@ -52,7 +53,9 @@ function SystemSummary({
       <h2 className={styles.sectionTitle}>{title}</h2>
       {system ? (
         <article>
-          <h3 className={styles.systemTitle}>{system.title}</h3>
+          <h3 className={styles.systemTitle}>
+            <Link href={`/systems/${system.slug}`}>{system.title}</Link>
+          </h3>
           {isCurrentBuild ? (
             <p className={styles.systemMeta}>
               <span className={styles.statusIndicator} aria-hidden="true" />
