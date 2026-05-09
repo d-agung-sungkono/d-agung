@@ -118,7 +118,7 @@ export default function Hero({
       const addSlide = (
         title: string,
         system: SystemItem | null,
-        variant?: 'default' | 'currentBuild'
+        variant?: 'default' | 'currentBuild' | 'selected' | 'upcoming'
       ) => {
         if (!system) return
         if (seen.has(system.slug)) return
