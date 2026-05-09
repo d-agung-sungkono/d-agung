@@ -26,6 +26,16 @@ const detailContentBySlug: Record<string, SystemDetailContent> = {
     impact:
       'From this foundation, rollout will continue in practical increments: keep shipping useful modules, grow with real user behavior, and sustain long-term fit for daily UMKM operations.',
   },
+  wriday: {
+    problem:
+      'Many learners know what they want to say in English, but slow drafting, uncertainty in phrasing, and weak feedback loops make writing practice inconsistent.',
+    solution:
+      'Wriday is designed as a mini SaaS writing companion: lightweight prompts, fast rewrite assistance, and focused iteration loops that keep practice short, clear, and repeatable.',
+    impact:
+      'The goal is simple: make writing practice easier to sustain, so progress comes from consistency rather than occasional long sessions.',
+    architecture:
+      'Built as a compact product surface first, with room to grow into modular writing utilities based on real user practice patterns.',
+  },
   'fasih-form-gear': {
     problem:
       'Large survey programs needed configurable form behavior at scale, but manual instrument updates and inconsistent validation rules created quality and rollout risks.',

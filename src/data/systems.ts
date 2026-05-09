@@ -13,6 +13,14 @@ export const systems: SystemItem[] = [
     productLabel: 'Visit WarungKit',
   },
   {
+    slug: 'wriday',
+    title: 'Wriday',
+    summary:
+      'Playful but useful mini SaaS to accelerate your English writing skills.',
+    status: 'exploring',
+    year: '2026',
+  },
+  {
     slug: 'fasih-form-gear',
     title: 'Form Gear - FASIH',
     summary:
