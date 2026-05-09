@@ -26,6 +26,16 @@ const detailContentBySlug: Record<string, SystemDetailContent> = {
     impact:
       'From this foundation, rollout will continue in practical increments: keep shipping useful modules, grow with real user behavior, and sustain long-term fit for daily UMKM operations.',
   },
+  wriday: {
+    problem:
+      'Writing in English can feel heavier than it should, especially for learners preparing for IELTS and academic writing formats. The ideas are there, but drafting speed, structure anxiety, and unclear feedback often turn practice into friction.',
+    solution:
+      'Wriday starts as a mini SaaS companion to make writing sessions feel lighter: focused prompts, rewrite support, and short iteration loops that keep momentum without making practice feel like a chore.',
+    impact:
+      'Still in idea stage, but the direction is clear: a practical writing layer people can return to often, where consistency beats pressure.',
+    architecture:
+      'Built as a compact surface first, then expanded into modular writing utilities as real usage patterns emerge.',
+  },
   'fasih-form-gear': {
     problem:
       'Large survey programs needed configurable form behavior at scale, but manual instrument updates and inconsistent validation rules created quality and rollout risks.',
