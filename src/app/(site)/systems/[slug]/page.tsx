@@ -28,13 +28,13 @@ const detailContentBySlug: Record<string, SystemDetailContent> = {
   },
   wriday: {
     problem:
-      'Many learners know what they want to say in English, but slow drafting, uncertainty in phrasing, and weak feedback loops make writing practice inconsistent.',
+      'Writing in English can feel heavier than it should, especially for learners preparing for IELTS and academic writing formats. The ideas are there, but drafting speed, structure anxiety, and unclear feedback often turn practice into friction.',
     solution:
-      'Wriday is designed as a mini SaaS writing companion: lightweight prompts, fast rewrite assistance, and focused iteration loops that keep practice short, clear, and repeatable.',
+      'Wriday starts as a mini SaaS companion to make writing sessions feel lighter: focused prompts, rewrite support, and short iteration loops that keep momentum without making practice feel like a chore.',
     impact:
-      'The goal is simple: make writing practice easier to sustain, so progress comes from consistency rather than occasional long sessions.',
+      'Still in idea stage, but the direction is clear: a practical writing layer people can return to often, where consistency beats pressure.',
     architecture:
-      'Built as a compact product surface first, with room to grow into modular writing utilities based on real user practice patterns.',
+      'Built as a compact surface first, then expanded into modular writing utilities as real usage patterns emerge.',
   },
   'fasih-form-gear': {
     problem:

@@ -1,26 +1,37 @@
 .hero {
+  --ink: #151618;
+  --muted-ink: rgba(21, 22, 24, 0.64);
+  --line: rgba(21, 22, 24, 0.18);
+  --surface: rgba(255, 255, 255, 0.78);
+  --accent: #148a6a;
   display: grid;
   grid-template-columns: 5fr 5fr 2fr;
-  gap: clamp(2rem, 3.2vw, 4rem);
+  gap: clamp(1.25rem, 2vw, 2.4rem);
   align-items: start;
-  max-width: 1360px;
+  max-width: 1320px;
   margin: 0 auto;
-  padding: clamp(3.1rem, 5.4vw, 5rem) clamp(1.75rem, 3.5vw, 4rem) clamp(2rem, 3.6vw, 4rem);
+  padding: clamp(2rem, 4vw, 3.5rem) clamp(1.1rem, 2.8vw, 3rem) clamp(1.5rem, 3vw, 2.5rem);
   background:
-    radial-gradient(circle at 68% -8%, rgba(255, 255, 255, 0.7), transparent 46%),
-    linear-gradient(180deg, rgba(255, 255, 255, 0.44) 0%, rgba(255, 255, 255, 0) 36%);
+    radial-gradient(circle at 18% 8%, rgba(20, 138, 106, 0.1), transparent 30%),
+    radial-gradient(circle at 72% -8%, rgba(255, 255, 255, 0.72), transparent 42%),
+    linear-gradient(160deg, rgba(255, 255, 255, 0.88), rgba(245, 246, 247, 0.74));
+  border-radius: 24px;
+  border: 1px solid rgba(255, 255, 255, 0.7);
+  box-shadow:
+    0 30px 55px rgba(9, 12, 20, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.95);
 }
 
 .leftColumn {
   display: flex;
   flex-direction: column;
-  gap: 2.4rem;
+  gap: 1.35rem;
 }
 
 .intro {
   display: flex;
   flex-direction: column;
-  gap: 0.9rem;
+  gap: 0.62rem;
 }
 
 .identity,
@@ -28,7 +39,7 @@
   margin: 0;
   text-transform: uppercase;
   letter-spacing: 0.14em;
-  font-size: 0.72rem;
+  font-size: 0.68rem;
   line-height: 1.3;
 }
 
@@ -37,17 +48,19 @@
 }
 
 .role {
-  color: rgba(17, 17, 17, 0.65);
+  color: var(--muted-ink);
 }
 
 .headline {
-  margin: 0.35rem 0 0.15rem;
-  font-size: clamp(2.4rem, 5.7vw, 4.8rem);
+  margin: 0.2rem 0 0.1rem;
+  font-size: clamp(2rem, 4.7vw, 4rem);
   line-height: 0.85;
   letter-spacing: -0.025em;
   text-transform: uppercase;
-  max-width: 13ch;
+  max-width: 12ch;
   text-wrap: balance;
+  color: var(--ink);
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.7);
 }
 
 .headline span {
@@ -56,29 +69,68 @@
 
 .supportingText {
   margin: 0;
-  max-width: 42ch;
-  color: rgba(17, 17, 17, 0.68);
-  font-size: 1rem;
-  line-height: 1.78;
+  max-width: 40ch;
+  color: var(--muted-ink);
+  font-size: 0.96rem;
+  line-height: 1.58;
+}
+
+.carouselSection {
+  display: grid;
+  gap: 0.55rem;
 }
 
 .systemSection {
-  padding-top: 1rem;
-  border-top: 1px solid rgba(17, 17, 17, 0.16);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 0.9rem 1rem 1.02rem;
+  background: rgba(255, 255, 255, 0.68);
+  box-shadow: 0 8px 18px rgba(14, 18, 24, 0.07);
 }
 
 .currentBuildCard {
-  padding: 1.15rem 1.2rem 1.25rem;
   border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 14px;
   background:
     radial-gradient(circle at 88% -12%, rgba(255, 255, 255, 0.14), transparent 42%),
     radial-gradient(circle at 12% 12%, rgba(255, 255, 255, 0.18), transparent 44%),
     linear-gradient(150deg, #141414 0%, #111111 55%, #1d1d1d 100%);
   color: #f3f3f3;
   box-shadow:
-    0 16px 32px rgba(5, 5, 5, 0.2),
+    0 12px 22px rgba(5, 5, 5, 0.17),
     inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  animation: riseIn 420ms ease-out both;
+}
+
+.selectedCard {
+  border-color: rgba(42, 84, 143, 0.22);
+  background:
+    radial-gradient(circle at 85% -20%, rgba(66, 153, 225, 0.16), transparent 42%),
+    linear-gradient(150deg, rgba(245, 251, 255, 0.96) 0%, rgba(236, 245, 255, 0.92) 100%);
+}
+
+.selectedCard .sectionTitle,
+.selectedCard .systemMeta {
+  color: rgba(30, 64, 111, 0.78);
+}
+
+.selectedCard .metaDivider {
+  color: rgba(30, 64, 111, 0.45);
+}
+
+.upcomingCard {
+  border-color: rgba(122, 73, 20, 0.22);
+  background:
+    radial-gradient(circle at 85% -20%, rgba(245, 158, 11, 0.2), transparent 45%),
+    linear-gradient(150deg, rgba(255, 250, 241, 0.98) 0%, rgba(255, 244, 229, 0.94) 100%);
+}
+
+.upcomingCard .sectionTitle,
+.upcomingCard .systemMeta {
+  color: rgba(120, 66, 18, 0.78);
+}
+
+.upcomingCard .metaDivider {
+  color: rgba(120, 66, 18, 0.45);
 }
 
 .currentBuildCard .sectionTitle {
@@ -87,46 +139,67 @@
 
 .currentBuildCard .systemMeta,
 .currentBuildCard .systemSummary {
-  color: rgba(248, 248, 248, 0.85);
+  color: rgba(248, 248, 248, 0.86);
 }
 
 .sectionTitle {
-  margin: 0 0 0.65rem;
-  font-size: 0.68rem;
+  margin: 0 0 0.52rem;
+  font-size: 0.64rem;
   text-transform: uppercase;
-  letter-spacing: 0.12em;
-  color: rgba(17, 17, 17, 0.62);
+  letter-spacing: 0.14em;
+  color: var(--muted-ink);
 }
 
 .systemTitle {
   margin: 0;
-  font-size: 1.16rem;
-  line-height: 1.3;
+  font-size: 1.06rem;
+  line-height: 1.25;
   letter-spacing: -0.01em;
 }
 
+.systemTitle a {
+  position: relative;
+}
+
+.systemTitle a::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: -0.08rem;
+  width: 100%;
+  height: 1px;
+  transform: scaleX(0);
+  transform-origin: left center;
+  background: currentColor;
+  transition: transform 180ms ease;
+}
+
+.systemTitle a:hover::after {
+  transform: scaleX(1);
+}
+
 .systemMeta {
-  margin: 0.45rem 0 0;
+  margin: 0.4rem 0 0;
   display: flex;
   align-items: center;
   flex-wrap: wrap;
-  gap: 0.45rem;
-  font-size: 0.73rem;
+  gap: 0.42rem;
+  font-size: 0.69rem;
   text-transform: uppercase;
   letter-spacing: 0.08em;
-  color: rgba(17, 17, 17, 0.7);
+  color: rgba(21, 22, 24, 0.76);
 }
 
 .statusIndicator {
-  width: 0.42rem;
-  height: 0.42rem;
+  width: 0.4rem;
+  height: 0.4rem;
   border-radius: 999px;
-  background: #56d087;
-  box-shadow: 0 0 0 4px rgba(86, 208, 135, 0.15);
+  background: var(--accent);
+  box-shadow: 0 0 0 3px rgba(20, 138, 106, 0.2);
 }
 
 .metaDivider {
-  color: rgba(17, 17, 17, 0.48);
+  color: rgba(21, 22, 24, 0.48);
 }
 
 .currentBuildCard .metaDivider {
@@ -138,29 +211,32 @@
 }
 
 .systemSummary {
-  margin: 0.65rem 0 0;
-  line-height: 1.65;
+  margin: 0.56rem 0 0;
+  line-height: 1.45;
+  font-size: 0.95rem;
+  color: rgba(21, 22, 24, 0.9);
 }
 
 .systemCtaWrap {
-  margin: 0.75rem 0 0;
+  margin: 0.64rem 0 0;
 }
 
 .systemCta {
   display: inline-flex;
   align-items: center;
   gap: 0.3rem;
-  font-size: 0.73rem;
+  font-size: 0.68rem;
   text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: rgba(17, 17, 17, 0.7);
+  letter-spacing: 0.09em;
+  color: rgba(21, 22, 24, 0.78);
   text-decoration: none;
-  transition: color 180ms ease, transform 180ms ease;
+  transition: color 180ms ease, transform 180ms ease, letter-spacing 180ms ease;
 }
 
 .systemCta:hover {
-  color: rgba(17, 17, 17, 0.95);
+  color: rgba(21, 22, 24, 0.98);
   transform: translateX(1px);
+  letter-spacing: 0.11em;
 }
 
 .currentBuildCard .systemCta {
@@ -173,23 +249,78 @@
 
 .emptyState {
   margin: 0;
-  font-size: 0.95rem;
-  line-height: 1.6;
+  font-size: 0.9rem;
+  line-height: 1.5;
   color: rgba(17, 17, 17, 0.68);
+}
+
+.carouselControls {
+  display: flex;
+  align-items: center;
+  gap: 0.44rem;
+  flex-wrap: wrap;
+  padding: 0.32rem 0.44rem;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  width: fit-content;
+  background: var(--surface);
+  backdrop-filter: blur(6px);
+}
+
+.carouselNavButton {
+  border: 1px solid rgba(21, 22, 24, 0.2);
+  background: rgba(255, 255, 255, 0.78);
+  color: rgba(21, 22, 24, 0.8);
+  font-size: 0.62rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  border-radius: 999px;
+  padding: 0.22rem 0.5rem;
+  cursor: pointer;
+  transition: border-color 180ms ease, color 180ms ease, background-color 180ms ease;
+}
+
+.carouselNavButton:hover {
+  border-color: rgba(21, 22, 24, 0.38);
+  color: rgba(21, 22, 24, 0.95);
+  background: rgba(255, 255, 255, 0.9);
+}
+
+.carouselDot {
+  width: 0.52rem;
+  height: 0.52rem;
+  border-radius: 999px;
+  border: 1px solid rgba(21, 22, 24, 0.3);
+  background: transparent;
+  cursor: pointer;
+  transition: transform 120ms ease, background-color 180ms ease, border-color 180ms ease;
+}
+
+.carouselDot:hover {
+  transform: scale(1.06);
+  border-color: rgba(21, 22, 24, 0.48);
+}
+
+.carouselDotActive {
+  background: var(--accent);
+  border-color: rgba(20, 138, 106, 0.8);
+  box-shadow: 0 0 0 2px rgba(20, 138, 106, 0.18);
 }
 
 .centerColumn {
   grid-column: 2;
   justify-self: end;
-  width: 80%;
+  width: 82%;
   position: relative;
   margin: 0;
-  min-height: clamp(480px, 72vh, 800px);
+  min-height: clamp(420px, 64vh, 700px);
   border: 1px solid rgba(17, 17, 17, 0.22);
   border-radius: 18px;
   overflow: hidden;
   background: linear-gradient(180deg, rgba(237, 237, 237, 0.9), rgba(210, 210, 210, 0.92));
-  box-shadow: 0 24px 36px rgba(6, 6, 6, 0.12);
+  box-shadow:
+    0 18px 30px rgba(6, 6, 6, 0.12),
+    0 0 0 1px rgba(255, 255, 255, 0.35);
 }
 
 .centerColumn::before {
@@ -207,7 +338,7 @@
   left: 0;
   right: 0;
   bottom: 0;
-  height: 46%;
+  height: 44%;
   background: linear-gradient(to bottom, rgba(255, 255, 255, 0), rgba(8, 8, 8, 0.42));
   pointer-events: none;
 }
@@ -222,6 +353,7 @@
   object-position: center 24%;
   filter: saturate(0.76) contrast(1.03) brightness(0.98);
   transform: scale(1.01);
+  transition: transform 700ms ease, filter 500ms ease;
 }
 
 .portraitMedia::before {
@@ -235,13 +367,18 @@
   z-index: 1;
 }
 
+.centerColumn:hover .portraitImage {
+  transform: scale(1.03);
+  filter: saturate(0.84) contrast(1.06) brightness(1);
+}
+
 .rightColumn {
   grid-column: 3;
   position: relative;
   display: flex;
   justify-content: flex-end;
-  padding-left: 0.4rem;
-  padding-top: clamp(1.4rem, 2.4vw, 2.2rem);
+  padding-left: 0.25rem;
+  padding-top: clamp(1rem, 2vw, 1.8rem);
 }
 
 .rightColumn::before {
@@ -250,9 +387,9 @@
 
 .railNav {
   position: relative;
-  width: min(100%, 260px);
-  padding-left: 1rem;
-  padding-top: 0.25rem;
+  width: min(100%, 246px);
+  padding-left: 0.8rem;
+  padding-top: 0.12rem;
 }
 
 .railNav::before {
@@ -278,7 +415,7 @@
 }
 
 .railItem + .railItem {
-  margin-top: 0.8rem;
+  margin-top: 0.62rem;
 }
 
 .railLink {
@@ -286,9 +423,12 @@
   display: block;
   color: rgba(17, 17, 17, 0.72);
   text-decoration: none;
-  padding: 0.62rem 0.65rem 0.6rem 0.78rem;
-  border: 1px solid rgba(17, 17, 17, 0.16);
+  padding: 0.52rem 0.6rem 0.54rem 0.72rem;
+  border: 1px solid rgba(21, 22, 24, 0.16);
   border-radius: 8px;
+  background: rgba(255, 255, 255, 0.62);
+  backdrop-filter: blur(6px);
+  box-shadow: 0 5px 12px rgba(17, 17, 17, 0.05);
   transition:
     color 180ms ease,
     transform 180ms ease,
@@ -298,10 +438,10 @@
 .railLink::before {
   content: '';
   position: absolute;
-  left: 0.32rem;
-  top: 0.73rem;
-  width: 0.38rem;
-  height: 0.38rem;
+  left: 0.31rem;
+  top: 0.62rem;
+  width: 0.36rem;
+  height: 0.36rem;
   border: 1px solid rgba(17, 17, 17, 0.3);
   border-radius: 999px;
   background:
@@ -313,9 +453,10 @@
 }
 
 .railLink:hover {
-  color: rgba(17, 17, 17, 0.92);
-  transform: translateX(1px);
-  border-color: rgba(17, 17, 17, 0.28);
+  color: rgba(21, 22, 24, 0.96);
+  transform: translateX(1px) translateY(-1px);
+  border-color: rgba(21, 22, 24, 0.28);
+  box-shadow: 0 8px 14px rgba(17, 17, 17, 0.08);
 }
 
 .railLink:hover::before {
@@ -325,37 +466,49 @@
 }
 
 .railLinkActive {
-  color: rgba(17, 17, 17, 0.95);
-  border-color: rgba(17, 17, 17, 0.36);
+  color: rgba(21, 22, 24, 0.98);
+  border-color: rgba(20, 138, 106, 0.55);
+  box-shadow: 0 10px 16px rgba(20, 138, 106, 0.12);
 }
 
 .railLinkActive::before {
-  border-color: rgba(17, 17, 17, 0.72);
+  border-color: rgba(20, 138, 106, 0.78);
   background:
-    radial-gradient(circle at 50% 50%, rgba(17, 17, 17, 0.86) 0 44%, transparent 48%);
+    radial-gradient(circle at 50% 50%, rgba(20, 138, 106, 0.9) 0 44%, transparent 48%);
   transform: scale(1.03);
 }
 
 .railLabel {
   display: block;
-  font-size: 0.68rem;
+  font-size: 0.64rem;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.15em;
-  padding-left: 0.75rem;
+  padding-left: 0.72rem;
 }
 
 .railSubLabel {
   display: block;
-  margin-top: 0.18rem;
-  font-size: 0.81rem;
-  line-height: 1.55;
-  color: rgba(17, 17, 17, 0.44);
-  padding-left: 0.75rem;
+  margin-top: 0.14rem;
+  font-size: 0.76rem;
+  line-height: 1.45;
+  color: rgba(21, 22, 24, 0.48);
+  padding-left: 0.72rem;
 }
 
 .railItemActive .railSubLabel {
-  color: rgba(17, 17, 17, 0.58);
+  color: rgba(21, 22, 24, 0.66);
+}
+
+@keyframes riseIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 @media (max-width: 1100px) {
@@ -373,7 +526,7 @@
     grid-column: 1 / -1;
     border-top: 1px solid rgba(17, 17, 17, 0.14);
     padding-left: 0;
-    padding-top: 1.25rem;
+    padding-top: 1rem;
     justify-content: flex-start;
   }
 
@@ -393,7 +546,7 @@
   .railList {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 0.95rem 1.35rem;
+    gap: 0.8rem 1rem;
   }
 
   .railItem + .railItem {
@@ -404,15 +557,18 @@
 @media (max-width: 760px) {
   .hero {
     grid-template-columns: 1fr;
-    gap: 1.45rem;
-    padding: 1.2rem;
+    gap: 1.15rem;
+    padding: 1rem;
+    border-radius: 0;
+    box-shadow: none;
+    border: none;
   }
 
   .centerColumn {
     grid-column: auto;
     justify-self: stretch;
     width: 100%;
-    min-height: 360px;
+    min-height: 340px;
     border-radius: 14px;
   }
 

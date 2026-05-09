@@ -16,7 +16,7 @@ export const systems: SystemItem[] = [
     slug: 'wriday',
     title: 'Wriday',
     summary:
-      'Playful but useful mini SaaS to accelerate your English writing skills.',
+      'Simple daily quiz that feels like a game, but quietly builds English writing consistency through bite-size practice and direct feedback.',
     status: 'exploring',
     year: '2026',
   },

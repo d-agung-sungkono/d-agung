@@ -1,5 +1,8 @@
+'use client'
+
 import Image from 'next/image'
 import Link from 'next/link'
+import { useEffect, useMemo, useState } from 'react'
 
 import type { SystemItem } from '@/types/system'
 
@@ -8,6 +11,7 @@ import styles from './Hero.module.css'
 type HeroProps = {
   featuredSystem: SystemItem | null
   selectedSystem: SystemItem | null
+  upcomingSystems: SystemItem[]
 }
 
 type RailItem = {
@@ -15,6 +19,13 @@ type RailItem = {
   sublabel: string
   href: string
   isActive?: boolean
+}
+
+type CarouselSlide = {
+  id: string
+  title: string
+  system: SystemItem | null
+  variant?: 'default' | 'currentBuild' | 'selected' | 'upcoming'
 }
 
 const railItems: RailItem[] = [
@@ -39,20 +50,22 @@ function SystemSummary({
 }: {
   title: string
   system: SystemItem | null
-  variant?: 'default' | 'currentBuild'
+  variant?: 'default' | 'currentBuild' | 'selected' | 'upcoming'
 }) {
   const isCurrentBuild = variant === 'currentBuild'
+  const isSelected = variant === 'selected'
+  const isUpcoming = variant === 'upcoming'
   const hasProductUrl = Boolean(system?.productUrl)
   const isExternalUrl = /^https?:\/\//.test(system?.productUrl ?? '')
 
   return (
-    <section
-      className={`${styles.systemSection} ${isCurrentBuild ? styles.currentBuildCard : ''}`}
+    <article
+      className={`${styles.systemSection} ${isCurrentBuild ? styles.currentBuildCard : ''} ${isSelected ? styles.selectedCard : ''} ${isUpcoming ? styles.upcomingCard : ''}`}
       aria-label={title}
     >
       <h2 className={styles.sectionTitle}>{title}</h2>
       {system ? (
-        <article>
+        <>
           <h3 className={styles.systemTitle}>
             <Link href={`/systems/${system.slug}`}>{system.title}</Link>
           </h3>
@@ -83,15 +96,64 @@ function SystemSummary({
               </a>
             </p>
           ) : null}
-        </article>
+        </>
       ) : (
         <p className={styles.emptyState}>No system selected.</p>
       )}
-    </section>
+    </article>
   )
 }
 
-export default function Hero({ featuredSystem, selectedSystem }: HeroProps) {
+export default function Hero({
+  featuredSystem,
+  selectedSystem,
+  upcomingSystems,
+}: HeroProps) {
+  const [slideIndex, setSlideIndex] = useState(0)
+
+  const slides: CarouselSlide[] = useMemo(
+    () => {
+      const seen = new Set<string>()
+      const results: CarouselSlide[] = []
+      const addSlide = (
+        title: string,
+        system: SystemItem | null,
+        variant?: 'default' | 'currentBuild'
+      ) => {
+        if (!system) return
+        if (seen.has(system.slug)) return
+        seen.add(system.slug)
+        results.push({
+          id: `${title.toLowerCase().replace(/\s+/g, '-')}-${system.slug}`,
+          title,
+          system,
+          variant,
+        })
+      }
+
+      addSlide('Current Build', featuredSystem, 'currentBuild')
+      addSlide('Selected System', selectedSystem, 'selected')
+      upcomingSystems.forEach((system) => addSlide('Upcoming', system, 'upcoming'))
+      return results
+    },
+    [featuredSystem, selectedSystem, upcomingSystems]
+  )
+
+  useEffect(() => {
+    if (slides.length <= 1) return
+    const interval = window.setInterval(() => {
+      setSlideIndex((index) => (index + 1) % slides.length)
+    }, 5200)
+
+    return () => window.clearInterval(interval)
+  }, [slides.length])
+
+  const safeSlideIndex = slides.length ? slideIndex % slides.length : 0
+  const activeSlide = slides.length ? slides[safeSlideIndex] : null
+  const onPrevSlide = () =>
+    setSlideIndex((index) => (index - 1 + slides.length) % slides.length)
+  const onNextSlide = () => setSlideIndex((index) => (index + 1) % slides.length)
+
   return (
     <section className={styles.hero} aria-label="Homepage hero">
       <div className={styles.leftColumn}>
@@ -109,12 +171,51 @@ export default function Hero({ featuredSystem, selectedSystem }: HeroProps) {
           </p>
         </header>
 
-        <SystemSummary
-          title="Current Build"
-          system={featuredSystem}
-          variant="currentBuild"
-        />
-        <SystemSummary title="Selected System" system={selectedSystem} />
+        <section className={styles.carouselSection} aria-label="System Highlights">
+          {activeSlide ? (
+            <>
+              <SystemSummary
+                title={activeSlide.title}
+                system={activeSlide.system}
+                variant={activeSlide.variant}
+              />
+              <div className={styles.carouselControls}>
+                {slides.length > 1 ? (
+                  <button
+                    type="button"
+                    className={styles.carouselNavButton}
+                    onClick={onPrevSlide}
+                    aria-label="Previous project"
+                  >
+                    Prev
+                  </button>
+                ) : null}
+                {slides.map((slide, index) => (
+                  <button
+                    key={slide.id}
+                    type="button"
+                    className={`${styles.carouselDot} ${index === safeSlideIndex ? styles.carouselDotActive : ''}`}
+                    onClick={() => setSlideIndex(index)}
+                    aria-label={`Show ${slide.title} ${slide.system?.title ?? ''}`}
+                    aria-pressed={index === safeSlideIndex}
+                  />
+                ))}
+                {slides.length > 1 ? (
+                  <button
+                    type="button"
+                    className={styles.carouselNavButton}
+                    onClick={onNextSlide}
+                    aria-label="Next project"
+                  >
+                    Next
+                  </button>
+                ) : null}
+              </div>
+            </>
+          ) : (
+            <p className={styles.emptyState}>No project data available.</p>
+          )}
+        </section>
       </div>
 
       <figure className={styles.centerColumn} aria-label="Featured portrait">
