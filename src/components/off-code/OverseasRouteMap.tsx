@@ -1,17 +1,15 @@
 'use client'
 
+import { geoNaturalEarth1, geoPath } from 'd3-geo'
+import type { FeatureCollection, GeoJsonProperties, Geometry } from 'geojson'
+import { feature } from 'topojson-client'
 import { useEffect, useMemo, useState } from 'react'
-import {
-  ComposableMap,
-  Geographies,
-  Geography,
-  Line,
-  Marker,
-} from 'react-simple-maps'
 
 import styles from './OverseasRouteMap.module.css'
 
 const geoUrl = 'https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json'
+const VIEWBOX_WIDTH = 1440
+const VIEWBOX_HEIGHT = 640
 
 type Stop = {
   label: string
@@ -20,12 +18,18 @@ type Stop = {
 
 type RouteKey = 'singapore' | 'oslo'
 
+type WorldAtlas = {
+  objects?: {
+    countries?: unknown
+  }
+}
+
 const stops: Stop[] = [
-  { label: 'Jakarta', coordinates: [106.8456, -6.2088] as [number, number] },
-  { label: 'Kepri', coordinates: [104.0535, 1.1302] as [number, number] },
-  { label: 'Singapore', coordinates: [103.8198, 1.3521] as [number, number] },
-  { label: 'Qatar', coordinates: [51.531, 25.2854] as [number, number] },
-  { label: 'Oslo', coordinates: [10.7522, 59.9139] as [number, number] },
+  { label: 'Jakarta', coordinates: [106.8456, -6.2088] },
+  { label: 'Kepri', coordinates: [104.0535, 1.1302] },
+  { label: 'Singapore', coordinates: [103.8198, 1.3521] },
+  { label: 'Qatar', coordinates: [51.531, 25.2854] },
+  { label: 'Oslo', coordinates: [10.7522, 59.9139] },
 ]
 
 const routeMap: Record<RouteKey, [number, number][]> = {
@@ -45,9 +49,7 @@ function pointDistance(a: [number, number], b: [number, number]) {
 }
 
 function pointAtProgress(path: [number, number][], progress: number): [number, number] {
-  if (path.length < 2) {
-    return path[0] ?? [0, 0]
-  }
+  if (path.length < 2) return path[0] ?? [0, 0]
 
   const clamped = Math.min(1, Math.max(0, progress))
   const lengths = path.slice(0, -1).map((point, index) => pointDistance(point, path[index + 1]))
@@ -73,15 +75,41 @@ function pointAtProgress(path: [number, number][], progress: number): [number, n
   return path[path.length - 1]
 }
 
+function linePath(points: [number, number][], project: (point: [number, number]) => [number, number] | null) {
+  const projected = points.map(project).filter((point): point is [number, number] => point !== null)
+  if (projected.length < 2) return null
+
+  return projected
+    .map(([x, y], index) => `${index === 0 ? 'M' : 'L'} ${x.toFixed(2)} ${y.toFixed(2)}`)
+    .join(' ')
+}
+
 export default function OverseasRouteMap() {
   const [activeRoute, setActiveRoute] = useState<RouteKey>('oslo')
   const [flightProgress, setFlightProgress] = useState(0)
+  const [world, setWorld] = useState<FeatureCollection<Geometry, GeoJsonProperties> | null>(null)
 
   const activePath = useMemo(() => routeMap[activeRoute], [activeRoute])
   const planePosition = useMemo(
     () => pointAtProgress(activePath, flightProgress),
     [activePath, flightProgress]
   )
+
+  useEffect(() => {
+    const loadWorld = async () => {
+      const response = await fetch(geoUrl)
+      const data = (await response.json()) as WorldAtlas
+      if (!data.objects?.countries) return
+
+      const countries = feature(data as never, data.objects.countries as never) as unknown as FeatureCollection<
+        Geometry,
+        GeoJsonProperties
+      >
+      setWorld(countries)
+    }
+
+    void loadWorld()
+  }, [])
 
   useEffect(() => {
     let frameId = 0
@@ -92,15 +120,32 @@ export default function OverseasRouteMap() {
       const elapsed = time - start
       const progress = Math.min(1, elapsed / duration)
       setFlightProgress(progress)
-      if (progress < 1) {
-        frameId = requestAnimationFrame(tick)
-      }
+      if (progress < 1) frameId = requestAnimationFrame(tick)
     }
 
     frameId = requestAnimationFrame(tick)
-
     return () => cancelAnimationFrame(frameId)
   }, [activeRoute])
+
+  const projection = useMemo(() => {
+    if (!world) return null
+    return geoNaturalEarth1().fitSize([VIEWBOX_WIDTH, VIEWBOX_HEIGHT], world)
+  }, [world])
+
+  const pathBuilder = useMemo(() => {
+    if (!projection) return null
+    return geoPath(projection)
+  }, [projection])
+
+  const project = (point: [number, number]) => {
+    if (!projection) return null
+    const output = projection(point)
+    return output ? ([output[0], output[1]] as [number, number]) : null
+  }
+
+  const singaporePath = linePath([stops[0].coordinates, stops[1].coordinates, stops[2].coordinates], project)
+  const osloPath = linePath([stops[0].coordinates, stops[3].coordinates, stops[4].coordinates], project)
+  const vehiclePoint = project(planePosition)
 
   return (
     <div className={styles.wrap} aria-label="Overseas travel route visualization">
@@ -122,94 +167,62 @@ export default function OverseasRouteMap() {
         </select>
       </div>
 
-      <ComposableMap
-        width={1440}
-        height={640}
-        projection="geoNaturalEarth1"
-        projectionConfig={{ scale: 265, center: [16, 18] }}
+      <svg
+        viewBox={`0 0 ${VIEWBOX_WIDTH} ${VIEWBOX_HEIGHT}`}
         className={styles.map}
+        role="img"
+        aria-label="World map with overseas routes"
       >
-        <Geographies geography={geoUrl}>
-          {({ geographies }) =>
-            geographies.map((geo) => (
-              <Geography
-                key={geo.rsmKey}
-                geography={geo}
-                className={styles.geo}
-                style={{
-                  default: {
-                    display: /antarctica/i.test(
-                      (geo.properties?.name as string | undefined) ?? ''
-                    )
-                      ? 'none'
-                      : 'inline',
-                  },
-                  hover: {
-                    display: /antarctica/i.test(
-                      (geo.properties?.name as string | undefined) ?? ''
-                    )
-                      ? 'none'
-                      : 'inline',
-                  },
-                  pressed: {
-                    display: /antarctica/i.test(
-                      (geo.properties?.name as string | undefined) ?? ''
-                    )
-                      ? 'none'
-                      : 'inline',
-                  },
-                }}
-              />
-            ))
-          }
-        </Geographies>
+        {world && pathBuilder
+          ? world.features.map((item, index) => {
+              const countryName = (item.properties?.name as string | undefined) ?? ''
+              if (/antarctica/i.test(countryName)) return null
 
-        <Line
-          from={stops[0].coordinates}
-          to={stops[1].coordinates}
-          className={activeRoute === 'singapore' ? styles.routeAActive : styles.routeA}
-        />
-        <Line
-          from={stops[1].coordinates}
-          to={stops[2].coordinates}
-          className={activeRoute === 'singapore' ? styles.routeAActive : styles.routeA}
-        />
-        <Line from={stops[2].coordinates} to={stops[1].coordinates} className={styles.routeA} />
-        <Line from={stops[1].coordinates} to={stops[0].coordinates} className={styles.routeA} />
+              const d = pathBuilder(item)
+              if (!d) return null
 
-        <Line
-          from={stops[0].coordinates}
-          to={stops[3].coordinates}
-          className={activeRoute === 'oslo' ? styles.routeBActive : styles.routeB}
-        />
-        <Line
-          from={stops[3].coordinates}
-          to={stops[4].coordinates}
-          className={activeRoute === 'oslo' ? styles.routeBActive : styles.routeB}
-        />
-        <Line from={stops[4].coordinates} to={stops[3].coordinates} className={styles.routeB} />
-        <Line from={stops[3].coordinates} to={stops[0].coordinates} className={styles.routeB} />
+              return <path key={`${item.id ?? index}`} d={d} className={styles.geo} />
+            })
+          : null}
 
-        {stops.map((stop) => (
-          <Marker key={stop.label} coordinates={stop.coordinates}>
-            <circle r={3.5} className={styles.ring} />
-            <circle r={1.8} className={styles.dot} />
-          </Marker>
-        ))}
+        {singaporePath ? (
+          <path
+            d={singaporePath}
+            className={activeRoute === 'singapore' ? styles.routeAActive : styles.routeA}
+          />
+        ) : null}
 
-        <Marker coordinates={planePosition}>
-          {activeRoute === 'oslo' ? (
-            <g className={styles.plane}>
-              <path d="M -2.8 1.2 L 3 0 L -2.8 -1.2 L -1.4 0 Z" />
+        {osloPath ? (
+          <path d={osloPath} className={activeRoute === 'oslo' ? styles.routeBActive : styles.routeB} />
+        ) : null}
+
+        {stops.map((stop) => {
+          const point = project(stop.coordinates)
+          if (!point) return null
+
+          return (
+            <g key={stop.label} transform={`translate(${point[0]}, ${point[1]})`}>
+              <circle r={3.5} className={styles.ring} />
+              <circle r={1.8} className={styles.dot} />
             </g>
-          ) : (
-            <g className={styles.ship}>
-              <path d="M -3 1.3 L 3 1.3 L 2 2.2 L -2 2.2 Z" />
-              <path d="M -0.8 1.2 L -0.8 -1.2 L 0.4 -0.2 L 0.4 1.2 Z" />
-            </g>
-          )}
-        </Marker>
-      </ComposableMap>
+          )
+        })}
+
+        {vehiclePoint ? (
+          <g transform={`translate(${vehiclePoint[0]}, ${vehiclePoint[1]})`}>
+            {activeRoute === 'oslo' ? (
+              <g className={styles.plane}>
+                <path d="M -2.8 1.2 L 3 0 L -2.8 -1.2 L -1.4 0 Z" />
+              </g>
+            ) : (
+              <g className={styles.ship}>
+                <path d="M -3 1.3 L 3 1.3 L 2 2.2 L -2 2.2 Z" />
+                <path d="M -0.8 1.2 L -0.8 -1.2 L 0.4 -0.2 L 0.4 1.2 Z" />
+              </g>
+            )}
+          </g>
+        ) : null}
+      </svg>
     </div>
   )
 }

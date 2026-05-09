@@ -1,20 +1,15 @@
 'use client'
 
+import { geoMercator, geoPath } from 'd3-geo'
+import type { Feature, FeatureCollection, GeoJsonProperties, Geometry } from 'geojson'
 import { useMemo, useState } from 'react'
-import { ComposableMap, Geographies, Geography, ZoomableGroup } from 'react-simple-maps'
 
 import indonesiaProvinces from '@/data/maps/indonesia-provinces.json'
 import { visitedProvinces } from '@/data/travel'
 
 import styles from './TravelMap.module.css'
 
-type ProvinceGeo = {
-  properties?: {
-    Propinsi?: string
-    province?: string
-    name?: string
-  }
-}
+type ProvinceFeature = Feature<Geometry, GeoJsonProperties>
 
 type HoverState = {
   province: string
@@ -22,32 +17,20 @@ type HoverState = {
   isVisited: boolean
 }
 
+const VIEWBOX_WIDTH = 1440
+const VIEWBOX_HEIGHT = 640
+
 function normalizeProvince(value: string) {
   const normalized = value.toLowerCase().replace(/\s+/g, ' ').trim()
 
-  if (normalized === 'kepulauan riau') {
-    return 'riau'
-  }
-
+  if (normalized === 'kepulauan riau') return 'riau'
   if (normalized === 'di yogyakarta' || normalized === 'd.i. yogyakarta') {
     return 'daerah istimewa yogyakarta'
   }
-
-  if (normalized === 'yogyakarta') {
-    return 'daerah istimewa yogyakarta'
-  }
-
-  if (normalized === 'jakarta raya') {
-    return 'dki jakarta'
-  }
-
-  if (normalized === 'banten') {
-    return 'probanten'
-  }
-
-  if (normalized === 'papua barat') {
-    return 'irian jaya barat'
-  }
+  if (normalized === 'yogyakarta') return 'daerah istimewa yogyakarta'
+  if (normalized === 'jakarta raya') return 'dki jakarta'
+  if (normalized === 'banten') return 'probanten'
+  if (normalized === 'papua barat') return 'irian jaya barat'
 
   return normalized
 }
@@ -60,25 +43,47 @@ function cleanProvinceName(value: string) {
     .trim()
 }
 
-function getProvinceName(geo: ProvinceGeo) {
+function getProvinceName(feature: ProvinceFeature) {
   return cleanProvinceName(
-    geo.properties?.Propinsi ?? geo.properties?.province ?? geo.properties?.name ?? 'Unknown Province'
+    (feature.properties?.Propinsi as string | undefined) ??
+      (feature.properties?.province as string | undefined) ??
+      (feature.properties?.name as string | undefined) ??
+      'Unknown Province'
   )
 }
 
 export default function TravelMap() {
   const [hovered, setHovered] = useState<HoverState | null>(null)
 
-  const visitedByProvince = useMemo(() => {
-    return new Map(visitedProvinces.map((item) => [normalizeProvince(item.province), item]))
+  const visitedByProvince = useMemo(
+    () => new Map(visitedProvinces.map((item) => [normalizeProvince(item.province), item])),
+    []
+  )
+
+  const featureCollection = useMemo(() => {
+    if (
+      typeof indonesiaProvinces !== 'object' ||
+      indonesiaProvinces === null ||
+      !Array.isArray((indonesiaProvinces as { features?: unknown[] }).features)
+    ) {
+      return null
+    }
+
+    return indonesiaProvinces as FeatureCollection<Geometry, GeoJsonProperties>
   }, [])
 
-  const hasGeographies =
-    typeof indonesiaProvinces === 'object' &&
-    indonesiaProvinces !== null &&
-    Array.isArray((indonesiaProvinces as { features?: unknown[] }).features)
+  const projection = useMemo(() => {
+    if (!featureCollection) return null
 
-  if (!hasGeographies) {
+    return geoMercator().fitSize([VIEWBOX_WIDTH, VIEWBOX_HEIGHT], featureCollection)
+  }, [featureCollection])
+
+  const pathBuilder = useMemo(() => {
+    if (!projection) return null
+    return geoPath(projection)
+  }, [projection])
+
+  if (!featureCollection || !pathBuilder) {
     return (
       <div className={styles.placeholder}>
         Province GeoJSON is not available yet. Add the file to
@@ -90,60 +95,40 @@ export default function TravelMap() {
   return (
     <div className={styles.mapWrap}>
       <div className={styles.canvas}>
-        <ComposableMap
-          width={1440}
-          height={640}
-          projection="geoMercator"
-          projectionConfig={{ center: [118, -2], scale: 1360 }}
+        <svg
+          viewBox={`0 0 ${VIEWBOX_WIDTH} ${VIEWBOX_HEIGHT}`}
           className={styles.map}
+          role="img"
+          aria-label="Indonesia provinces map"
         >
-          <ZoomableGroup center={[118, -2]} zoom={1.18}>
-            <Geographies geography={indonesiaProvinces}>
-              {({ geographies }) =>
-                geographies.map((geo) => {
-                  const provinceName = getProvinceName(geo as ProvinceGeo)
-                  const visit = visitedByProvince.get(normalizeProvince(provinceName))
-                  const isVisited = Boolean(visit)
+          {featureCollection.features.map((feature, index) => {
+            const provinceName = getProvinceName(feature)
+            const visit = visitedByProvince.get(normalizeProvince(provinceName))
+            const isVisited = Boolean(visit)
+            const pathData = pathBuilder(feature)
 
-                  return (
-                    <Geography
-                      key={geo.rsmKey}
-                      geography={geo}
-                      className={`${styles.province} ${isVisited ? styles.visitedProvince : ''}`}
-                      onMouseEnter={() => {
-                        setHovered({
-                          province: provinceName,
-                          cities: visit?.cities ?? [],
-                          isVisited,
-                        })
-                      }}
-                      onMouseLeave={() => setHovered(null)}
-                      style={{
-                        default: {
-                          fill: isVisited ? '#56d087' : 'rgba(17, 17, 17, 0.13)',
-                          stroke: 'rgba(17, 17, 17, 0.28)',
-                          strokeWidth: 0.52,
-                          outline: 'none',
-                        },
-                        hover: {
-                          fill: isVisited ? '#4cc47d' : 'rgba(17, 17, 17, 0.21)',
-                          stroke: 'rgba(17, 17, 17, 0.44)',
-                          strokeWidth: 0.6,
-                          outline: 'none',
-                          cursor: 'pointer',
-                        },
-                        pressed: {
-                          fill: isVisited ? '#44b472' : 'rgba(17, 17, 17, 0.25)',
-                          outline: 'none',
-                        },
-                      }}
-                    />
-                  )
-                })
-              }
-            </Geographies>
-          </ZoomableGroup>
-        </ComposableMap>
+            if (!pathData) return null
+
+            return (
+              <path
+                key={`${feature.id ?? provinceName}-${index}`}
+                d={pathData}
+                className={`${styles.province} ${isVisited ? styles.visitedProvince : ''}`}
+                fill={isVisited ? '#56d087' : 'rgba(17, 17, 17, 0.13)'}
+                stroke="rgba(17, 17, 17, 0.28)"
+                strokeWidth={0.52}
+                onMouseEnter={() => {
+                  setHovered({
+                    province: provinceName,
+                    cities: visit?.cities ?? [],
+                    isVisited,
+                  })
+                }}
+                onMouseLeave={() => setHovered(null)}
+              />
+            )
+          })}
+        </svg>
       </div>
 
       <div className={styles.hoverInfo} aria-live="polite">
