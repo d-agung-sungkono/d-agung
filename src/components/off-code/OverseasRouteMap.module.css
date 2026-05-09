@@ -21,18 +21,19 @@
   outline: none;
 }
 
-.routeSoft {
-  stroke: rgba(86, 208, 135, 0.42);
-  stroke-width: 1.2;
+.routeA {
+  stroke: rgba(86, 208, 135, 0.9);
+  stroke-width: 1.15;
   stroke-linecap: round;
+  stroke-dasharray: 4 2.5;
   fill: none;
 }
 
-.routeMain {
-  stroke: rgba(86, 208, 135, 0.95);
-  stroke-width: 1.35;
+.routeB {
+  stroke: rgba(17, 17, 17, 0.55);
+  stroke-width: 1;
   stroke-linecap: round;
-  stroke-dasharray: 4 3;
+  stroke-dasharray: 3 2.8;
   fill: none;
 }
 
@@ -61,6 +62,7 @@
 
 .meta {
   margin: 0.36rem 0 0;
-  font-size: 0.9rem;
+  font-size: 0.86rem;
+  line-height: 1.55;
   color: rgba(17, 17, 17, 0.74);
 }
