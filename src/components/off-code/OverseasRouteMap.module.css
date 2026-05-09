@@ -1,0 +1,118 @@
+.wrap {
+  width: 100%;
+  position: relative;
+  margin-top: 0;
+  border: 1px solid rgba(17, 17, 17, 0.11);
+  border-radius: 14px;
+  padding: clamp(0.22rem, 0.5vw, 0.4rem);
+  overflow: hidden;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.95), rgba(248, 248, 248, 0.93));
+  box-shadow: 0 9px 20px rgba(0, 0, 0, 0.04);
+}
+
+.overlayControls {
+  position: absolute;
+  top: calc(clamp(0.22rem, 0.5vw, 0.4rem) + 0.36rem);
+  left: calc(clamp(0.22rem, 0.5vw, 0.4rem) + 0.36rem);
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.34rem 0.48rem;
+  border: 1px solid rgba(17, 17, 17, 0.1);
+  border-radius: 9px;
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(4px);
+}
+
+.overlayLabel {
+  font-size: 0.66rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgba(17, 17, 17, 0.54);
+}
+
+.overlaySelect {
+  border: 0;
+  background: transparent;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: rgba(17, 17, 17, 0.82);
+  outline: none;
+  cursor: pointer;
+}
+
+.map {
+  width: 100%;
+  min-height: clamp(330px, 44vw, 620px);
+  display: block;
+}
+
+.geo {
+  fill: rgba(17, 17, 17, 0.08);
+  stroke: rgba(17, 17, 17, 0.2);
+  stroke-width: 0.32;
+  outline: none;
+  transition: fill 180ms ease;
+}
+
+.routeA {
+  stroke: rgba(86, 208, 135, 0.38);
+  stroke-width: 0.82;
+  stroke-linecap: round;
+  stroke-dasharray: 3.3 2.4;
+  fill: none;
+}
+
+.routeB {
+  stroke: rgba(17, 17, 17, 0.26);
+  stroke-width: 0.78;
+  stroke-linecap: round;
+  stroke-dasharray: 3 2.5;
+  fill: none;
+}
+
+.routeAActive {
+  stroke: rgba(86, 208, 135, 0.96);
+  stroke-width: 1.1;
+  stroke-linecap: round;
+  stroke-dasharray: 3.7 2.3;
+  fill: none;
+}
+
+.routeBActive {
+  stroke: rgba(17, 17, 17, 0.56);
+  stroke-width: 1.02;
+  stroke-linecap: round;
+  stroke-dasharray: 3.3 2.3;
+  fill: none;
+}
+
+.dot {
+  fill: rgba(17, 17, 17, 0.86);
+}
+
+.ring {
+  fill: none;
+  stroke: rgba(17, 17, 17, 0.24);
+  stroke-width: 0.7;
+}
+
+.plane {
+  fill: rgba(17, 17, 17, 0.9);
+}
+
+.ship {
+  fill: rgba(17, 17, 17, 0.9);
+}
+
+@media (min-width: 1024px) and (max-width: 1440px) {
+  .wrap {
+    padding: 0.2rem;
+    min-height: clamp(360px, 44vw, 600px);
+  }
+
+  .map {
+    min-height: clamp(320px, 40vw, 560px);
+  }
+}

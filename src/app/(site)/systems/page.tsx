@@ -5,6 +5,7 @@ import { systems } from '@/data/systems'
 import styles from './systems.module.css'
 
 function formatStatus(status: string): string {
+  if (status.trim() === 'running') return 'launching'
   return status.trim().replace('-', ' ')
 }
 

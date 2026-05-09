@@ -1,0 +1,110 @@
+.mapWrap {
+  width: 100%;
+  border: 1px solid rgba(17, 17, 17, 0.11);
+  border-radius: 14px;
+  padding: clamp(0.22rem, 0.5vw, 0.4rem);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.95), rgba(248, 248, 248, 0.93));
+  overflow: hidden;
+  min-height: clamp(380px, 50vw, 660px);
+  box-shadow: 0 9px 20px rgba(0, 0, 0, 0.04);
+}
+
+.canvas {
+  width: 100%;
+  transform-origin: 50% 50%;
+  animation: mapDrift 18s ease-in-out infinite;
+}
+
+.map {
+  width: 100%;
+  min-height: clamp(330px, 44vw, 620px);
+  height: auto;
+  display: block;
+}
+
+.province {
+  transition: fill 180ms ease, stroke 180ms ease;
+}
+
+.visitedProvince {
+  animation: visitedPulse 5.4s ease-in-out infinite;
+}
+
+.hoverInfo {
+  margin-top: 0.65rem;
+  padding: 0.62rem 0.2rem 0.12rem;
+  border-top: 1px solid rgba(17, 17, 17, 0.08);
+  background: rgba(255, 255, 255, 0.72);
+  border-radius: 8px;
+}
+
+.hoverProvince {
+  margin: 0;
+  font-size: 0.75rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(17, 17, 17, 0.62);
+}
+
+.hoverMeta {
+  margin: 0.36rem 0 0;
+  font-size: 0.88rem;
+  line-height: 1.5;
+  color: rgba(17, 17, 17, 0.66);
+}
+
+.placeholder {
+  border: 1px solid rgba(17, 17, 17, 0.14);
+  background: rgba(17, 17, 17, 0.02);
+  border-radius: 10px;
+  padding: 1rem;
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: rgba(17, 17, 17, 0.72);
+}
+
+.placeholder code {
+  margin-left: 0.3rem;
+  font-size: 0.84rem;
+}
+
+@keyframes mapDrift {
+  0% {
+    transform: translate3d(-0.1%, 0.1%, 0) scale(1.001);
+  }
+  50% {
+    transform: translate3d(0.16%, -0.1%, 0) scale(1.01);
+  }
+  100% {
+    transform: translate3d(-0.1%, 0.1%, 0) scale(1.001);
+  }
+}
+
+@keyframes visitedPulse {
+  0% {
+    filter: saturate(1) brightness(1);
+  }
+  50% {
+    filter: saturate(1.08) brightness(1.03);
+  }
+  100% {
+    filter: saturate(1) brightness(1);
+  }
+}
+
+@media (max-width: 760px) {
+  .canvas {
+    animation-duration: 18s;
+  }
+}
+
+@media (min-width: 1024px) and (max-width: 1440px) {
+  .mapWrap {
+    padding: 0.2rem;
+    min-height: clamp(360px, 44vw, 600px);
+  }
+
+  .map {
+    min-height: clamp(320px, 40vw, 560px);
+  }
+}
