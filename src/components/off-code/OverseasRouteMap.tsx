@@ -104,11 +104,62 @@ export default function OverseasRouteMap() {
 
   return (
     <div className={styles.wrap} aria-label="Overseas travel route visualization">
-      <ComposableMap projection="geoNaturalEarth1" className={styles.map}>
+      <div className={styles.overlayControls}>
+        <label htmlFor="overseas-route" className={styles.overlayLabel}>
+          Destination
+        </label>
+        <select
+          id="overseas-route"
+          className={styles.overlaySelect}
+          value={activeRoute}
+          onChange={(event) => {
+            setActiveRoute(event.target.value as RouteKey)
+            setFlightProgress(0)
+          }}
+        >
+          <option value="singapore">Singapore</option>
+          <option value="oslo">Norway</option>
+        </select>
+      </div>
+
+      <ComposableMap
+        width={1440}
+        height={640}
+        projection="geoNaturalEarth1"
+        projectionConfig={{ scale: 265, center: [16, 18] }}
+        className={styles.map}
+      >
         <Geographies geography={geoUrl}>
           {({ geographies }) =>
             geographies.map((geo) => (
-              <Geography key={geo.rsmKey} geography={geo} className={styles.geo} />
+              <Geography
+                key={geo.rsmKey}
+                geography={geo}
+                className={styles.geo}
+                style={{
+                  default: {
+                    display: /antarctica/i.test(
+                      (geo.properties?.name as string | undefined) ?? ''
+                    )
+                      ? 'none'
+                      : 'inline',
+                  },
+                  hover: {
+                    display: /antarctica/i.test(
+                      (geo.properties?.name as string | undefined) ?? ''
+                    )
+                      ? 'none'
+                      : 'inline',
+                  },
+                  pressed: {
+                    display: /antarctica/i.test(
+                      (geo.properties?.name as string | undefined) ?? ''
+                    )
+                      ? 'none'
+                      : 'inline',
+                  },
+                }}
+              />
             ))
           }
         </Geographies>
@@ -143,32 +194,22 @@ export default function OverseasRouteMap() {
           <Marker key={stop.label} coordinates={stop.coordinates}>
             <circle r={3.5} className={styles.ring} />
             <circle r={1.8} className={styles.dot} />
-            {(stop.label === 'Singapore' || stop.label === 'Oslo') && (
-              <circle
-                r={6.2}
-                className={styles.hotspot}
-                onClick={() => setActiveRoute(stop.label.toLowerCase() as RouteKey)}
-              />
-            )}
           </Marker>
         ))}
 
         <Marker coordinates={planePosition}>
-          <g className={styles.plane}>
-            <path d="M -2.8 1.2 L 3 0 L -2.8 -1.2 L -1.4 0 Z" />
-          </g>
+          {activeRoute === 'oslo' ? (
+            <g className={styles.plane}>
+              <path d="M -2.8 1.2 L 3 0 L -2.8 -1.2 L -1.4 0 Z" />
+            </g>
+          ) : (
+            <g className={styles.ship}>
+              <path d="M -3 1.3 L 3 1.3 L 2 2.2 L -2 2.2 Z" />
+              <path d="M -0.8 1.2 L -0.8 -1.2 L 0.4 -0.2 L 0.4 1.2 Z" />
+            </g>
+          )}
         </Marker>
       </ComposableMap>
-
-      <div className={styles.legend}>
-        <p className={styles.label}>Overseas Path (Click Singapore/Oslo)</p>
-        <p className={styles.meta}>
-          Route 1: Jakarta → Kepri → Singapore → Kepri → Jakarta (PP)
-        </p>
-        <p className={styles.meta}>
-          Route 2: Jakarta → Qatar (transit) → Oslo → Qatar → Jakarta (PP)
-        </p>
-      </div>
     </div>
   )
 }
