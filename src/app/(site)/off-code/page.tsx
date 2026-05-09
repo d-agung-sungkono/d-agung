@@ -1,4 +1,5 @@
 import TravelMap from '@/components/off-code/TravelMap'
+import OverseasRouteMap from '@/components/off-code/OverseasRouteMap'
 
 import { visitedCountries, visitedProvinces } from '@/data/travel'
 
@@ -46,6 +47,8 @@ export default function OffCodePage() {
               </li>
             ))}
           </ul>
+
+          <OverseasRouteMap />
         </aside>
       </section>
     </main>

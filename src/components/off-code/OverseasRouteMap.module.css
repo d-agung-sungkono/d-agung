@@ -1,0 +1,60 @@
+.wrap {
+  margin-top: 0.9rem;
+  border: 1px solid rgba(17, 17, 17, 0.1);
+  border-radius: 12px;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.75);
+}
+
+.map {
+  width: 100%;
+  display: block;
+}
+
+.bg {
+  fill: rgba(17, 17, 17, 0.03);
+}
+
+.routeSoft {
+  fill: none;
+  stroke: rgba(86, 208, 135, 0.42);
+  stroke-width: 0.55;
+  stroke-linecap: round;
+}
+
+.routeMain {
+  fill: none;
+  stroke: url(#routeFade);
+  stroke-width: 0.95;
+  stroke-linecap: round;
+  stroke-dasharray: 2.1 1.9;
+}
+
+.dot {
+  fill: rgba(17, 17, 17, 0.86);
+}
+
+.ring {
+  fill: none;
+  stroke: rgba(17, 17, 17, 0.2);
+  stroke-width: 0.3;
+}
+
+.legend {
+  border-top: 1px solid rgba(17, 17, 17, 0.1);
+  padding: 0.6rem 0.72rem 0.72rem;
+}
+
+.label {
+  margin: 0;
+  font-size: 0.7rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgba(17, 17, 17, 0.62);
+}
+
+.meta {
+  margin: 0.36rem 0 0;
+  font-size: 0.9rem;
+  color: rgba(17, 17, 17, 0.74);
+}

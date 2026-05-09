@@ -98,6 +98,11 @@ export const visitedProvinces: VisitedProvince[] = [
     note: 'Visited.',
   },
   {
+    province: 'Gorontalo',
+    cities: [],
+    note: 'Visited.',
+  },
+  {
     province: 'Sulawesi Selatan',
     cities: [],
     note: 'Visited.',
