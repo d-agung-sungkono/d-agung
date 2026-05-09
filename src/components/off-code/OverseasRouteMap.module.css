@@ -22,18 +22,34 @@
 }
 
 .routeA {
-  stroke: rgba(86, 208, 135, 0.9);
-  stroke-width: 1.15;
+  stroke: rgba(86, 208, 135, 0.48);
+  stroke-width: 0.95;
   stroke-linecap: round;
-  stroke-dasharray: 4 2.5;
+  stroke-dasharray: 3.6 2.4;
   fill: none;
 }
 
 .routeB {
-  stroke: rgba(17, 17, 17, 0.55);
-  stroke-width: 1;
+  stroke: rgba(17, 17, 17, 0.34);
+  stroke-width: 0.88;
   stroke-linecap: round;
   stroke-dasharray: 3 2.8;
+  fill: none;
+}
+
+.routeAActive {
+  stroke: rgba(86, 208, 135, 0.96);
+  stroke-width: 1.35;
+  stroke-linecap: round;
+  stroke-dasharray: 3.9 2.3;
+  fill: none;
+}
+
+.routeBActive {
+  stroke: rgba(17, 17, 17, 0.72);
+  stroke-width: 1.22;
+  stroke-linecap: round;
+  stroke-dasharray: 3.6 2.3;
   fill: none;
 }
 
@@ -45,6 +61,15 @@
   fill: none;
   stroke: rgba(17, 17, 17, 0.24);
   stroke-width: 0.7;
+}
+
+.hotspot {
+  fill: transparent;
+  cursor: pointer;
+}
+
+.plane {
+  fill: rgba(17, 17, 17, 0.95);
 }
 
 .legend {
