@@ -1,4 +1,5 @@
 import { Button } from '@mantine/core'
+import { IconPlus } from '@tabler/icons-react'
 
 import DbUnavailable from '@/components/os/db-unavailable'
 import styles from '@/components/os/os-shell.module.css'
@@ -63,7 +64,7 @@ export default async function OsTodayPage() {
             A calendar view for the daily operating plan, publishing queue, and review blocks.
           </p>
         </div>
-        <Button type="button">
+        <Button leftSection={<IconPlus size={18} stroke={1.8} />} type="button">
           Add Activity
         </Button>
       </section>

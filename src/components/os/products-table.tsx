@@ -2,7 +2,7 @@
 
 import { Fragment, useMemo, useState } from 'react'
 import { ActionIcon, Box, Button, Group, Modal, Select, SimpleGrid, Table, Text, TextInput, Tooltip } from '@mantine/core'
-import { IconExternalLink, IconEye, IconRefresh, IconTestPipe, IconX } from '@tabler/icons-react'
+import { IconExternalLink, IconEye, IconPlus, IconRefresh, IconTestPipe, IconX } from '@tabler/icons-react'
 
 import styles from './os-shell.module.css'
 
@@ -159,7 +159,9 @@ export default function ProductsTable({ products }: ProductsTableProps) {
         >
           Atur ulang
         </Button>
-        <Button onClick={() => setIsAddOpen(true)}>Tambah Produk</Button>
+        <Button leftSection={<IconPlus size={18} stroke={1.8} />} onClick={() => setIsAddOpen(true)}>
+          Tambah Produk
+        </Button>
       </SimpleGrid>
 
       <Box component="section" className={styles.productTableWrap}>

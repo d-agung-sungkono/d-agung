@@ -15,6 +15,7 @@ import {
   IconCopy,
   IconEdit,
   IconExternalLink,
+  IconPlus,
   IconTrash,
   type Icon,
 } from '@tabler/icons-react'
@@ -180,7 +181,7 @@ export default function ProfilesSettings({ groups, socmeds, userSocmeds }: Profi
             Platform accounts used to map content, publishing targets, and future embeds.
           </Text>
         </Box>
-        <Button loading={isPending} onClick={openCreateModal}>
+        <Button leftSection={<IconPlus size={18} stroke={1.8} />} loading={isPending} onClick={openCreateModal}>
           Add Social Media Account
         </Button>
       </Box>

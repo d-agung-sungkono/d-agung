@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import { IconPlus } from '@tabler/icons-react'
 
 import DbUnavailable from '@/components/os/db-unavailable'
 import OsLiveClock from '@/components/os/os-live-clock'
@@ -121,12 +122,15 @@ export default async function OsHomePage() {
           </div>
           <div className={styles.quickActions}>
             <Link className={styles.actionLink} href="/os/content">
+              <IconPlus size={18} stroke={1.8} />
               Add Contents
             </Link>
             <Link className={styles.actionLink} href="/os/products">
+              <IconPlus size={18} stroke={1.8} />
               Add Product
             </Link>
             <Link className={styles.actionLink} href="/os/thoughts">
+              <IconPlus size={18} stroke={1.8} />
               Capture Thought
             </Link>
           </div>
