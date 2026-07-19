@@ -1330,6 +1330,13 @@
   color: #1e3a8a;
 }
 
+.calendar :global(.os-calendar-source-shopee),
+.calendar :global(.os-calendar-source-shopee-target) {
+  border-color: #c2410c;
+  background: #ffedd5;
+  color: #7c2d12;
+}
+
 .calendar :global(.os-calendar-event-skipped) {
   border-color: #6b7280;
   background: #f3f4f6;

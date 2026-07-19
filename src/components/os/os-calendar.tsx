@@ -28,6 +28,10 @@ function addOneHour(value: string) {
   return date.toISOString()
 }
 
+function getSourceClassName(source: string) {
+  return `os-calendar-source-${source.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`
+}
+
 export default function OsCalendar({ events }: OsCalendarProps) {
   const [calendarEvents, setCalendarEvents] = useState(events)
 
@@ -38,7 +42,7 @@ export default function OsCalendar({ events }: OsCalendarProps) {
         title: event.title,
         start: event.start,
         end: event.end ?? addOneHour(event.start),
-        classNames: [`os-calendar-event-${event.status}`],
+        classNames: [`os-calendar-event-${event.status}`, getSourceClassName(event.source)],
         extendedProps: {
           completed: event.completed ?? false,
           source: event.source,
