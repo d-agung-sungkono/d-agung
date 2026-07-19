@@ -709,12 +709,97 @@
   min-width: 0;
 }
 
+.profileTitleRow {
+  display: inline-flex;
+  align-items: center;
+  max-width: 100%;
+  gap: 0.5rem;
+  vertical-align: top;
+}
+
+.profileTitleRow .compactTitle {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .profileActions {
   display: inline-flex;
   align-items: center;
-  gap: 0.45rem;
-  flex-wrap: wrap;
+  gap: 0.35rem;
+  flex-wrap: nowrap;
   justify-content: flex-end;
+}
+
+.iconActionButton {
+  position: relative;
+  width: 2.15rem;
+  height: 2.15rem;
+  display: inline-grid;
+  place-items: center;
+  flex: 0 0 auto;
+  border: 1px solid #dcdcdc;
+  border-radius: 0.42rem;
+  background: #ffffff;
+  color: #2f2f2f;
+  cursor: pointer;
+  font: inherit;
+  text-decoration: none;
+  transition: background 150ms ease, border-color 150ms ease, color 150ms ease;
+}
+
+.iconActionButton:hover,
+.iconActionButton:focus-visible {
+  border-color: #bfbfbf;
+  background: #f7f7f7;
+  color: #1f1f1f;
+}
+
+.iconActionButton:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
+.iconDangerButton {
+  border-color: rgba(184, 57, 57, 0.28);
+  background: rgba(184, 57, 57, 0.06);
+  color: #973434;
+}
+
+.iconDangerButton:hover,
+.iconDangerButton:focus-visible {
+  border-color: rgba(184, 57, 57, 0.42);
+  background: rgba(184, 57, 57, 0.1);
+  color: #842c2c;
+}
+
+.tooltipText {
+  position: absolute;
+  left: 50%;
+  bottom: calc(100% + 0.45rem);
+  z-index: 20;
+  width: max-content;
+  max-width: 9rem;
+  padding: 0.32rem 0.48rem;
+  border: 1px solid #dddddd;
+  border-radius: 0.38rem;
+  background: #ffffff;
+  box-shadow: 0 10px 24px rgba(15, 15, 15, 0.12);
+  color: #262626;
+  font-size: 0.74rem;
+  font-weight: 650;
+  line-height: 1.2;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateX(-50%) translateY(0.2rem);
+  transition: opacity 120ms ease, transform 120ms ease;
+}
+
+.iconActionButton:hover .tooltipText,
+.iconActionButton:focus-visible .tooltipText {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
 }
 
 .profileMeta {
@@ -1346,8 +1431,10 @@
     grid-template-columns: 2.25rem minmax(0, 1fr);
   }
 
-  .profileItem > .badge {
+  .profileActions {
     grid-column: 2;
+    justify-content: flex-start;
+    margin-top: 0.2rem;
   }
 
   .calendar :global(.fc-toolbar) {

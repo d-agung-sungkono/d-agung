@@ -10,6 +10,11 @@ import {
   IconBrandTiktok,
   IconBrandX,
   IconBrandYoutube,
+  IconCheck,
+  IconCopy,
+  IconEdit,
+  IconExternalLink,
+  IconTrash,
   type Icon,
 } from '@tabler/icons-react'
 
@@ -206,7 +211,12 @@ export default function ProfilesSettings({ groups, socmeds, userSocmeds }: Profi
               <div className={styles.profileBody}>
                 <div className={styles.itemHeader}>
                   <div>
-                    <p className={styles.compactTitle}>{profile.label}</p>
+                    <div className={styles.profileTitleRow}>
+                      <p className={styles.compactTitle}>{profile.label}</p>
+                      <span className={styles.badge} data-status={profile.status}>
+                        {profile.status}
+                      </span>
+                    </div>
                     <p className={styles.muted}>
                       {profile.platform} · @{profile.account}
                       {profile.groupName ? ` · ${profile.groupName}` : ''}
@@ -216,24 +226,48 @@ export default function ProfilesSettings({ groups, socmeds, userSocmeds }: Profi
                     </p>
                   </div>
                   <div className={styles.profileActions}>
-                    <button className={styles.secondaryButton} onClick={() => copyProfileUrl(profile)} type="button">
-                      {copyState === profile.id ? 'Copied' : 'Copy URL'}
+                    <button
+                      aria-label={copyState === profile.id ? 'Copied profile URL' : 'Copy profile URL'}
+                      className={styles.iconActionButton}
+                      onClick={() => copyProfileUrl(profile)}
+                      type="button"
+                    >
+                      {copyState === profile.id ? <IconCheck size={18} stroke={1.8} /> : <IconCopy size={18} stroke={1.8} />}
+                      <span className={styles.tooltipText}>{copyState === profile.id ? 'Copied' : 'Copy URL'}</span>
                     </button>
-                    <button className={styles.secondaryButton} disabled={isPending} onClick={() => openEditModal(profile)} type="button">
-                      Edit
+                    <button
+                      aria-label="Edit social account"
+                      className={styles.iconActionButton}
+                      disabled={isPending}
+                      onClick={() => openEditModal(profile)}
+                      type="button"
+                    >
+                      <IconEdit size={18} stroke={1.8} />
+                      <span className={styles.tooltipText}>Edit</span>
                     </button>
-                    <button className={styles.dangerButton} disabled={isPending} onClick={() => deleteSocmed(profile)} type="button">
-                      Delete
+                    <button
+                      aria-label="Delete social account"
+                      className={`${styles.iconActionButton} ${styles.iconDangerButton}`}
+                      disabled={isPending}
+                      onClick={() => deleteSocmed(profile)}
+                      type="button"
+                    >
+                      <IconTrash size={18} stroke={1.8} />
+                      <span className={styles.tooltipText}>Delete</span>
                     </button>
-                    <a className={styles.secondaryButton} href={profile.url} rel="noreferrer" target="_blank">
-                      Open
+                    <a
+                      aria-label="Open social profile"
+                      className={styles.iconActionButton}
+                      href={profile.url}
+                      rel="noreferrer"
+                      target="_blank"
+                    >
+                      <IconExternalLink size={18} stroke={1.8} />
+                      <span className={styles.tooltipText}>Open</span>
                     </a>
                   </div>
                 </div>
               </div>
-              <span className={styles.badge} data-status={profile.status}>
-                {profile.status}
-              </span>
             </li>
           ))}
         </ul>
