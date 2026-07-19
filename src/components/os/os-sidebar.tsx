@@ -5,11 +5,11 @@ import { usePathname } from 'next/navigation'
 import { ActionIcon, Tooltip } from '@mantine/core'
 import {
   IconArticle,
+  IconBrain,
   IconCalendar,
   IconHome,
   IconLogout,
   IconPackage,
-  IconPencil,
   IconShare2,
   type Icon,
 } from '@tabler/icons-react'
@@ -23,7 +23,7 @@ const navigation = [
   { label: 'Today', href: '/os/today', icon: IconCalendar },
   { label: 'Contents', href: '/os/content', icon: IconArticle },
   { label: 'Products', href: '/os/products', icon: IconPackage },
-  { label: 'Thoughts', href: '/os/thoughts', icon: IconPencil },
+  { label: 'Thoughts', href: '/os/thoughts', icon: IconBrain },
   { label: 'Social Medias', href: '/os/socmeds', icon: IconShare2 },
 ] satisfies Array<{ href: string; icon: Icon; label: string }>
 
