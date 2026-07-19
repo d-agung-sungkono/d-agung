@@ -1,3 +1,5 @@
+import { Button } from '@mantine/core'
+
 import styles from '@/components/os/os-shell.module.css'
 import OsCalendar, { type OsCalendarEvent } from '@/components/os/os-calendar'
 import TodayList from '@/components/os/today-list'
@@ -33,9 +35,9 @@ export default function OsTodayPage() {
             A calendar view for the daily operating plan, publishing queue, and review blocks.
           </p>
         </div>
-        <button className={styles.primaryButton} type="button">
+        <Button type="button">
           Add Activity
-        </button>
+        </Button>
       </section>
 
       <section className={styles.panel}>

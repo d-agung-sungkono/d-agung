@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import { ActionIcon, Tooltip } from '@mantine/core'
 import {
   IconArticle,
   IconCalendar,
@@ -54,12 +55,11 @@ export default function OsSidebar() {
       </nav>
 
       <form action={logoutFromOs} className={styles.logoutForm}>
-        <button className={styles.logoutButton} title="Logout" type="submit">
-          <span aria-hidden="true" className={styles.navIcon}>
+        <Tooltip label="Logout" position="right">
+          <ActionIcon aria-label="Logout" className={styles.logoutButton} title="Logout" type="submit" variant="subtle">
             <IconLogout size={17} stroke={1.8} />
-          </span>
-          <span className={styles.navLabel}>Logout</span>
-        </button>
+          </ActionIcon>
+        </Tooltip>
       </form>
     </aside>
   )

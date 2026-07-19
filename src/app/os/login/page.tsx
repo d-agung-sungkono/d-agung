@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import { redirect } from 'next/navigation'
+import { Alert, Button, Card, PasswordInput, Stack, Text, TextInput, Title } from '@mantine/core'
 
 import { loginToOs } from '@/app/os/actions'
 import styles from '@/components/os/os-shell.module.css'
@@ -27,49 +28,29 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
 
   return (
     <main className={styles.loginPage}>
-      <section className={styles.loginCard} aria-labelledby="login-title">
-        <p className={styles.eyebrow}>Private Area</p>
-        <h1 className={styles.loginTitle} id="login-title">
+      <Card component="section" className={styles.loginCard} aria-labelledby="login-title" padding="lg" radius="md" withBorder>
+        <Text className={styles.eyebrow}>Private Area</Text>
+        <Title className={styles.loginTitle} id="login-title" order={1}>
           Agung OS
-        </h1>
-        <p className={styles.muted}>Sign in to continue to the personal operating system.</p>
+        </Title>
+        <Text className={styles.muted}>Sign in to continue to the personal operating system.</Text>
 
         {hasError ? (
-          <p className={styles.error} role="alert">
+          <Alert className={styles.error} color="red" role="alert" variant="light">
             Username or password is incorrect.
-          </p>
+          </Alert>
         ) : null}
 
         <form action={loginToOs} className={styles.loginForm}>
-          <label className={styles.field} htmlFor="username">
-            <span className={styles.label}>Username</span>
-            <input
-              autoComplete="username"
-              className={styles.input}
-              id="username"
-              name="username"
-              required
-              type="text"
-            />
-          </label>
-
-          <label className={styles.field} htmlFor="password">
-            <span className={styles.label}>Password</span>
-            <input
-              autoComplete="current-password"
-              className={styles.input}
-              id="password"
-              name="password"
-              required
-              type="password"
-            />
-          </label>
-
-          <button className={styles.primaryButton} type="submit">
-            Login
-          </button>
+          <Stack gap="sm">
+            <TextInput autoComplete="username" label="Username" name="username" required type="text" />
+            <PasswordInput autoComplete="current-password" label="Password" name="password" required />
+            <Button type="submit">
+              Login
+            </Button>
+          </Stack>
         </form>
-      </section>
+      </Card>
     </main>
   )
 }

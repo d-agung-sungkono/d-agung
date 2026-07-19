@@ -1,7 +1,8 @@
 'use client'
 
 import { useMemo, useState, useTransition } from 'react'
-import { IconEdit, IconExternalLink, IconPlus, IconTrash } from '@tabler/icons-react'
+import { ActionIcon, Badge, Box, Button, Card, Group, Modal, Select, SimpleGrid, Stack, Text, Textarea, TextInput, Tooltip } from '@mantine/core'
+import { IconEdit, IconExternalLink, IconPlus, IconRefresh, IconTrash } from '@tabler/icons-react'
 
 import { createContentPost, deleteContentPost, updateContentPost } from '@/app/os/(protected)/content/actions'
 
@@ -60,6 +61,14 @@ type ContentForm = {
   url: string
   userSocmedId: string
 }
+
+const statusOptions = [
+  { label: 'Draft', value: 'draft' },
+  { label: 'Planned', value: 'planned' },
+  { label: 'Ready', value: 'ready' },
+  { label: 'Published', value: 'published' },
+  { label: 'Skipped', value: 'skipped' },
+]
 
 function formatDate(value: string) {
   return new Intl.DateTimeFormat('en-US', {
@@ -121,13 +130,18 @@ export default function ContentList({ content, profiles, targets }: ContentListP
   const [platform, setPlatform] = useState('all')
   const [status, setStatus] = useState('all')
   const [page, setPage] = useState(1)
-  const [pageSize, setPageSize] = useState(5)
+  const [pageSize, setPageSize] = useState('5')
   const [form, setForm] = useState<ContentForm>(() => getEmptyForm(profiles[0]?.id ?? ''))
   const isEditing = Boolean(form.id)
 
   const profilesById = useMemo(() => new Map(profiles.map((profile) => [profile.id, profile])), [profiles])
   const platforms = useMemo(() => ['all', ...Array.from(new Set(content.map((item) => item.platform)))], [content])
   const statuses = useMemo(() => ['all', ...Array.from(new Set(content.map((item) => item.status)))], [content])
+  const profileOptions = profiles.map((profile) => ({
+    label: `${profile.platform} · @${profile.account}`,
+    value: profile.id,
+  }))
+  const pageSizeNumber = Number(pageSize)
 
   const filteredContent = content.filter((item) => {
     const profile = item.userSocmedId ? profilesById.get(item.userSocmedId) : null
@@ -144,9 +158,9 @@ export default function ContentList({ content, profiles, targets }: ContentListP
     return matchesQuery && matchesProfile && matchesPlatform && matchesStatus
   })
 
-  const pageCount = Math.max(1, Math.ceil(filteredContent.length / pageSize))
+  const pageCount = Math.max(1, Math.ceil(filteredContent.length / pageSizeNumber))
   const safePage = Math.min(page, pageCount)
-  const paginatedContent = filteredContent.slice((safePage - 1) * pageSize, safePage * pageSize)
+  const paginatedContent = filteredContent.slice((safePage - 1) * pageSizeNumber, safePage * pageSizeNumber)
 
   function resetPagination(update: () => void) {
     update()
@@ -192,65 +206,52 @@ export default function ContentList({ content, profiles, targets }: ContentListP
   }
 
   return (
-    <section className={styles.panel}>
-      <div className={styles.panelHeader}>
-        <div>
-          <h3 className={styles.panelTitle}>Content Posts</h3>
-          <p className={styles.muted}>Manage drafts, schedules, links, and published posts from DB.</p>
-        </div>
-        <button className={styles.primaryButton} disabled={isPending} onClick={openCreateModal} type="button">
-          <IconPlus size={18} stroke={1.8} />
+    <Box component="section" className={styles.panel}>
+      <Group justify="space-between" align="flex-start" gap="md" className={styles.panelHeader}>
+        <Box>
+          <Text component="h3" className={styles.panelTitle}>Content Posts</Text>
+          <Text className={styles.muted}>Manage drafts, schedules, links, and published posts from DB.</Text>
+        </Box>
+        <Button leftSection={<IconPlus size={18} stroke={1.8} />} loading={isPending} onClick={openCreateModal}>
           Add Content
-        </button>
-      </div>
+        </Button>
+      </Group>
 
-      <div className={styles.targetStrip}>
+      <SimpleGrid cols={{ base: 1, md: 2 }} spacing="xs" className={styles.targetStrip}>
         {targets.map((target) => (
-          <div className={styles.targetPill} key={target.id}>
-            <p className={styles.compactTitle}>{target.name}</p>
-            <p className={styles.muted}>
+          <Card className={styles.targetPill} key={target.id} padding="sm" radius="sm" withBorder>
+            <Text className={styles.compactTitle}>{target.name}</Text>
+            <Text className={styles.muted}>
               {target.platform} · @{target.account} · every {target.cadenceDays} days
-            </p>
-          </div>
+            </Text>
+          </Card>
         ))}
-      </div>
+      </SimpleGrid>
 
-      <div className={styles.contentToolbar}>
-        <input
-          className={styles.productSearch}
-          onChange={(event) => resetPagination(() => setQuery(event.target.value))}
+      <SimpleGrid cols={{ base: 1, sm: 2, lg: 5 }} spacing="xs" className={styles.contentToolbar}>
+        <TextInput
+          onChange={(event) => resetPagination(() => setQuery(event.currentTarget.value))}
           placeholder="Cari judul, akun, platform"
           type="search"
           value={query}
         />
-        <select
-          className={styles.productFilter}
-          onChange={(event) => resetPagination(() => setUserSocmedId(event.target.value))}
+        <Select
+          data={[{ label: 'Akun', value: 'all' }, ...profileOptions]}
+          onChange={(value) => resetPagination(() => setUserSocmedId(value ?? 'all'))}
           value={userSocmedId}
-        >
-          <option value="all">Akun</option>
-          {profiles.map((profile) => (
-            <option key={profile.id} value={profile.id}>
-              {profile.platform} · @{profile.account}
-            </option>
-          ))}
-        </select>
-        <select className={styles.productFilter} onChange={(event) => resetPagination(() => setPlatform(event.target.value))} value={platform}>
-          {platforms.map((item) => (
-            <option key={item} value={item}>
-              {item === 'all' ? 'Platform' : item}
-            </option>
-          ))}
-        </select>
-        <select className={styles.productFilter} onChange={(event) => resetPagination(() => setStatus(event.target.value))} value={status}>
-          {statuses.map((item) => (
-            <option key={item} value={item}>
-              {item === 'all' ? 'Status' : item}
-            </option>
-          ))}
-        </select>
-        <button
-          className={styles.secondaryButton}
+        />
+        <Select
+          data={platforms.map((item) => ({ label: item === 'all' ? 'Platform' : item, value: item }))}
+          onChange={(value) => resetPagination(() => setPlatform(value ?? 'all'))}
+          value={platform}
+        />
+        <Select
+          data={statuses.map((item) => ({ label: item === 'all' ? 'Status' : item, value: item }))}
+          onChange={(value) => resetPagination(() => setStatus(value ?? 'all'))}
+          value={status}
+        />
+        <Button
+          leftSection={<IconRefresh size={18} stroke={1.8} />}
           onClick={() => {
             setQuery('')
             setUserSocmedId('all')
@@ -258,216 +259,138 @@ export default function ContentList({ content, profiles, targets }: ContentListP
             setStatus('all')
             setPage(1)
           }}
-          type="button"
+          variant="default"
         >
           Atur ulang
-        </button>
-      </div>
+        </Button>
+      </SimpleGrid>
 
-      <ul className={styles.compactList}>
+      <Stack gap="xs">
         {paginatedContent.map((item) => (
-          <li className={styles.compactItem} key={item.id}>
-            <div className={styles.itemHeader}>
-              <div>
-                <p className={styles.compactTitle}>{item.title}</p>
-                <p className={styles.muted}>
+          <Card className={styles.compactItem} key={item.id} padding="sm" radius="sm" withBorder>
+            <Group justify="space-between" align="flex-start" gap="sm">
+              <Box>
+                <Text className={styles.compactTitle}>{item.title}</Text>
+                <Text className={styles.muted}>
                   {item.label} · {item.platform} · @{item.account}
                   {item.groupName ? ` · ${item.groupName}` : ''} · {formatDate(item.scheduledAt)}
-                </p>
-              </div>
-              <div className={styles.profileActions}>
+                </Text>
+              </Box>
+              <Group gap="xs" wrap="nowrap">
                 {item.url ? (
-                  <a
-                    aria-label="Open content link"
-                    className={styles.iconActionButton}
-                    href={item.url}
-                    rel="noreferrer"
-                    target="_blank"
-                  >
-                    <IconExternalLink size={18} stroke={1.8} />
-                    <span className={styles.tooltipText}>Open</span>
-                  </a>
+                  <Tooltip label="Open">
+                    <ActionIcon aria-label="Open content link" component="a" href={item.url} rel="noreferrer" target="_blank" variant="default">
+                      <IconExternalLink size={18} stroke={1.8} />
+                    </ActionIcon>
+                  </Tooltip>
                 ) : null}
-                <button
-                  aria-label="Edit content"
-                  className={styles.iconActionButton}
-                  disabled={isPending}
-                  onClick={() => openEditModal(item)}
-                  type="button"
-                >
-                  <IconEdit size={18} stroke={1.8} />
-                  <span className={styles.tooltipText}>Edit</span>
-                </button>
-                <button
-                  aria-label="Delete content"
-                  className={`${styles.iconActionButton} ${styles.iconDangerButton}`}
-                  disabled={isPending}
-                  onClick={() => removeContent(item)}
-                  type="button"
-                >
-                  <IconTrash size={18} stroke={1.8} />
-                  <span className={styles.tooltipText}>Delete</span>
-                </button>
-              </div>
-            </div>
-            <div className={styles.contentMetaRow}>
-              <span className={styles.badge} data-status={item.status}>
+                <Tooltip label="Edit">
+                  <ActionIcon aria-label="Edit content" disabled={isPending} onClick={() => openEditModal(item)} variant="default">
+                    <IconEdit size={18} stroke={1.8} />
+                  </ActionIcon>
+                </Tooltip>
+                <Tooltip label="Delete">
+                  <ActionIcon aria-label="Delete content" color="red" disabled={isPending} onClick={() => removeContent(item)} variant="light">
+                    <IconTrash size={18} stroke={1.8} />
+                  </ActionIcon>
+                </Tooltip>
+              </Group>
+            </Group>
+            <Group gap="xs" mt="xs">
+              <Badge className={styles.badge} data-status={item.status} variant="light">
                 {item.status}
-              </span>
-              {item.notes ? <span className={styles.profileMeta}>{item.notes}</span> : null}
-            </div>
-          </li>
+              </Badge>
+              {item.notes ? <Text className={styles.profileMeta}>{item.notes}</Text> : null}
+            </Group>
+          </Card>
         ))}
-      </ul>
+      </Stack>
 
       {paginatedContent.length === 0 ? (
-        <div className={styles.emptyState}>
-          <p className={styles.compactTitle}>No content found.</p>
-          <p className={styles.muted}>Adjust filters or add a new content item.</p>
-        </div>
+        <Card className={styles.emptyState} padding="md" radius="sm" withBorder>
+          <Text className={styles.compactTitle}>No content found.</Text>
+          <Text className={styles.muted}>Adjust filters or add a new content item.</Text>
+        </Card>
       ) : null}
 
-      <div className={styles.pagination}>
-        <span>
+      <Group justify="flex-end" gap="xs" className={styles.pagination}>
+        <Text>
           Page {safePage} of {pageCount} · {filteredContent.length} content
-        </span>
-        <select
-          className={styles.pageSize}
-          onChange={(event) => {
-            setPageSize(Number(event.target.value))
+        </Text>
+        <Select
+          data={[
+            { label: '5 / page', value: '5' },
+            { label: '10 / page', value: '10' },
+            { label: '20 / page', value: '20' },
+          ]}
+          onChange={(value) => {
+            setPageSize(value ?? '5')
             setPage(1)
           }}
           value={pageSize}
-        >
-          {[5, 10, 20].map((size) => (
-            <option key={size} value={size}>
-              {size} / page
-            </option>
-          ))}
-        </select>
-        <button className={styles.secondaryButton} disabled={safePage <= 1} onClick={() => setPage((current) => Math.max(1, current - 1))} type="button">
+          w={110}
+        />
+        <Button disabled={safePage <= 1} onClick={() => setPage((current) => Math.max(1, current - 1))} variant="default">
           Prev
-        </button>
-        <button className={styles.secondaryButton} disabled={safePage >= pageCount} onClick={() => setPage((current) => Math.min(pageCount, current + 1))} type="button">
+        </Button>
+        <Button disabled={safePage >= pageCount} onClick={() => setPage((current) => Math.min(pageCount, current + 1))} variant="default">
           Next
-        </button>
-      </div>
+        </Button>
+      </Group>
 
-      {isOpen ? (
-        <div className={styles.modalBackdrop} role="presentation">
-          <section aria-labelledby="content-post-title" className={styles.modal} role="dialog">
-            <div className={styles.modalHeader}>
-              <div>
-                <p className={styles.eyebrow}>Content</p>
-                <h3 className={styles.modalTitle} id="content-post-title">
-                  {isEditing ? 'Edit Content' : 'Add Content'}
-                </h3>
-              </div>
-              <button
-                aria-label="Close content dialog"
-                className={styles.iconCloseButton}
-                onClick={() => setIsOpen(false)}
-                type="button"
-              >
-                ×
-              </button>
-            </div>
-
-            <form className={styles.modalForm}>
-              <label className={styles.field} htmlFor="content-title">
-                <span className={styles.label}>Title</span>
-                <input
-                  className={styles.input}
-                  id="content-title"
-                  onChange={(event) => setForm((current) => ({ ...current, title: event.target.value }))}
-                  placeholder="Content title"
-                  type="text"
-                  value={form.title}
-                />
-              </label>
-
-              <div className={styles.formGrid}>
-                <label className={styles.field} htmlFor="content-account">
-                  <span className={styles.label}>Account</span>
-                  <select
-                    className={styles.input}
-                    id="content-account"
-                    onChange={(event) => setForm((current) => ({ ...current, userSocmedId: event.target.value }))}
-                    value={form.userSocmedId}
-                  >
-                    {profiles.map((profile) => (
-                      <option key={profile.id} value={profile.id}>
-                        {profile.platform} · @{profile.account}
-                      </option>
-                    ))}
-                  </select>
-                </label>
-
-                <label className={styles.field} htmlFor="content-status">
-                  <span className={styles.label}>Status</span>
-                  <select
-                    className={styles.input}
-                    id="content-status"
-                    onChange={(event) => setForm((current) => ({ ...current, status: event.target.value }))}
-                    value={form.status}
-                  >
-                    <option value="draft">Draft</option>
-                    <option value="planned">Planned</option>
-                    <option value="ready">Ready</option>
-                    <option value="published">Published</option>
-                    <option value="skipped">Skipped</option>
-                  </select>
-                </label>
-              </div>
-
-              <div className={styles.formGrid}>
-                <label className={styles.field} htmlFor="content-url">
-                  <span className={styles.label}>Content Link</span>
-                  <input
-                    className={styles.input}
-                    id="content-url"
-                    onChange={(event) => setForm((current) => ({ ...current, url: event.target.value }))}
-                    placeholder="https://"
-                    type="url"
-                    value={form.url}
-                  />
-                </label>
-
-                <label className={styles.field} htmlFor="content-schedule">
-                  <span className={styles.label}>Schedule WIB</span>
-                  <input
-                    className={styles.input}
-                    id="content-schedule"
-                    onChange={(event) => setForm((current) => ({ ...current, scheduledAt: event.target.value }))}
-                    type="datetime-local"
-                    value={form.scheduledAt}
-                  />
-                </label>
-              </div>
-
-              <label className={styles.field} htmlFor="content-notes">
-                <span className={styles.label}>Notes</span>
-                <textarea
-                  className={styles.textarea}
-                  id="content-notes"
-                  onChange={(event) => setForm((current) => ({ ...current, notes: event.target.value }))}
-                  placeholder="Optional"
-                  value={form.notes}
-                />
-              </label>
-
-              <div className={styles.modalActions}>
-                <button className={styles.secondaryButton} disabled={isPending} onClick={() => setIsOpen(false)} type="button">
-                  Cancel
-                </button>
-                <button className={styles.primaryButton} disabled={isPending} onClick={saveContent} type="button">
-                  {isPending ? 'Saving...' : 'Save Content'}
-                </button>
-              </div>
-            </form>
-          </section>
-        </div>
-      ) : null}
-    </section>
+      <Modal opened={isOpen} onClose={() => setIsOpen(false)} title={isEditing ? 'Edit Content' : 'Add Content'} centered>
+        <Stack gap="sm">
+          <TextInput
+            label="Title"
+            onChange={(event) => setForm((current) => ({ ...current, title: event.currentTarget.value }))}
+            placeholder="Content title"
+            value={form.title}
+          />
+          <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="sm">
+            <Select
+              data={profileOptions}
+              label="Account"
+              onChange={(value) => setForm((current) => ({ ...current, userSocmedId: value ?? '' }))}
+              value={form.userSocmedId}
+            />
+            <Select
+              data={statusOptions}
+              label="Status"
+              onChange={(value) => setForm((current) => ({ ...current, status: value ?? 'draft' }))}
+              value={form.status}
+            />
+          </SimpleGrid>
+          <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="sm">
+            <TextInput
+              label="Content Link"
+              onChange={(event) => setForm((current) => ({ ...current, url: event.currentTarget.value }))}
+              placeholder="https://"
+              type="url"
+              value={form.url}
+            />
+            <TextInput
+              label="Schedule WIB"
+              onChange={(event) => setForm((current) => ({ ...current, scheduledAt: event.currentTarget.value }))}
+              type="datetime-local"
+              value={form.scheduledAt}
+            />
+          </SimpleGrid>
+          <Textarea
+            label="Notes"
+            onChange={(event) => setForm((current) => ({ ...current, notes: event.currentTarget.value }))}
+            placeholder="Optional"
+            value={form.notes}
+          />
+          <Group justify="flex-end">
+            <Button disabled={isPending} onClick={() => setIsOpen(false)} variant="default">
+              Cancel
+            </Button>
+            <Button loading={isPending} onClick={saveContent}>
+              Save Content
+            </Button>
+          </Group>
+        </Stack>
+      </Modal>
+    </Box>
   )
 }

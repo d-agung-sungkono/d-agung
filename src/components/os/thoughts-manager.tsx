@@ -1,6 +1,8 @@
 'use client'
 
 import { useMemo, useState } from 'react'
+import { ActionIcon, Badge, Box, Button, Card, Group, Modal, Select, SimpleGrid, Stack, Text, Textarea, TextInput, Tooltip } from '@mantine/core'
+import { IconArchive, IconEdit, IconPlus, IconRefresh, IconTrash } from '@tabler/icons-react'
 
 import styles from './os-shell.module.css'
 
@@ -45,13 +47,14 @@ export default function ThoughtsManager({ thoughts }: ThoughtsManagerProps) {
   const [category, setCategory] = useState('all')
   const [status, setStatus] = useState('all')
   const [page, setPage] = useState(1)
-  const [pageSize, setPageSize] = useState(5)
+  const [pageSize, setPageSize] = useState('5')
   const [editingId, setEditingId] = useState<string | null>(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [form, setForm] = useState<ThoughtForm>(emptyForm)
 
   const categories = useMemo(() => ['all', ...Array.from(new Set(items.map((item) => item.category)))], [items])
   const statuses = useMemo(() => ['all', ...Array.from(new Set(items.map((item) => item.status)))], [items])
+  const pageSizeNumber = Number(pageSize)
 
   const filteredItems = items.filter((item) => {
     const normalizedQuery = query.toLowerCase()
@@ -65,9 +68,9 @@ export default function ThoughtsManager({ thoughts }: ThoughtsManagerProps) {
     return matchesQuery && matchesCategory && matchesStatus
   })
 
-  const pageCount = Math.max(1, Math.ceil(filteredItems.length / pageSize))
+  const pageCount = Math.max(1, Math.ceil(filteredItems.length / pageSizeNumber))
   const safePage = Math.min(page, pageCount)
-  const paginatedItems = filteredItems.slice((safePage - 1) * pageSize, safePage * pageSize)
+  const paginatedItems = filteredItems.slice((safePage - 1) * pageSizeNumber, safePage * pageSizeNumber)
 
   function resetPagination(update: () => void) {
     update()
@@ -143,198 +146,154 @@ export default function ThoughtsManager({ thoughts }: ThoughtsManagerProps) {
 
   return (
     <>
-      <section className={styles.pageHeader}>
-        <div>
-          <p className={styles.breadcrumb}>Agung OS / Thoughts</p>
-          <h2 className={styles.pageTitle}>Thoughts</h2>
-          <p className={styles.pageDescription}>
+      <Box component="section" className={styles.pageHeader}>
+        <Box>
+          <Text className={styles.breadcrumb}>Agung OS / Thoughts</Text>
+          <Text component="h2" className={styles.pageTitle}>Thoughts</Text>
+          <Text className={styles.pageDescription}>
             A capture inbox for product ideas, operating notes, and content angles before they become tasks.
-          </p>
-        </div>
-        <button className={styles.primaryButton} onClick={openCreateModal} type="button">
+          </Text>
+        </Box>
+        <Button leftSection={<IconPlus size={18} stroke={1.8} />} onClick={openCreateModal}>
           Capture Thought
-        </button>
-      </section>
+        </Button>
+      </Box>
 
-      <section className={styles.panel}>
-        <div className={styles.contentToolbar}>
-          <input
-            className={styles.productSearch}
-            onChange={(event) => resetPagination(() => setQuery(event.target.value))}
+      <Box component="section" className={styles.panel}>
+        <SimpleGrid cols={{ base: 1, sm: 2, lg: 4 }} spacing="xs" className={styles.contentToolbar}>
+          <TextInput
+            onChange={(event) => resetPagination(() => setQuery(event.currentTarget.value))}
             placeholder="Cari thought, kategori, catatan"
             type="search"
             value={query}
           />
-          <select className={styles.productFilter} onChange={(event) => resetPagination(() => setCategory(event.target.value))} value={category}>
-            {categories.map((item) => (
-              <option key={item} value={item}>
-                {item === 'all' ? 'Kategori' : item}
-              </option>
-            ))}
-          </select>
-          <select className={styles.productFilter} onChange={(event) => resetPagination(() => setStatus(event.target.value))} value={status}>
-            {statuses.map((item) => (
-              <option key={item} value={item}>
-                {item === 'all' ? 'Status' : item}
-              </option>
-            ))}
-          </select>
-          <button
-            className={styles.secondaryButton}
+          <Select
+            data={categories.map((item) => ({ label: item === 'all' ? 'Kategori' : item, value: item }))}
+            onChange={(value) => resetPagination(() => setCategory(value ?? 'all'))}
+            value={category}
+          />
+          <Select
+            data={statuses.map((item) => ({ label: item === 'all' ? 'Status' : item, value: item }))}
+            onChange={(value) => resetPagination(() => setStatus(value ?? 'all'))}
+            value={status}
+          />
+          <Button
+            leftSection={<IconRefresh size={18} stroke={1.8} />}
             onClick={() => {
               setQuery('')
               setCategory('all')
               setStatus('all')
               setPage(1)
             }}
-            type="button"
+            variant="default"
           >
             Atur ulang
-          </button>
-        </div>
+          </Button>
+        </SimpleGrid>
 
-        <ul className={styles.thoughtList}>
+        <Stack gap="xs">
           {paginatedItems.map((thought) => (
-            <li className={styles.thoughtItem} key={thought.id}>
-              <div className={styles.thoughtMain}>
-                <div>
-                  <p className={styles.compactTitle}>{thought.title}</p>
-                  {thought.body ? <p className={styles.thoughtBody}>{thought.body}</p> : null}
-                  <p className={styles.muted}>
+            <Card className={styles.thoughtItem} key={thought.id} padding="sm" radius="sm" withBorder>
+              <Group justify="space-between" align="flex-start" gap="sm">
+                <Box>
+                  <Text className={styles.compactTitle}>{thought.title}</Text>
+                  {thought.body ? <Text className={styles.thoughtBody}>{thought.body}</Text> : null}
+                  <Text className={styles.muted}>
                     {thought.category} · {formatDate(thought.createdAt)}
-                  </p>
-                </div>
-                <span className={styles.badge} data-status={thought.status}>
+                  </Text>
+                </Box>
+                <Badge className={styles.badge} data-status={thought.status} variant="light">
                   {thought.status}
-                </span>
-              </div>
+                </Badge>
+              </Group>
 
-              <div className={styles.thoughtActions}>
-                <button className={styles.secondaryButton} onClick={() => openEditModal(thought)} type="button">
-                  Edit
-                </button>
-                <button className={styles.secondaryButton} onClick={() => toggleArchive(thought)} type="button">
-                  {thought.status === 'archived' ? 'Reopen' : 'Archive'}
-                </button>
-                <button className={styles.dangerButton} onClick={() => deleteThought(thought.id)} type="button">
-                  Delete
-                </button>
-              </div>
-            </li>
+              <Group gap="xs">
+                <Tooltip label="Edit">
+                  <ActionIcon aria-label="Edit thought" onClick={() => openEditModal(thought)} variant="default">
+                    <IconEdit size={18} stroke={1.8} />
+                  </ActionIcon>
+                </Tooltip>
+                <Tooltip label={thought.status === 'archived' ? 'Reopen' : 'Archive'}>
+                  <ActionIcon aria-label={thought.status === 'archived' ? 'Reopen thought' : 'Archive thought'} onClick={() => toggleArchive(thought)} variant="default">
+                    <IconArchive size={18} stroke={1.8} />
+                  </ActionIcon>
+                </Tooltip>
+                <Tooltip label="Delete">
+                  <ActionIcon aria-label="Delete thought" color="red" onClick={() => deleteThought(thought.id)} variant="light">
+                    <IconTrash size={18} stroke={1.8} />
+                  </ActionIcon>
+                </Tooltip>
+              </Group>
+            </Card>
           ))}
-        </ul>
+        </Stack>
 
-        <div className={styles.pagination}>
-          <span>
+        <Group justify="flex-end" gap="xs" className={styles.pagination}>
+          <Text>
             Page {safePage} of {pageCount} · {filteredItems.length} thoughts
-          </span>
-          <select
-            className={styles.pageSize}
-            onChange={(event) => {
-              setPageSize(Number(event.target.value))
+          </Text>
+          <Select
+            data={[
+              { label: '5 / page', value: '5' },
+              { label: '10 / page', value: '10' },
+              { label: '20 / page', value: '20' },
+            ]}
+            onChange={(value) => {
+              setPageSize(value ?? '5')
               setPage(1)
             }}
             value={pageSize}
-          >
-            {[5, 10, 20].map((size) => (
-              <option key={size} value={size}>
-                {size} / page
-              </option>
-            ))}
-          </select>
-          <button className={styles.secondaryButton} disabled={safePage <= 1} onClick={() => setPage((current) => Math.max(1, current - 1))} type="button">
+            w={110}
+          />
+          <Button disabled={safePage <= 1} onClick={() => setPage((current) => Math.max(1, current - 1))} variant="default">
             Prev
-          </button>
-          <button className={styles.secondaryButton} disabled={safePage >= pageCount} onClick={() => setPage((current) => Math.min(pageCount, current + 1))} type="button">
+          </Button>
+          <Button disabled={safePage >= pageCount} onClick={() => setPage((current) => Math.min(pageCount, current + 1))} variant="default">
             Next
-          </button>
-        </div>
-      </section>
+          </Button>
+        </Group>
+      </Box>
 
-      {isModalOpen ? (
-        <div className={styles.modalBackdrop} role="presentation">
-          <section aria-labelledby="thought-modal-title" className={styles.modal} role="dialog">
-            <div className={styles.modalHeader}>
-              <div>
-                <p className={styles.eyebrow}>Thoughts</p>
-                <h3 className={styles.modalTitle} id="thought-modal-title">
-                  {editingId ? 'Edit Thought' : 'Capture Thought'}
-                </h3>
-              </div>
-              <button
-                aria-label="Close thought dialog"
-                className={styles.iconCloseButton}
-                onClick={() => setIsModalOpen(false)}
-                type="button"
-              >
-                ×
-              </button>
-            </div>
-
-            <form className={styles.modalForm}>
-              <label className={styles.field} htmlFor="thought-title">
-                <span className={styles.label}>Title</span>
-                <input
-                  className={styles.input}
-                  id="thought-title"
-                  onChange={(event) => setForm((current) => ({ ...current, title: event.target.value }))}
-                  placeholder="Short thought title"
-                  type="text"
-                  value={form.title}
-                />
-              </label>
-
-              <label className={styles.field} htmlFor="thought-body">
-                <span className={styles.label}>Note</span>
-                <textarea
-                  className={styles.textarea}
-                  id="thought-body"
-                  onChange={(event) => setForm((current) => ({ ...current, body: event.target.value }))}
-                  placeholder="Capture the context, why it matters, or what to do next."
-                  rows={5}
-                  value={form.body}
-                />
-              </label>
-
-              <div className={styles.formGrid}>
-                <label className={styles.field} htmlFor="thought-category">
-                  <span className={styles.label}>Category</span>
-                  <input
-                    className={styles.input}
-                    id="thought-category"
-                    onChange={(event) => setForm((current) => ({ ...current, category: event.target.value }))}
-                    placeholder="Product"
-                    type="text"
-                    value={form.category}
-                  />
-                </label>
-
-                <label className={styles.field} htmlFor="thought-status">
-                  <span className={styles.label}>Status</span>
-                  <select
-                    className={styles.input}
-                    id="thought-status"
-                    onChange={(event) => setForm((current) => ({ ...current, status: event.target.value }))}
-                    value={form.status}
-                  >
-                    <option value="open">Open</option>
-                    <option value="archived">Archived</option>
-                  </select>
-                </label>
-              </div>
-
-              <div className={styles.modalActions}>
-                <button className={styles.secondaryButton} onClick={() => setIsModalOpen(false)} type="button">
-                  Cancel
-                </button>
-                <button className={styles.primaryButton} onClick={saveThought} type="button">
-                  Save Thought
-                </button>
-              </div>
-            </form>
-          </section>
-        </div>
-      ) : null}
+      <Modal opened={isModalOpen} onClose={() => setIsModalOpen(false)} title={editingId ? 'Edit Thought' : 'Capture Thought'} centered>
+        <Stack gap="sm">
+          <TextInput
+            label="Title"
+            onChange={(event) => setForm((current) => ({ ...current, title: event.currentTarget.value }))}
+            placeholder="Short thought title"
+            value={form.title}
+          />
+          <Textarea
+            label="Note"
+            onChange={(event) => setForm((current) => ({ ...current, body: event.currentTarget.value }))}
+            placeholder="Capture the context, why it matters, or what to do next."
+            rows={5}
+            value={form.body}
+          />
+          <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="sm">
+            <TextInput
+              label="Category"
+              onChange={(event) => setForm((current) => ({ ...current, category: event.currentTarget.value }))}
+              placeholder="Product"
+              value={form.category}
+            />
+            <Select
+              data={[
+                { label: 'Open', value: 'open' },
+                { label: 'Archived', value: 'archived' },
+              ]}
+              label="Status"
+              onChange={(value) => setForm((current) => ({ ...current, status: value ?? 'open' }))}
+              value={form.status}
+            />
+          </SimpleGrid>
+          <Group justify="flex-end">
+            <Button onClick={() => setIsModalOpen(false)} variant="default">
+              Cancel
+            </Button>
+            <Button onClick={saveThought}>Save Thought</Button>
+          </Group>
+        </Stack>
+      </Modal>
     </>
   )
 }

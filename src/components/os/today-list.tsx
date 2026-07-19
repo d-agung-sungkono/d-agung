@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { Badge, Box, Checkbox, Stack, Text } from '@mantine/core'
 
 import styles from './os-shell.module.css'
 
@@ -26,19 +27,19 @@ export default function TodayList({ items }: TodayListProps) {
   )
 
   return (
-    <ul className={styles.todayList}>
+    <Stack component="ul" gap="xs" className={styles.todayList}>
       {items.map((item) => (
-        <li className={styles.todayItem} key={item.id}>
-          <div className={styles.todayTopLine}>
-            <label className={styles.checkLabel}>
-              <input
-                checked={checkedItems.has(item.id)}
-                className={styles.checkbox}
-                onChange={(event) => {
+        <Box component="li" className={styles.todayItem} key={item.id}>
+          <Box className={styles.todayTopLine}>
+            <Checkbox
+              checked={checkedItems.has(item.id)}
+              className={styles.checkLabel}
+              label={<Text className={styles.todayTitle}>{item.title}</Text>}
+              onChange={(event) => {
                   setCheckedItems((currentItems) => {
                     const nextItems = new Set(currentItems)
 
-                    if (event.target.checked) {
+                    if (event.currentTarget.checked) {
                       nextItems.add(item.id)
                     } else {
                       nextItems.delete(item.id)
@@ -46,18 +47,15 @@ export default function TodayList({ items }: TodayListProps) {
 
                     return nextItems
                   })
-                }}
-                type="checkbox"
-              />
-              <span className={styles.todayTitle}>{item.title}</span>
-            </label>
-            <span className={styles.badge} data-status={item.status}>
+              }}
+            />
+            <Badge className={styles.badge} data-status={item.status} variant="light">
               {formatStatus(item.status)}
-            </span>
-          </div>
-          <time className={styles.time}>{item.time}</time>
-        </li>
+            </Badge>
+          </Box>
+          <Text component="time" className={styles.time}>{item.time}</Text>
+        </Box>
       ))}
-    </ul>
+    </Stack>
   )
 }

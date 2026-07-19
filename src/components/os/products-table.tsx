@@ -1,6 +1,8 @@
 'use client'
 
 import { Fragment, useMemo, useState } from 'react'
+import { ActionIcon, Box, Button, Group, Modal, Select, SimpleGrid, Table, Text, TextInput, Tooltip } from '@mantine/core'
+import { IconExternalLink, IconEye, IconRefresh, IconTestPipe, IconX } from '@tabler/icons-react'
 
 import styles from './os-shell.module.css'
 
@@ -63,11 +65,12 @@ export default function ProductsTable({ products }: ProductsTableProps) {
   const [weekStart, setWeekStart] = useState(defaultWeekStart)
   const [weekEnd, setWeekEnd] = useState(defaultWeekEnd)
   const [page, setPage] = useState(1)
-  const [pageSize, setPageSize] = useState(5)
+  const [pageSize, setPageSize] = useState('5')
   const [openProductId, setOpenProductId] = useState<string | null>(null)
   const [isAddOpen, setIsAddOpen] = useState(false)
   const [productUrl, setProductUrl] = useState('')
   const [testResult, setTestResult] = useState<string | null>(null)
+  const pageSizeNumber = Number(pageSize)
 
   const categories = useMemo(() => ['all', ...Array.from(new Set(products.map((product) => product.category)))], [products])
   const sources = useMemo(() => ['all', ...Array.from(new Set(products.map((product) => product.platform)))], [products])
@@ -90,9 +93,9 @@ export default function ProductsTable({ products }: ProductsTableProps) {
     return matchesQuery && matchesSource && matchesCategory && matchesStock && matchesWeekStart && matchesWeekEnd
   })
 
-  const pageCount = Math.max(1, Math.ceil(filteredProducts.length / pageSize))
+  const pageCount = Math.max(1, Math.ceil(filteredProducts.length / pageSizeNumber))
   const safePage = Math.min(page, pageCount)
-  const paginatedProducts = filteredProducts.slice((safePage - 1) * pageSize, safePage * pageSize)
+  const paginatedProducts = filteredProducts.slice((safePage - 1) * pageSizeNumber, safePage * pageSizeNumber)
 
   function updateFilter(update: () => void) {
     update()
@@ -117,53 +120,32 @@ export default function ProductsTable({ products }: ProductsTableProps) {
 
   return (
     <>
-      <div className={styles.productToolbar}>
-        <input
-          className={styles.productSearch}
-          onChange={(event) => updateFilter(() => setQuery(event.target.value))}
+      <SimpleGrid cols={{ base: 1, sm: 2, lg: 8 }} spacing="xs" className={styles.productToolbar}>
+        <TextInput
+          onChange={(event) => updateFilter(() => setQuery(event.currentTarget.value))}
           placeholder="Cari SKU atau nama produk"
           type="search"
           value={query}
         />
-        <select className={styles.productFilter} onChange={(event) => updateFilter(() => setSource(event.target.value))} value={source}>
-          {sources.map((item) => (
-            <option key={item} value={item}>
-              {item === 'all' ? 'Source' : item}
-            </option>
-          ))}
-        </select>
-        <select className={styles.productFilter} onChange={(event) => updateFilter(() => setCategory(event.target.value))} value={category}>
-          {categories.map((item) => (
-            <option key={item} value={item}>
-              {item === 'all' ? 'Kategori' : item}
-            </option>
-          ))}
-        </select>
-        <select
-          className={styles.productFilter}
-          onChange={(event) => updateFilter(() => setStockStatus(event.target.value))}
+        <Select
+          data={sources.map((item) => ({ label: item === 'all' ? 'Source' : item, value: item }))}
+          onChange={(value) => updateFilter(() => setSource(value ?? 'all'))}
+          value={source}
+        />
+        <Select
+          data={categories.map((item) => ({ label: item === 'all' ? 'Kategori' : item, value: item }))}
+          onChange={(value) => updateFilter(() => setCategory(value ?? 'all'))}
+          value={category}
+        />
+        <Select
+          data={stockStatuses.map((item) => ({ label: item === 'all' ? 'Stok' : item, value: item }))}
+          onChange={(value) => updateFilter(() => setStockStatus(value ?? 'all'))}
           value={stockStatus}
-        >
-          {stockStatuses.map((item) => (
-            <option key={item} value={item}>
-              {item === 'all' ? 'Stok' : item}
-            </option>
-          ))}
-        </select>
-        <input
-          className={styles.productFilter}
-          onChange={(event) => updateFilter(() => setWeekStart(event.target.value))}
-          type="date"
-          value={weekStart}
         />
-        <input
-          className={styles.productFilter}
-          onChange={(event) => updateFilter(() => setWeekEnd(event.target.value))}
-          type="date"
-          value={weekEnd}
-        />
-        <button
-          className={styles.secondaryButton}
+        <TextInput onChange={(event) => updateFilter(() => setWeekStart(event.currentTarget.value))} type="date" value={weekStart} />
+        <TextInput onChange={(event) => updateFilter(() => setWeekEnd(event.currentTarget.value))} type="date" value={weekEnd} />
+        <Button
+          leftSection={<IconRefresh size={18} stroke={1.8} />}
           onClick={() => {
             setQuery('')
             setSource('all')
@@ -173,167 +155,168 @@ export default function ProductsTable({ products }: ProductsTableProps) {
             setWeekEnd(defaultWeekEnd)
             setPage(1)
           }}
-          type="button"
+          variant="default"
         >
           Atur ulang
-        </button>
-        <button className={styles.primaryButton} onClick={() => setIsAddOpen(true)} type="button">
-          Tambah Produk
-        </button>
-      </div>
+        </Button>
+        <Button onClick={() => setIsAddOpen(true)}>Tambah Produk</Button>
+      </SimpleGrid>
 
-      <section className={styles.productTableWrap}>
-        <div className={styles.productCount}>
-          <span>{filteredProducts.length} Products</span>
-          <span>
+      <Box component="section" className={styles.productTableWrap}>
+        <Group justify="space-between" className={styles.productCount}>
+          <Text>{filteredProducts.length} Products</Text>
+          <Text>
             Minggu pembanding {weekStart ? formatDate(weekStart) : '-'} sampai {weekEnd ? formatDate(weekEnd) : '-'} vs hari ini
-          </span>
-        </div>
-        <table className={styles.productTable}>
-          <thead>
-            <tr>
-              <th>Title</th>
-              <th>Minggu lalu dan stok</th>
-              <th>Hari ini dan stok</th>
-              <th>Persentase</th>
-              <th>Detail</th>
-            </tr>
-          </thead>
-          <tbody>
+          </Text>
+        </Group>
+        <Table className={styles.productTable} verticalSpacing="sm">
+          <Table.Thead>
+            <Table.Tr>
+              <Table.Th>Title</Table.Th>
+              <Table.Th>Minggu lalu dan stok</Table.Th>
+              <Table.Th>Hari ini dan stok</Table.Th>
+              <Table.Th>Persentase</Table.Th>
+              <Table.Th>Detail</Table.Th>
+            </Table.Tr>
+          </Table.Thead>
+          <Table.Tbody>
             {paginatedProducts.map((product) => {
               const percentage = getPercentageDifference(product.snapshotA.price, product.snapshotB.price)
               const isOpen = openProductId === product.id
 
               return (
                 <Fragment key={product.id}>
-                  <tr key={product.id}>
-                    <td>
-                      <div className={styles.productTitleCell}>
-                        <p className={styles.productTitle}>{product.name}</p>
-                        <p className={styles.productSku}>SKU: {product.sku}</p>
-                        <p className={styles.productMeta}>
+                  <Table.Tr>
+                    <Table.Td>
+                      <Box className={styles.productTitleCell}>
+                        <Text className={styles.productTitle}>{product.name}</Text>
+                        <Text className={styles.productSku}>SKU: {product.sku}</Text>
+                        <Text className={styles.productMeta}>
                           {product.platform} · {product.category}
-                        </p>
-                      </div>
-                    </td>
-                    <td>
-                      <p className={styles.productPrice}>{formatCurrency(product.snapshotA.price)}</p>
-                      <p className={styles.productDate}>{formatDate(product.snapshotA.date)}</p>
-                      <p className={styles.productSku}>Stok {product.snapshotA.stock}</p>
-                    </td>
-                    <td>
-                      <p className={styles.productPrice}>{formatCurrency(product.snapshotB.price)}</p>
-                      <p className={styles.productDate}>{formatDate(product.snapshotB.date)}</p>
-                      <p className={styles.productSku}>Stok {product.snapshotB.stock}</p>
-                    </td>
-                    <td>
-                      <span className={percentage <= 0 ? styles.diffDown : styles.diffUp}>
+                        </Text>
+                      </Box>
+                    </Table.Td>
+                    <Table.Td>
+                      <Text className={styles.productPrice}>{formatCurrency(product.snapshotA.price)}</Text>
+                      <Text className={styles.productDate}>{formatDate(product.snapshotA.date)}</Text>
+                      <Text className={styles.productSku}>Stok {product.snapshotA.stock}</Text>
+                    </Table.Td>
+                    <Table.Td>
+                      <Text className={styles.productPrice}>{formatCurrency(product.snapshotB.price)}</Text>
+                      <Text className={styles.productDate}>{formatDate(product.snapshotB.date)}</Text>
+                      <Text className={styles.productSku}>Stok {product.snapshotB.stock}</Text>
+                    </Table.Td>
+                    <Table.Td>
+                      <Text component="span" className={percentage <= 0 ? styles.diffDown : styles.diffUp}>
                         {percentage > 0 ? '+' : ''}
                         {percentage.toFixed(1)}%
-                      </span>
-                    </td>
-                    <td>
-                      <button
-                        className={styles.secondaryButton}
-                        onClick={() => setOpenProductId(isOpen ? null : product.id)}
-                        type="button"
-                      >
-                        {isOpen ? 'Tutup' : 'Detail'}
-                      </button>
-                    </td>
-                  </tr>
+                      </Text>
+                    </Table.Td>
+                    <Table.Td>
+                      <Tooltip label={isOpen ? 'Tutup' : 'Detail'}>
+                        <ActionIcon aria-label={isOpen ? 'Tutup detail' : 'Buka detail'} onClick={() => setOpenProductId(isOpen ? null : product.id)} variant="default">
+                          {isOpen ? <IconX size={18} stroke={1.8} /> : <IconEye size={18} stroke={1.8} />}
+                        </ActionIcon>
+                      </Tooltip>
+                    </Table.Td>
+                  </Table.Tr>
                   {isOpen ? (
-                    <tr>
-                      <td className={styles.productDetail} colSpan={5}>
-                        <p>{product.description}</p>
-                        <a href={product.url} rel="noreferrer" target="_blank">
+                    <Table.Tr>
+                      <Table.Td className={styles.productDetail} colSpan={5}>
+                        <Text>{product.description}</Text>
+                        <Button
+                          component="a"
+                          href={product.url}
+                          leftSection={<IconExternalLink size={18} stroke={1.8} />}
+                          mt="sm"
+                          rel="noreferrer"
+                          target="_blank"
+                          variant="default"
+                        >
                           Buka sumber produk
-                        </a>
-                      </td>
-                    </tr>
+                        </Button>
+                      </Table.Td>
+                    </Table.Tr>
                   ) : null}
                 </Fragment>
               )
             })}
-          </tbody>
-        </table>
-        <div className={styles.pagination}>
-          <span>
-            Page {safePage} of {pageCount}
-          </span>
-          <select
-            className={styles.pageSize}
-            onChange={(event) => {
-              setPageSize(Number(event.target.value))
+          </Table.Tbody>
+        </Table>
+        <Group justify="flex-end" className={styles.pagination}>
+          <Text>Page {safePage} of {pageCount}</Text>
+          <Select
+            data={[
+              { label: '5 / page', value: '5' },
+              { label: '10 / page', value: '10' },
+              { label: '20 / page', value: '20' },
+            ]}
+            onChange={(value) => {
+              setPageSize(value ?? '5')
               setPage(1)
             }}
             value={pageSize}
-          >
-            {[5, 10, 20].map((size) => (
-              <option key={size} value={size}>
-                {size} / page
-              </option>
-            ))}
-          </select>
-          <button className={styles.secondaryButton} disabled={safePage <= 1} onClick={() => setPage((current) => Math.max(1, current - 1))} type="button">
+            w={110}
+          />
+          <Button disabled={safePage <= 1} onClick={() => setPage((current) => Math.max(1, current - 1))} variant="default">
             Prev
-          </button>
-          <button className={styles.secondaryButton} disabled={safePage >= pageCount} onClick={() => setPage((current) => Math.min(pageCount, current + 1))} type="button">
+          </Button>
+          <Button disabled={safePage >= pageCount} onClick={() => setPage((current) => Math.min(pageCount, current + 1))} variant="default">
             Next
-          </button>
-        </div>
-      </section>
+          </Button>
+        </Group>
+      </Box>
 
-      {isAddOpen ? (
-        <div className={styles.modalBackdrop} role="presentation">
-          <section aria-labelledby="add-product-title" className={styles.modal} role="dialog">
-            <div className={styles.modalHeader}>
-              <div>
-                <p className={styles.eyebrow}>Products</p>
-                <h3 className={styles.modalTitle} id="add-product-title">
-                  Tambah Produk
-                </h3>
-              </div>
-              <button
-                aria-label="Close add product dialog"
-                className={styles.iconCloseButton}
-                onClick={() => setIsAddOpen(false)}
-                type="button"
-              >
-                ×
-              </button>
-            </div>
-
-            <form className={styles.modalForm}>
-              <label className={styles.field} htmlFor="product-url">
-                <span className={styles.label}>Link Jacknote atau Jackmall</span>
-                <input
-                  className={styles.input}
-                  id="product-url"
-                  onChange={(event) => {
-                    setProductUrl(event.target.value)
-                    setTestResult(null)
-                  }}
-                  placeholder="https://www.jackmall.com/..."
-                  type="url"
-                  value={productUrl}
-                />
-              </label>
-
-              {testResult ? <p className={styles.testResult}>{testResult}</p> : null}
-
-              <div className={styles.modalActions}>
-                <button className={styles.secondaryButton} onClick={testProductUrl} type="button">
-                  Test
-                </button>
-                <button className={styles.primaryButton} onClick={() => setIsAddOpen(false)} type="button">
-                  Simpan Link
-                </button>
-              </div>
-            </form>
-          </section>
-        </div>
-      ) : null}
+      <Modal opened={isAddOpen} onClose={() => setIsAddOpen(false)} title="Tambah Produk" centered>
+        <StackLikeProductModal
+          productUrl={productUrl}
+          setProductUrl={setProductUrl}
+          setTestResult={setTestResult}
+          testProductUrl={testProductUrl}
+          testResult={testResult}
+          close={() => setIsAddOpen(false)}
+        />
+      </Modal>
     </>
+  )
+}
+
+function StackLikeProductModal({
+  close,
+  productUrl,
+  setProductUrl,
+  setTestResult,
+  testProductUrl,
+  testResult,
+}: {
+  close: () => void
+  productUrl: string
+  setProductUrl: (value: string) => void
+  setTestResult: (value: string | null) => void
+  testProductUrl: () => void
+  testResult: string | null
+}) {
+  return (
+    <Box>
+      <TextInput
+        label="Link Jacknote atau Jackmall"
+        onChange={(event) => {
+          setProductUrl(event.currentTarget.value)
+          setTestResult(null)
+        }}
+        placeholder="https://www.jackmall.com/..."
+        type="url"
+        value={productUrl}
+      />
+
+      {testResult ? <Text className={styles.testResult} mt="sm">{testResult}</Text> : null}
+
+      <Group justify="flex-end" mt="md">
+        <Button leftSection={<IconTestPipe size={18} stroke={1.8} />} onClick={testProductUrl} variant="default">
+          Test
+        </Button>
+        <Button onClick={close}>Simpan Link</Button>
+      </Group>
+    </Box>
   )
 }

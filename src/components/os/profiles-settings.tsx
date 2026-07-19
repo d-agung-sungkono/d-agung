@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useTransition } from 'react'
+import { ActionIcon, Badge, Box, Button, Card, Group, Modal, Select, SimpleGrid, Stack, Text, TextInput, Tooltip } from '@mantine/core'
 import {
   IconBrandFacebook,
   IconBrandInstagram,
@@ -109,6 +110,11 @@ export default function ProfilesSettings({ groups, socmeds, userSocmeds }: Profi
       }
     }),
   ]
+  const socmedOptions = socmeds.map((socmed) => ({ label: socmed.name, value: socmed.id }))
+  const groupOptions = [
+    { label: 'No group', value: 'none' },
+    ...groups.map((group) => ({ label: group.name, value: group.id })),
+  ]
 
   async function copyProfileUrl(profile: UserSocmed) {
     await navigator.clipboard.writeText(profile.url)
@@ -141,10 +147,15 @@ export default function ProfilesSettings({ groups, socmeds, userSocmeds }: Profi
 
   function saveSocmed() {
     startTransition(async () => {
+      const normalizedForm = {
+        ...form,
+        accountGroupId: form.accountGroupId === 'none' ? '' : form.accountGroupId,
+      }
+
       if (isEditing) {
-        await updateUserSocmed(buildFormData(form))
+        await updateUserSocmed(buildFormData(normalizedForm))
       } else {
-        await createUserSocmed(buildFormData(form))
+        await createUserSocmed(buildFormData(normalizedForm))
       }
 
       setIsOpen(false)
@@ -161,270 +172,185 @@ export default function ProfilesSettings({ groups, socmeds, userSocmeds }: Profi
 
   return (
     <>
-      <section className={styles.pageHeader}>
-        <div>
-          <p className={styles.breadcrumb}>Agung OS / Social Media</p>
-          <h2 className={styles.pageTitle}>Social Media</h2>
-          <p className={styles.pageDescription}>
+      <Box component="section" className={styles.pageHeader}>
+        <Box>
+          <Text className={styles.breadcrumb}>Agung OS / Social Media</Text>
+          <Text component="h2" className={styles.pageTitle}>Social Media</Text>
+          <Text className={styles.pageDescription}>
             Platform accounts used to map content, publishing targets, and future embeds.
-          </p>
-        </div>
-        <button className={styles.primaryButton} disabled={isPending} onClick={openCreateModal} type="button">
+          </Text>
+        </Box>
+        <Button loading={isPending} onClick={openCreateModal}>
           Add Social Account
-        </button>
-      </section>
+        </Button>
+      </Box>
 
-      <section aria-label="Account groups" className={styles.groupCardGrid}>
+      <SimpleGrid cols={{ base: 1, sm: 2, lg: 4 }} spacing="xs" className={styles.groupCardGrid}>
         {groupCards.map((group) => (
-          <button
+          <Card
             aria-pressed={selectedGroupId === group.id}
             className={styles.groupCard}
+            component="button"
             data-active={selectedGroupId === group.id}
             key={group.id}
             onClick={() => setSelectedGroupId(group.id)}
-            type="button"
+            padding="sm"
+            radius="sm"
+            withBorder
           >
-            <span className={styles.groupCardLabel}>{group.name}</span>
-            <span className={styles.groupCardCount}>{group.count}</span>
-            <span className={styles.groupCardMeta}>{group.meta}</span>
-          </button>
+            <Text className={styles.groupCardLabel}>{group.name}</Text>
+            <Text className={styles.groupCardCount}>{group.count}</Text>
+            <Text className={styles.groupCardMeta}>{group.meta}</Text>
+          </Card>
         ))}
-      </section>
+      </SimpleGrid>
 
-      <section className={styles.panel}>
-        <div className={styles.panelHeader}>
-          <div>
-            <h3 className={styles.panelTitle}>Social Accounts</h3>
-            <p className={styles.muted}>Each account is linked to a master platform and an account group.</p>
-          </div>
-        </div>
+      <Box component="section" className={styles.panel}>
+        <Group justify="space-between" align="flex-start" className={styles.panelHeader}>
+          <Box>
+            <Text component="h3" className={styles.panelTitle}>Social Accounts</Text>
+            <Text className={styles.muted}>Each account is linked to a master platform and an account group.</Text>
+          </Box>
+        </Group>
 
-        <ul className={styles.profileList}>
-          {visibleSocmeds.map((profile) => (
-            <li className={styles.profileItem} key={profile.id}>
-              <div className={styles.profileBrand} data-platform={profile.platform}>
-                {(() => {
-                  const PlatformIcon = platformIcons[profile.platform]
-                  return PlatformIcon ? <PlatformIcon size={28} stroke={1.7} /> : profile.platform.slice(0, 2)
-                })()}
-              </div>
-              <div className={styles.profileBody}>
-                <div className={styles.itemHeader}>
-                  <div>
-                    <div className={styles.profileTitleRow}>
-                      <p className={styles.compactTitle}>{profile.label}</p>
-                      <span className={styles.badge} data-status={profile.status}>
-                        {profile.status}
-                      </span>
-                    </div>
-                    <p className={styles.muted}>
-                      {profile.platform} · @{profile.account}
-                      {profile.groupName ? ` · ${profile.groupName}` : ''}
-                    </p>
-                    <p className={styles.profileMeta}>
-                      Email: {profile.linkedEmail ?? '-'} · WA: {profile.linkedWhatsapp ?? '-'}
-                    </p>
-                  </div>
-                  <div className={styles.profileActions}>
-                    <button
-                      aria-label={copyState === profile.id ? 'Copied profile URL' : 'Copy profile URL'}
-                      className={styles.iconActionButton}
-                      onClick={() => copyProfileUrl(profile)}
-                      type="button"
-                    >
-                      {copyState === profile.id ? <IconCheck size={18} stroke={1.8} /> : <IconCopy size={18} stroke={1.8} />}
-                      <span className={styles.tooltipText}>{copyState === profile.id ? 'Copied' : 'Copy URL'}</span>
-                    </button>
-                    <button
-                      aria-label="Edit social account"
-                      className={styles.iconActionButton}
-                      disabled={isPending}
-                      onClick={() => openEditModal(profile)}
-                      type="button"
-                    >
-                      <IconEdit size={18} stroke={1.8} />
-                      <span className={styles.tooltipText}>Edit</span>
-                    </button>
-                    <button
-                      aria-label="Delete social account"
-                      className={`${styles.iconActionButton} ${styles.iconDangerButton}`}
-                      disabled={isPending}
-                      onClick={() => deleteSocmed(profile)}
-                      type="button"
-                    >
-                      <IconTrash size={18} stroke={1.8} />
-                      <span className={styles.tooltipText}>Delete</span>
-                    </button>
-                    <a
-                      aria-label="Open social profile"
-                      className={styles.iconActionButton}
-                      href={profile.url}
-                      rel="noreferrer"
-                      target="_blank"
-                    >
-                      <IconExternalLink size={18} stroke={1.8} />
-                      <span className={styles.tooltipText}>Open</span>
-                    </a>
-                  </div>
-                </div>
-              </div>
-            </li>
-          ))}
-        </ul>
+        <Stack gap="xs">
+          {visibleSocmeds.map((profile) => {
+            const PlatformIcon = platformIcons[profile.platform]
+
+            return (
+              <Card className={styles.profileItem} key={profile.id} padding="sm" radius="sm" withBorder>
+                <Box className={styles.profileBrand} data-platform={profile.platform}>
+                  {PlatformIcon ? <PlatformIcon size={28} stroke={1.7} /> : profile.platform.slice(0, 2)}
+                </Box>
+                <Box className={styles.profileBody}>
+                  <Group justify="space-between" align="flex-start" gap="sm">
+                    <Box>
+                      <Group gap="xs" wrap="nowrap" className={styles.profileTitleRow}>
+                        <Text className={styles.compactTitle}>{profile.label}</Text>
+                        <Badge className={styles.badge} data-status={profile.status} variant="light">
+                          {profile.status}
+                        </Badge>
+                      </Group>
+                      <Text className={styles.muted}>
+                        {profile.platform} · @{profile.account}
+                        {profile.groupName ? ` · ${profile.groupName}` : ''}
+                      </Text>
+                      <Text className={styles.profileMeta}>
+                        Email: {profile.linkedEmail ?? '-'} · WA: {profile.linkedWhatsapp ?? '-'}
+                      </Text>
+                    </Box>
+                    <Group gap="xs" wrap="nowrap">
+                      <Tooltip label={copyState === profile.id ? 'Copied' : 'Copy URL'}>
+                        <ActionIcon
+                          aria-label={copyState === profile.id ? 'Copied profile URL' : 'Copy profile URL'}
+                          onClick={() => copyProfileUrl(profile)}
+                          variant="default"
+                        >
+                          {copyState === profile.id ? <IconCheck size={18} stroke={1.8} /> : <IconCopy size={18} stroke={1.8} />}
+                        </ActionIcon>
+                      </Tooltip>
+                      <Tooltip label="Edit">
+                        <ActionIcon aria-label="Edit social account" disabled={isPending} onClick={() => openEditModal(profile)} variant="default">
+                          <IconEdit size={18} stroke={1.8} />
+                        </ActionIcon>
+                      </Tooltip>
+                      <Tooltip label="Delete">
+                        <ActionIcon aria-label="Delete social account" color="red" disabled={isPending} onClick={() => deleteSocmed(profile)} variant="light">
+                          <IconTrash size={18} stroke={1.8} />
+                        </ActionIcon>
+                      </Tooltip>
+                      <Tooltip label="Open">
+                        <ActionIcon aria-label="Open social profile" component="a" href={profile.url} rel="noreferrer" target="_blank" variant="default">
+                          <IconExternalLink size={18} stroke={1.8} />
+                        </ActionIcon>
+                      </Tooltip>
+                    </Group>
+                  </Group>
+                </Box>
+              </Card>
+            )
+          })}
+        </Stack>
 
         {visibleSocmeds.length === 0 ? (
-          <div className={styles.emptyState}>
-            <p className={styles.compactTitle}>No social accounts in this group.</p>
-            <p className={styles.muted}>Add an account or choose another group.</p>
-          </div>
+          <Card className={styles.emptyState} padding="md" radius="sm" withBorder>
+            <Text className={styles.compactTitle}>No social accounts in this group.</Text>
+            <Text className={styles.muted}>Add an account or choose another group.</Text>
+          </Card>
         ) : null}
-      </section>
+      </Box>
 
-      {isOpen ? (
-        <div className={styles.modalBackdrop} role="presentation">
-          <section aria-labelledby="user-socmed-title" className={styles.modal} role="dialog">
-            <div className={styles.modalHeader}>
-              <div>
-                <p className={styles.eyebrow}>Social Media</p>
-                <h3 className={styles.modalTitle} id="user-socmed-title">
-                  {isEditing ? 'Edit Social Account' : 'Add Social Account'}
-                </h3>
-              </div>
-              <button
-                aria-label="Close user socmed dialog"
-                className={styles.iconCloseButton}
-                onClick={() => setIsOpen(false)}
-                type="button"
-              >
-                ×
-              </button>
-            </div>
-
-            <form className={styles.modalForm}>
-              <div className={styles.formGrid}>
-                <label className={styles.field} htmlFor="user-socmed-platform">
-                  <span className={styles.label}>Platform</span>
-                  <select
-                    className={styles.input}
-                    id="user-socmed-platform"
-                    onChange={(event) => setForm((current) => ({ ...current, socmedId: event.target.value }))}
-                    value={form.socmedId}
-                  >
-                    {socmeds.map((socmed) => (
-                      <option key={socmed.id} value={socmed.id}>
-                        {socmed.name}
-                      </option>
-                    ))}
-                  </select>
-                </label>
-
-                <label className={styles.field} htmlFor="user-socmed-group">
-                  <span className={styles.label}>Account Group</span>
-                  <select
-                    className={styles.input}
-                    id="user-socmed-group"
-                    onChange={(event) => setForm((current) => ({ ...current, accountGroupId: event.target.value }))}
-                    value={form.accountGroupId}
-                  >
-                    <option value="">No group</option>
-                    {groups.map((group) => (
-                      <option key={group.id} value={group.id}>
-                        {group.name}
-                      </option>
-                    ))}
-                  </select>
-                </label>
-              </div>
-
-              <div className={styles.formGrid}>
-                <label className={styles.field} htmlFor="user-socmed-account">
-                  <span className={styles.label}>Account</span>
-                  <input
-                    className={styles.input}
-                    id="user-socmed-account"
-                    onChange={(event) => setForm((current) => ({ ...current, account: event.target.value }))}
-                    placeholder="das.agung"
-                    type="text"
-                    value={form.account}
-                  />
-                </label>
-
-                <label className={styles.field} htmlFor="user-socmed-label">
-                  <span className={styles.label}>Label</span>
-                  <input
-                    className={styles.input}
-                    id="user-socmed-label"
-                    onChange={(event) => setForm((current) => ({ ...current, label: event.target.value }))}
-                    placeholder="Personal Brand"
-                    type="text"
-                    value={form.label}
-                  />
-                </label>
-              </div>
-
-              <label className={styles.field} htmlFor="user-socmed-url">
-                <span className={styles.label}>Profile URL</span>
-                <input
-                  className={styles.input}
-                  id="user-socmed-url"
-                  onChange={(event) => setForm((current) => ({ ...current, url: event.target.value }))}
-                  placeholder="https://..."
-                  type="url"
-                  value={form.url}
-                />
-              </label>
-
-              <div className={styles.formGrid}>
-                <label className={styles.field} htmlFor="user-socmed-email">
-                  <span className={styles.label}>Linked Email</span>
-                  <input
-                    className={styles.input}
-                    id="user-socmed-email"
-                    onChange={(event) => setForm((current) => ({ ...current, linkedEmail: event.target.value }))}
-                    placeholder="Optional"
-                    type="email"
-                    value={form.linkedEmail}
-                  />
-                </label>
-
-                <label className={styles.field} htmlFor="user-socmed-whatsapp">
-                  <span className={styles.label}>Linked WhatsApp</span>
-                  <input
-                    className={styles.input}
-                    id="user-socmed-whatsapp"
-                    onChange={(event) => setForm((current) => ({ ...current, linkedWhatsapp: event.target.value }))}
-                    placeholder="Optional"
-                    type="text"
-                    value={form.linkedWhatsapp}
-                  />
-                </label>
-              </div>
-
-              <label className={styles.field} htmlFor="user-socmed-status">
-                <span className={styles.label}>Status</span>
-                <select
-                  className={styles.input}
-                  id="user-socmed-status"
-                  onChange={(event) => setForm((current) => ({ ...current, status: event.target.value }))}
-                  value={form.status}
-                >
-                  <option value="active">Active</option>
-                  <option value="archived">Archived</option>
-                </select>
-              </label>
-
-              <div className={styles.modalActions}>
-                <button className={styles.secondaryButton} disabled={isPending} onClick={() => setIsOpen(false)} type="button">
-                  Cancel
-                </button>
-                <button className={styles.primaryButton} disabled={isPending} onClick={saveSocmed} type="button">
-                  {isPending ? 'Saving...' : 'Save Account'}
-                </button>
-              </div>
-            </form>
-          </section>
-        </div>
-      ) : null}
+      <Modal opened={isOpen} onClose={() => setIsOpen(false)} title={isEditing ? 'Edit Social Account' : 'Add Social Account'} centered>
+        <Stack gap="sm">
+          <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="sm">
+            <Select
+              data={socmedOptions}
+              label="Platform"
+              onChange={(value) => setForm((current) => ({ ...current, socmedId: value ?? '' }))}
+              value={form.socmedId}
+            />
+            <Select
+              data={groupOptions}
+              label="Account Group"
+              onChange={(value) => setForm((current) => ({ ...current, accountGroupId: value === 'none' ? '' : value ?? '' }))}
+              value={form.accountGroupId || 'none'}
+            />
+          </SimpleGrid>
+          <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="sm">
+            <TextInput
+              label="Account"
+              onChange={(event) => setForm((current) => ({ ...current, account: event.currentTarget.value }))}
+              placeholder="das.agung"
+              value={form.account}
+            />
+            <TextInput
+              label="Label"
+              onChange={(event) => setForm((current) => ({ ...current, label: event.currentTarget.value }))}
+              placeholder="Personal Brand"
+              value={form.label}
+            />
+          </SimpleGrid>
+          <TextInput
+            label="Profile URL"
+            onChange={(event) => setForm((current) => ({ ...current, url: event.currentTarget.value }))}
+            placeholder="https://..."
+            type="url"
+            value={form.url}
+          />
+          <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="sm">
+            <TextInput
+              label="Linked Email"
+              onChange={(event) => setForm((current) => ({ ...current, linkedEmail: event.currentTarget.value }))}
+              placeholder="Optional"
+              type="email"
+              value={form.linkedEmail}
+            />
+            <TextInput
+              label="Linked WhatsApp"
+              onChange={(event) => setForm((current) => ({ ...current, linkedWhatsapp: event.currentTarget.value }))}
+              placeholder="Optional"
+              value={form.linkedWhatsapp}
+            />
+          </SimpleGrid>
+          <Select
+            data={[
+              { label: 'Active', value: 'active' },
+              { label: 'Archived', value: 'archived' },
+            ]}
+            label="Status"
+            onChange={(value) => setForm((current) => ({ ...current, status: value ?? 'active' }))}
+            value={form.status}
+          />
+          <Group justify="flex-end">
+            <Button disabled={isPending} onClick={() => setIsOpen(false)} variant="default">
+              Cancel
+            </Button>
+            <Button loading={isPending} onClick={saveSocmed}>
+              Save Account
+            </Button>
+          </Group>
+        </Stack>
+      </Modal>
     </>
   )
 }
