@@ -126,6 +126,7 @@ export default function ContentList({ content, profiles, targets }: ContentListP
   const [isPending, startTransition] = useTransition()
   const [isOpen, setIsOpen] = useState(false)
   const [query, setQuery] = useState('')
+  const [selectedCard, setSelectedCard] = useState('all')
   const [userSocmedId, setUserSocmedId] = useState('all')
   const [platform, setPlatform] = useState('all')
   const [status, setStatus] = useState('all')
@@ -142,6 +143,36 @@ export default function ContentList({ content, profiles, targets }: ContentListP
     value: profile.id,
   }))
   const pageSizeNumber = Number(pageSize)
+  const filterCards = [
+    {
+      count: content.length,
+      id: 'all',
+      meta: `${platforms.length - 1} platforms`,
+      name: 'All Contents',
+      type: 'all',
+      value: 'all',
+    },
+    ...platforms
+      .filter((item) => item !== 'all')
+      .map((item) => ({
+        count: content.filter((contentItem) => contentItem.platform === item).length,
+        id: `platform:${item}`,
+        meta: 'platform',
+        name: item,
+        type: 'platform',
+        value: item,
+      })),
+    ...statuses
+      .filter((item) => item !== 'all')
+      .map((item) => ({
+        count: content.filter((contentItem) => contentItem.status === item).length,
+        id: `status:${item}`,
+        meta: 'status',
+        name: item.charAt(0).toUpperCase() + item.slice(1),
+        type: 'status',
+        value: item,
+      })),
+  ]
 
   const filteredContent = content.filter((item) => {
     const profile = item.userSocmedId ? profilesById.get(item.userSocmedId) : null
@@ -165,6 +196,26 @@ export default function ContentList({ content, profiles, targets }: ContentListP
   function resetPagination(update: () => void) {
     update()
     setPage(1)
+  }
+
+  function applyFilterCard(card: (typeof filterCards)[number]) {
+    setSelectedCard(card.id)
+    setPage(1)
+
+    if (card.type === 'all') {
+      setPlatform('all')
+      setStatus('all')
+      return
+    }
+
+    if (card.type === 'platform') {
+      setPlatform(card.value)
+      setStatus('all')
+      return
+    }
+
+    setPlatform('all')
+    setStatus(card.value)
   }
 
   function openCreateModal() {
@@ -229,6 +280,26 @@ export default function ContentList({ content, profiles, targets }: ContentListP
         ))}
       </SimpleGrid>
 
+      <SimpleGrid cols={{ base: 1, sm: 2, lg: 4 }} spacing="xs" className={styles.groupCardGrid}>
+        {filterCards.map((card) => (
+          <Card
+            aria-pressed={selectedCard === card.id}
+            className={styles.groupCard}
+            component="button"
+            data-active={selectedCard === card.id}
+            key={card.id}
+            onClick={() => applyFilterCard(card)}
+            padding="sm"
+            radius="sm"
+            withBorder
+          >
+            <Text className={styles.groupCardLabel}>{card.name}</Text>
+            <Text className={styles.groupCardCount}>{card.count}</Text>
+            <Text className={styles.groupCardMeta}>{card.meta}</Text>
+          </Card>
+        ))}
+      </SimpleGrid>
+
       <SimpleGrid cols={{ base: 1, sm: 2, lg: 5 }} spacing="xs" className={styles.contentToolbar}>
         <TextInput
           onChange={(event) => resetPagination(() => setQuery(event.currentTarget.value))}
@@ -255,6 +326,7 @@ export default function ContentList({ content, profiles, targets }: ContentListP
           leftSection={<IconRefresh size={18} stroke={1.8} />}
           onClick={() => {
             setQuery('')
+            setSelectedCard('all')
             setUserSocmedId('all')
             setPlatform('all')
             setStatus('all')

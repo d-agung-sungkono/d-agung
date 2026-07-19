@@ -1299,10 +1299,12 @@
 }
 
 .calendar :global(.fc-event) {
-  border: 0;
+  border: 1px solid transparent;
   border-radius: 0.42rem;
-  background: #1f694b;
+  background: #064e3b;
+  color: #ffffff;
   cursor: grab;
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.08);
 }
 
 .calendar :global(.fc-event:active) {
@@ -1310,19 +1312,27 @@
 }
 
 .calendar :global(.os-calendar-event-planned) {
-  background: #8a661f;
+  border-color: #92400e;
+  background: #fef3c7;
+  color: #5f3905;
 }
 
 .calendar :global(.os-calendar-event-ready) {
-  background: #1f694b;
+  border-color: #047857;
+  background: #d1fae5;
+  color: #064e3b;
 }
 
 .calendar :global(.os-calendar-event-published) {
-  background: #244f9a;
+  border-color: #1d4ed8;
+  background: #dbeafe;
+  color: #1e3a8a;
 }
 
 .calendar :global(.os-calendar-event-skipped) {
-  background: #74593e;
+  border-color: #6b7280;
+  background: #f3f4f6;
+  color: #374151;
 }
 
 .calendar :global(.fc-daygrid-event) {
@@ -1350,7 +1360,7 @@
   align-items: center;
   gap: 0.25rem;
   font-size: 0.78rem;
-  font-weight: 750;
+  font-weight: 850;
 }
 
 .calendarCheck {
@@ -1360,7 +1370,8 @@
 
 .calendarEventMeta {
   font-size: 0.68rem;
-  opacity: 0.78;
+  font-weight: 650;
+  opacity: 0.86;
 }
 
 @media (max-width: 860px) {
