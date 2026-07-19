@@ -1,6 +1,5 @@
-import ProfilesSettings from '@/components/os/profiles-settings'
-import profiles from '@/data/os/profiles.json'
+import { redirect } from 'next/navigation'
 
-export default function OsSettingsPage() {
-  return <ProfilesSettings profiles={profiles} />
+export default async function OsSettingsPage() {
+  redirect('/os/socmeds')
 }

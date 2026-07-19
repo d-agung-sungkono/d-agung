@@ -532,6 +532,66 @@
   padding: 1rem;
 }
 
+.groupCardGrid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.65rem;
+  margin-bottom: 0.75rem;
+}
+
+.groupCard {
+  display: grid;
+  gap: 0.35rem;
+  min-height: 5.3rem;
+  padding: 0.8rem;
+  border: 1px solid #e3e3e3;
+  border-radius: 0.5rem;
+  background: #ffffff;
+  color: #1f1f1f;
+  cursor: pointer;
+  font: inherit;
+  text-align: left;
+  transition: border-color 150ms ease, background 150ms ease, box-shadow 150ms ease;
+}
+
+.groupCard:hover,
+.groupCard[data-active="true"] {
+  border-color: rgba(36, 166, 111, 0.55);
+  background: rgba(94, 224, 161, 0.1);
+}
+
+.groupCard[data-active="true"] {
+  box-shadow: inset 0 0 0 1px rgba(36, 166, 111, 0.55);
+}
+
+.groupCardLabel,
+.groupCardCount,
+.groupCardMeta {
+  display: block;
+  min-width: 0;
+}
+
+.groupCardLabel {
+  overflow: hidden;
+  color: rgba(31, 31, 31, 0.7);
+  font-size: 0.84rem;
+  font-weight: 700;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.groupCardCount {
+  font-size: 1.65rem;
+  font-weight: 800;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+
+.groupCardMeta {
+  color: rgba(31, 31, 31, 0.5);
+  font-size: 0.78rem;
+}
+
 .profileList {
   display: grid;
   gap: 0.65rem;
@@ -561,6 +621,40 @@
   font-size: 0.72rem;
   font-weight: 800;
   text-transform: uppercase;
+}
+
+.profileBrand {
+  width: 2.25rem;
+  min-height: 2.25rem;
+  display: grid;
+  place-items: center;
+  color: #3f3f3f;
+}
+
+.profileBrand[data-platform="TikTok"],
+.profileBrand[data-platform="Threads"],
+.profileBrand[data-platform="X"] {
+  color: #111111;
+}
+
+.profileBrand[data-platform="Instagram"] {
+  color: #d93d83;
+}
+
+.profileBrand[data-platform="Facebook"] {
+  color: #2f75dc;
+}
+
+.profileBrand[data-platform="LinkedIn"] {
+  color: #0b77a5;
+}
+
+.profileBrand[data-platform="Shopee"] {
+  color: #e35834;
+}
+
+.profileBrand[data-platform="YouTube"] {
+  color: #d11f1f;
 }
 
 .profileMark[data-platform="TikTok"] {
@@ -621,6 +715,21 @@
   gap: 0.45rem;
   flex-wrap: wrap;
   justify-content: flex-end;
+}
+
+.profileMeta {
+  margin: 0.35rem 0 0;
+  color: rgba(31, 31, 31, 0.48);
+  font-size: 0.82rem;
+}
+
+.emptyState {
+  display: grid;
+  gap: 0.25rem;
+  padding: 1.1rem;
+  border: 1px dashed #dcdcdc;
+  border-radius: 0.45rem;
+  background: #fbfbfb;
 }
 
 .metric {
@@ -1212,6 +1321,7 @@
   .summaryGrid,
   .dashboardGrid,
   .placeholderGrid,
+  .groupCardGrid,
   .productToolbar,
   .contentToolbar {
     grid-template-columns: 1fr;
