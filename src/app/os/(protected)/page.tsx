@@ -4,11 +4,9 @@ import DbUnavailable from '@/components/os/db-unavailable'
 import OsLiveClock from '@/components/os/os-live-clock'
 import styles from '@/components/os/os-shell.module.css'
 import SummaryCard from '@/components/os/summary-card'
-import TodayList from '@/components/os/today-list'
 import products from '@/data/os/products.json'
 import thoughts from '@/data/os/thoughts.json'
-import today from '@/data/os/today.json'
-import { getContentData, getContentTargetsDueToday } from '@/lib/os-content'
+import { getContentData } from '@/lib/os-content'
 
 function getGreeting() {
   const hour = new Intl.DateTimeFormat('en-US', {
@@ -29,9 +27,23 @@ function getGreeting() {
   return 'Good evening'
 }
 
+function getJakartaDateKey(value: string | Date = new Date()) {
+  return new Intl.DateTimeFormat('en-CA', {
+    day: '2-digit',
+    month: '2-digit',
+    timeZone: 'Asia/Jakarta',
+    year: 'numeric',
+  }).format(value instanceof Date ? value : new Date(value))
+}
+
 async function getHomeContentState() {
   try {
-    const [{ posts }, targetsDueToday] = await Promise.all([getContentData(), getContentTargetsDueToday()])
+    const { posts, targets } = await getContentData()
+    const today = getJakartaDateKey()
+    const targetsDueToday = targets
+      .filter((target) => target.status === 'active' && getJakartaDateKey(target.nextDueAt) <= today)
+      .sort((a, b) => a.nextDueAt.localeCompare(b.nextDueAt) || a.name.localeCompare(b.name))
+
     return { dbError: false, posts, targetsDueToday }
   } catch (error) {
     console.error('Failed to load Agung OS home content data', error)
@@ -82,7 +94,8 @@ export default async function OsHomePage() {
                     <p className={styles.compactTitle}>{target.name}</p>
                     <p className={styles.muted}>
                       {target.platform} · @{target.account}
-                      {target.preferredTime ? ` · ${target.preferredTime.slice(0, 5)} WIB` : ''}
+                      {target.preferredTime ? ` · ${target.preferredTime.slice(0, 5)} WIB` : ''} · every{' '}
+                      {target.cadenceDays} days
                     </p>
                   </div>
                   <span className={styles.badge}>Target</span>
@@ -97,7 +110,6 @@ export default async function OsHomePage() {
               </div>
             )}
           </div>
-          <TodayList items={today} />
         </div>
 
         <div className={styles.panel}>

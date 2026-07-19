@@ -4,7 +4,14 @@ import { useMemo, useState, useTransition } from 'react'
 import { ActionIcon, Badge, Box, Button, Card, Group, Modal, Select, SimpleGrid, Stack, Text, Textarea, TextInput, Tooltip } from '@mantine/core'
 import { IconEdit, IconExternalLink, IconPlus, IconRefresh, IconTrash } from '@tabler/icons-react'
 
-import { createContentPost, deleteContentPost, updateContentPost } from '@/app/os/(protected)/content/actions'
+import {
+  createContentPost,
+  createContentTarget,
+  deleteContentPost,
+  deleteContentTarget,
+  updateContentPost,
+  updateContentTarget,
+} from '@/app/os/(protected)/content/actions'
 
 import styles from './os-shell.module.css'
 
@@ -44,6 +51,9 @@ type ContentTarget = {
   preferredTime: string | null
   timezone: string
   status: string
+  notes: string | null
+  latestPublishedAt: string | null
+  nextDueAt: string
 }
 
 type ContentListProps = {
@@ -62,12 +72,29 @@ type ContentForm = {
   userSocmedId: string
 }
 
+type ScheduleForm = {
+  cadenceDays: string
+  id: string
+  name: string
+  notes: string
+  preferredTime: string
+  startDate: string
+  status: string
+  userSocmedId: string
+}
+
 const statusOptions = [
   { label: 'Draft', value: 'draft' },
   { label: 'Planned', value: 'planned' },
   { label: 'Ready', value: 'ready' },
   { label: 'Published', value: 'published' },
   { label: 'Skipped', value: 'skipped' },
+]
+
+const scheduleStatusOptions = [
+  { label: 'Active', value: 'active' },
+  { label: 'Paused', value: 'paused' },
+  { label: 'Archived', value: 'archived' },
 ]
 
 function formatDate(value: string) {
@@ -110,6 +137,19 @@ function buildFormData(form: ContentForm) {
   return formData
 }
 
+function buildScheduleFormData(form: ScheduleForm) {
+  const formData = new FormData()
+  formData.set('cadenceDays', form.cadenceDays)
+  formData.set('id', form.id)
+  formData.set('name', form.name)
+  formData.set('notes', form.notes)
+  formData.set('preferredTime', form.preferredTime)
+  formData.set('startDate', form.startDate)
+  formData.set('status', form.status)
+  formData.set('userSocmedId', form.userSocmedId)
+  return formData
+}
+
 function getEmptyForm(profileId = ''): ContentForm {
   return {
     id: '',
@@ -122,9 +162,28 @@ function getEmptyForm(profileId = ''): ContentForm {
   }
 }
 
+function getEmptyScheduleForm(profileId = ''): ScheduleForm {
+  return {
+    cadenceDays: '3',
+    id: '',
+    name: '',
+    notes: '',
+    preferredTime: '19:00',
+    startDate: new Intl.DateTimeFormat('en-CA', {
+      day: '2-digit',
+      month: '2-digit',
+      timeZone: 'Asia/Jakarta',
+      year: 'numeric',
+    }).format(new Date()),
+    status: 'active',
+    userSocmedId: profileId,
+  }
+}
+
 export default function ContentList({ content, profiles, targets }: ContentListProps) {
   const [isPending, startTransition] = useTransition()
   const [isOpen, setIsOpen] = useState(false)
+  const [isScheduleOpen, setIsScheduleOpen] = useState(false)
   const [query, setQuery] = useState('')
   const [selectedCard, setSelectedCard] = useState('all')
   const [userSocmedId, setUserSocmedId] = useState('all')
@@ -133,7 +192,9 @@ export default function ContentList({ content, profiles, targets }: ContentListP
   const [page, setPage] = useState(1)
   const [pageSize, setPageSize] = useState('5')
   const [form, setForm] = useState<ContentForm>(() => getEmptyForm(profiles[0]?.id ?? ''))
+  const [scheduleForm, setScheduleForm] = useState<ScheduleForm>(() => getEmptyScheduleForm(profiles[0]?.id ?? ''))
   const isEditing = Boolean(form.id)
+  const isEditingSchedule = Boolean(scheduleForm.id)
 
   const profilesById = useMemo(() => new Map(profiles.map((profile) => [profile.id, profile])), [profiles])
   const platforms = useMemo(() => ['all', ...Array.from(new Set(content.map((item) => item.platform)))], [content])
@@ -223,6 +284,11 @@ export default function ContentList({ content, profiles, targets }: ContentListP
     setIsOpen(true)
   }
 
+  function openCreateScheduleModal() {
+    setScheduleForm(getEmptyScheduleForm(profiles[0]?.id ?? ''))
+    setIsScheduleOpen(true)
+  }
+
   function openEditModal(item: ContentItem) {
     setForm({
       id: item.id,
@@ -234,6 +300,20 @@ export default function ContentList({ content, profiles, targets }: ContentListP
       userSocmedId: item.userSocmedId ?? profiles[0]?.id ?? '',
     })
     setIsOpen(true)
+  }
+
+  function openEditScheduleModal(item: ContentTarget) {
+    setScheduleForm({
+      cadenceDays: String(item.cadenceDays),
+      id: item.id,
+      name: item.name,
+      notes: item.notes ?? '',
+      preferredTime: item.preferredTime ? item.preferredTime.slice(0, 5) : '',
+      startDate: item.startDate,
+      status: item.status,
+      userSocmedId: item.userSocmedId,
+    })
+    setIsScheduleOpen(true)
   }
 
   function saveContent() {
@@ -248,11 +328,31 @@ export default function ContentList({ content, profiles, targets }: ContentListP
     })
   }
 
+  function saveSchedule() {
+    startTransition(async () => {
+      if (isEditingSchedule) {
+        await updateContentTarget(buildScheduleFormData(scheduleForm))
+      } else {
+        await createContentTarget(buildScheduleFormData(scheduleForm))
+      }
+
+      setIsScheduleOpen(false)
+    })
+  }
+
   function removeContent(item: ContentItem) {
     startTransition(async () => {
       const formData = new FormData()
       formData.set('id', item.id)
       await deleteContentPost(formData)
+    })
+  }
+
+  function removeSchedule(item: ContentTarget) {
+    startTransition(async () => {
+      const formData = new FormData()
+      formData.set('id', item.id)
+      await deleteContentTarget(formData)
     })
   }
 
@@ -263,19 +363,44 @@ export default function ContentList({ content, profiles, targets }: ContentListP
           <Text component="h3" className={styles.panelTitle}>Contents</Text>
           <Text className={styles.muted}>Manage drafts, schedules, links, and published posts from DB.</Text>
         </Box>
-        <Button leftSection={<IconPlus size={18} stroke={1.8} />} loading={isPending} onClick={openCreateModal}>
-          Add Contents
-        </Button>
+        <Group gap="xs">
+          <Button leftSection={<IconPlus size={18} stroke={1.8} />} loading={isPending} onClick={openCreateScheduleModal} variant="default">
+            Add Schedule
+          </Button>
+          <Button leftSection={<IconPlus size={18} stroke={1.8} />} loading={isPending} onClick={openCreateModal}>
+            Add Contents
+          </Button>
+        </Group>
       </Group>
 
       <SimpleGrid cols={{ base: 1, md: 2 }} spacing="xs" className={styles.targetStrip}>
         {targets.map((target) => (
           <Card className={styles.targetPill} key={target.id} padding="sm" radius="sm" withBorder>
-            <Text className={styles.compactTitle}>{target.name}</Text>
-            <Text className={styles.muted}>
-              {target.platform} · @{target.account} · every {target.cadenceDays} days
-              {target.preferredTime ? ` · ${target.preferredTime.slice(0, 5)} WIB` : ''}
-            </Text>
+            <Group justify="space-between" align="flex-start" gap="xs" wrap="nowrap">
+              <Box>
+                <Text className={styles.compactTitle}>{target.name}</Text>
+                <Text className={styles.muted}>
+                  {target.platform} · @{target.account} · every {target.cadenceDays} days
+                  {target.preferredTime ? ` · ${target.preferredTime.slice(0, 5)} WIB` : ''}
+                </Text>
+                <Text className={styles.profileMeta}>
+                  Next due {formatDate(target.nextDueAt)}
+                  {target.latestPublishedAt ? ` · last published ${formatDate(target.latestPublishedAt)}` : ''}
+                </Text>
+              </Box>
+              <Group gap={4} wrap="nowrap">
+                <Tooltip label="Edit schedule">
+                  <ActionIcon aria-label="Edit schedule" disabled={isPending} onClick={() => openEditScheduleModal(target)} variant="default">
+                    <IconEdit size={17} stroke={1.8} />
+                  </ActionIcon>
+                </Tooltip>
+                <Tooltip label="Delete schedule">
+                  <ActionIcon aria-label="Delete schedule" color="red" disabled={isPending} onClick={() => removeSchedule(target)} variant="light">
+                    <IconTrash size={17} stroke={1.8} />
+                  </ActionIcon>
+                </Tooltip>
+              </Group>
+            </Group>
           </Card>
         ))}
       </SimpleGrid>
@@ -460,6 +585,64 @@ export default function ContentList({ content, profiles, targets }: ContentListP
             </Button>
             <Button loading={isPending} onClick={saveContent}>
               Save Contents
+            </Button>
+          </Group>
+        </Stack>
+      </Modal>
+
+      <Modal opened={isScheduleOpen} onClose={() => setIsScheduleOpen(false)} title={isEditingSchedule ? 'Edit Schedule' : 'Add Schedule'} centered>
+        <Stack gap="sm">
+          <TextInput
+            label="Schedule Name"
+            onChange={(event) => setScheduleForm((current) => ({ ...current, name: event.currentTarget.value }))}
+            placeholder="Agung Branding Contents"
+            value={scheduleForm.name}
+          />
+          <Select
+            data={profileOptions}
+            label="Account"
+            onChange={(value) => setScheduleForm((current) => ({ ...current, userSocmedId: value ?? '' }))}
+            value={scheduleForm.userSocmedId}
+          />
+          <SimpleGrid cols={{ base: 1, sm: 3 }} spacing="sm">
+            <TextInput
+              label="Every"
+              min={1}
+              onChange={(event) => setScheduleForm((current) => ({ ...current, cadenceDays: event.currentTarget.value }))}
+              type="number"
+              value={scheduleForm.cadenceDays}
+            />
+            <TextInput
+              label="Start Date"
+              onChange={(event) => setScheduleForm((current) => ({ ...current, startDate: event.currentTarget.value }))}
+              type="date"
+              value={scheduleForm.startDate}
+            />
+            <TextInput
+              label="Time WIB"
+              onChange={(event) => setScheduleForm((current) => ({ ...current, preferredTime: event.currentTarget.value }))}
+              type="time"
+              value={scheduleForm.preferredTime}
+            />
+          </SimpleGrid>
+          <Select
+            data={scheduleStatusOptions}
+            label="Status"
+            onChange={(value) => setScheduleForm((current) => ({ ...current, status: value ?? 'active' }))}
+            value={scheduleForm.status}
+          />
+          <Textarea
+            label="Notes"
+            onChange={(event) => setScheduleForm((current) => ({ ...current, notes: event.currentTarget.value }))}
+            placeholder="Optional"
+            value={scheduleForm.notes}
+          />
+          <Group justify="flex-end">
+            <Button disabled={isPending} onClick={() => setIsScheduleOpen(false)} variant="default">
+              Cancel
+            </Button>
+            <Button loading={isPending} onClick={saveSchedule}>
+              Save Schedule
             </Button>
           </Group>
         </Stack>

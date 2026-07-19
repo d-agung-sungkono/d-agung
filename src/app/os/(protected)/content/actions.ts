@@ -24,6 +24,21 @@ function normalizeJakartaDateTime(value: FormDataEntryValue | null) {
   return `${normalized}:00+07:00`
 }
 
+function nullableTime(value: FormDataEntryValue | null) {
+  const normalized = String(value ?? '').trim()
+
+  if (!normalized) {
+    return null
+  }
+
+  return normalized.length === 5 ? `${normalized}:00` : normalized
+}
+
+function positiveInteger(value: FormDataEntryValue | null, fallback: number) {
+  const parsed = Number.parseInt(String(value ?? ''), 10)
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : fallback
+}
+
 function revalidateContent() {
   revalidatePath('/os')
   revalidatePath('/os/content')
@@ -108,5 +123,88 @@ export async function deleteContentPost(formData: FormData) {
   }
 
   await query('DELETE FROM content_posts WHERE id = $1 AND user_id = $2', [id, userId])
+  revalidateContent()
+}
+
+export async function createContentTarget(formData: FormData) {
+  const userId = await getOsUserId()
+  const userSocmedId = nullableValue(formData.get('userSocmedId'))
+  const name = String(formData.get('name') ?? '').trim()
+  const cadenceDays = positiveInteger(formData.get('cadenceDays'), 1)
+  const startDate = String(formData.get('startDate') ?? '').trim()
+  const preferredTime = nullableTime(formData.get('preferredTime'))
+  const status = String(formData.get('status') ?? 'active')
+  const notes = nullableValue(formData.get('notes'))
+
+  if (!userSocmedId || !name || !startDate) {
+    throw new Error('Account, name, and start date are required.')
+  }
+
+  await query(
+    `
+      INSERT INTO content_targets (
+        user_id,
+        user_socmed_id,
+        name,
+        cadence_days,
+        start_date,
+        preferred_time,
+        timezone,
+        status,
+        notes
+      )
+      VALUES ($1, $2, $3, $4, $5, $6, 'Asia/Jakarta', $7, $8)
+    `,
+    [userId, userSocmedId, name, cadenceDays, startDate, preferredTime, status, notes]
+  )
+
+  revalidateContent()
+}
+
+export async function updateContentTarget(formData: FormData) {
+  const userId = await getOsUserId()
+  const id = String(formData.get('id') ?? '').trim()
+  const userSocmedId = nullableValue(formData.get('userSocmedId'))
+  const name = String(formData.get('name') ?? '').trim()
+  const cadenceDays = positiveInteger(formData.get('cadenceDays'), 1)
+  const startDate = String(formData.get('startDate') ?? '').trim()
+  const preferredTime = nullableTime(formData.get('preferredTime'))
+  const status = String(formData.get('status') ?? 'active')
+  const notes = nullableValue(formData.get('notes'))
+
+  if (!id || !userSocmedId || !name || !startDate) {
+    throw new Error('id, account, name, and start date are required.')
+  }
+
+  await query(
+    `
+      UPDATE content_targets
+      SET
+        user_socmed_id = $1,
+        name = $2,
+        cadence_days = $3,
+        start_date = $4,
+        preferred_time = $5,
+        status = $6,
+        notes = $7,
+        updated_at = now()
+      WHERE id = $8
+        AND user_id = $9
+    `,
+    [userSocmedId, name, cadenceDays, startDate, preferredTime, status, notes, id, userId]
+  )
+
+  revalidateContent()
+}
+
+export async function deleteContentTarget(formData: FormData) {
+  const userId = await getOsUserId()
+  const id = String(formData.get('id') ?? '').trim()
+
+  if (!id) {
+    throw new Error('id is required.')
+  }
+
+  await query('DELETE FROM content_targets WHERE id = $1 AND user_id = $2', [id, userId])
   revalidateContent()
 }

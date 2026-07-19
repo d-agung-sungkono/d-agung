@@ -39,6 +39,9 @@ export type ContentTarget = {
   preferredTime: string | null
   timezone: string
   status: string
+  notes: string | null
+  latestPublishedAt: string | null
+  nextDueAt: string
 }
 
 type ProfileRow = {
@@ -77,10 +80,39 @@ type ContentTargetRow = {
   preferred_time: string | null
   timezone: string
   status: string
+  notes: string | null
 }
 
 function toIsoString(value: Date | string) {
   return value instanceof Date ? value.toISOString() : new Date(value).toISOString()
+}
+
+function getJakartaDateKey(value: Date | string = new Date()) {
+  return new Intl.DateTimeFormat('en-CA', {
+    day: '2-digit',
+    month: '2-digit',
+    timeZone: 'Asia/Jakarta',
+    year: 'numeric',
+  }).format(value instanceof Date ? value : new Date(value))
+}
+
+function addDays(dateKey: string, days: number) {
+  const date = new Date(`${dateKey}T00:00:00+07:00`)
+  date.setUTCDate(date.getUTCDate() + days)
+  return getJakartaDateKey(date)
+}
+
+function toJakartaDateTime(dateKey: string, preferredTime: string | null) {
+  const time = preferredTime ? preferredTime.slice(0, 5) : '09:00'
+  return `${dateKey}T${time}:00+07:00`
+}
+
+function getNextDueDate(target: Pick<ContentTarget, 'cadenceDays' | 'preferredTime' | 'startDate'>, latestPublishedAt: string | null) {
+  if (!latestPublishedAt) {
+    return toJakartaDateTime(target.startDate, target.preferredTime)
+  }
+
+  return toJakartaDateTime(addDays(getJakartaDateKey(latestPublishedAt), target.cadenceDays), target.preferredTime)
 }
 
 export async function getContentData() {
@@ -141,7 +173,8 @@ export async function getContentData() {
           ct.start_date::text,
           ct.preferred_time::text,
           ct.timezone,
-          ct.status
+          ct.status,
+          ct.notes
         FROM content_targets ct
         INNER JOIN user_socmeds us ON us.id = ct.user_socmed_id
         INNER JOIN socmeds s ON s.id = us.socmed_id
@@ -153,21 +186,35 @@ export async function getContentData() {
     ),
   ])
 
+  const posts = postsResult.rows.map((row) => ({
+    account: row.account ?? '-',
+    groupName: row.group_name,
+    id: row.id,
+    label: row.label ?? 'Unmapped Account',
+    notes: row.notes,
+    platform: row.platform ?? 'Unmapped',
+    publishedAt: row.published_at ? toIsoString(row.published_at) : null,
+    scheduledAt: toIsoString(row.scheduled_at),
+    status: row.status,
+    title: row.title,
+    url: row.url,
+    userSocmedId: row.user_socmed_id,
+  }))
+  const latestPublishedBySocmedId = new Map<string, string>()
+
+  for (const post of posts) {
+    if (post.status !== 'published' || !post.publishedAt || !post.userSocmedId) {
+      continue
+    }
+
+    const current = latestPublishedBySocmedId.get(post.userSocmedId)
+    if (!current || new Date(post.publishedAt) > new Date(current)) {
+      latestPublishedBySocmedId.set(post.userSocmedId, post.publishedAt)
+    }
+  }
+
   return {
-    posts: postsResult.rows.map((row) => ({
-      account: row.account ?? '-',
-      groupName: row.group_name,
-      id: row.id,
-      label: row.label ?? 'Unmapped Account',
-      notes: row.notes,
-      platform: row.platform ?? 'Unmapped',
-      publishedAt: row.published_at ? toIsoString(row.published_at) : null,
-      scheduledAt: toIsoString(row.scheduled_at),
-      status: row.status,
-      title: row.title,
-      url: row.url,
-      userSocmedId: row.user_socmed_id,
-    })),
+    posts,
     profiles: profilesResult.rows.map((row) => ({
       account: row.account,
       groupName: row.group_name,
@@ -175,72 +222,38 @@ export async function getContentData() {
       label: row.label,
       platform: row.platform,
     })),
-    targets: targetsResult.rows.map((row) => ({
-      account: row.account,
-      cadenceDays: row.cadence_days,
-      groupName: row.group_name,
-      id: row.id,
-      label: row.label,
-      platform: row.platform,
-      preferredTime: row.preferred_time,
-      startDate: row.start_date,
-      status: row.status,
-      timezone: row.timezone,
-      userSocmedId: row.user_socmed_id,
-      name: row.name,
-    })),
+    targets: targetsResult.rows.map((row) => {
+      const target = {
+        account: row.account,
+        cadenceDays: row.cadence_days,
+        groupName: row.group_name,
+        id: row.id,
+        label: row.label,
+        platform: row.platform,
+        preferredTime: row.preferred_time,
+        startDate: row.start_date,
+        status: row.status,
+        timezone: row.timezone,
+        userSocmedId: row.user_socmed_id,
+        name: row.name,
+        notes: row.notes,
+      }
+      const latestPublishedAt = latestPublishedBySocmedId.get(row.user_socmed_id) ?? null
+
+      return {
+        ...target,
+        latestPublishedAt,
+        nextDueAt: getNextDueDate(target, latestPublishedAt),
+      }
+    }),
   }
 }
 
 export async function getContentTargetsDueToday() {
-  const userId = await getOsUserId()
-  const today = new Intl.DateTimeFormat('en-CA', {
-    day: '2-digit',
-    month: '2-digit',
-    timeZone: 'Asia/Jakarta',
-    year: 'numeric',
-  }).format(new Date())
+  const { targets } = await getContentData()
+  const today = getJakartaDateKey()
 
-  const result = await query<ContentTargetRow>(
-    `
-      SELECT
-        ct.id,
-        ct.name,
-        ct.user_socmed_id,
-        s.name AS platform,
-        us.account,
-        us.label,
-        ag.name AS group_name,
-        ct.cadence_days,
-        ct.start_date::text,
-        ct.preferred_time::text,
-        ct.timezone,
-        ct.status
-      FROM content_targets ct
-      INNER JOIN user_socmeds us ON us.id = ct.user_socmed_id
-      INNER JOIN socmeds s ON s.id = us.socmed_id
-      LEFT JOIN account_groups ag ON ag.id = us.account_group_id
-      WHERE ct.user_id = $1
-        AND ct.status = 'active'
-        AND $2::date >= ct.start_date
-        AND (($2::date - ct.start_date) % ct.cadence_days) = 0
-      ORDER BY ct.preferred_time NULLS LAST, ct.name
-    `,
-    [userId, today]
-  )
-
-  return result.rows.map((row) => ({
-    account: row.account,
-    cadenceDays: row.cadence_days,
-    groupName: row.group_name,
-    id: row.id,
-    label: row.label,
-    platform: row.platform,
-    preferredTime: row.preferred_time,
-    startDate: row.start_date,
-    status: row.status,
-    timezone: row.timezone,
-    userSocmedId: row.user_socmed_id,
-    name: row.name,
-  }))
+  return targets
+    .filter((target) => target.status === 'active' && getJakartaDateKey(target.nextDueAt) <= today)
+    .sort((a, b) => a.nextDueAt.localeCompare(b.nextDueAt) || a.name.localeCompare(b.name))
 }
