@@ -4,10 +4,10 @@ import OsLiveClock from '@/components/os/os-live-clock'
 import styles from '@/components/os/os-shell.module.css'
 import SummaryCard from '@/components/os/summary-card'
 import TodayList from '@/components/os/today-list'
-import content from '@/data/os/content.json'
 import products from '@/data/os/products.json'
 import thoughts from '@/data/os/thoughts.json'
 import today from '@/data/os/today.json'
+import { getContentData, getContentTargetsDueToday } from '@/lib/os-content'
 
 function getGreeting() {
   const hour = new Intl.DateTimeFormat('en-US', {
@@ -28,8 +28,9 @@ function getGreeting() {
   return 'Good evening'
 }
 
-export default function OsHomePage() {
-  const readyContentToday = content.filter((item) => item.status === 'ready').length
+export default async function OsHomePage() {
+  const [{ posts }, targetsDueToday] = await Promise.all([getContentData(), getContentTargetsDueToday()])
+  const readyContentToday = posts.filter((item) => item.status === 'ready').length
   const openThoughts = thoughts.filter((item) => item.status === 'open').length
 
   return (
@@ -60,6 +61,29 @@ export default function OsHomePage() {
             <Link className={styles.secondaryButton} href="/os/today">
               View
             </Link>
+          </div>
+          <div className={styles.targetTodayList}>
+            {targetsDueToday.length > 0 ? (
+              targetsDueToday.map((target) => (
+                <div className={styles.targetTodayItem} key={target.id}>
+                  <div>
+                    <p className={styles.compactTitle}>{target.name}</p>
+                    <p className={styles.muted}>
+                      {target.platform} · @{target.account}
+                      {target.preferredTime ? ` · ${target.preferredTime.slice(0, 5)} WIB` : ''}
+                    </p>
+                  </div>
+                  <span className={styles.badge}>Target</span>
+                </div>
+              ))
+            ) : (
+              <div className={styles.targetTodayItem}>
+                <div>
+                  <p className={styles.compactTitle}>No publishing target today.</p>
+                  <p className={styles.muted}>Cadence is clear for now.</p>
+                </div>
+              </div>
+            )}
           </div>
           <TodayList items={today} />
         </div>

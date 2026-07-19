@@ -465,6 +465,23 @@
   gap: 0.6rem;
 }
 
+.targetTodayList {
+  display: grid;
+  gap: 0.45rem;
+  margin-bottom: 0.55rem;
+}
+
+.targetTodayItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.55rem 0.7rem;
+  border: 1px solid rgba(36, 166, 111, 0.2);
+  border-radius: 0.45rem;
+  background: rgba(94, 224, 161, 0.08);
+}
+
 .actionLink,
 .primaryButton,
 .secondaryButton {
@@ -837,6 +854,27 @@
   gap: 0.55rem;
   align-items: center;
   margin-bottom: 0.75rem;
+}
+
+.targetStrip {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.55rem;
+  margin-bottom: 0.75rem;
+}
+
+.targetPill {
+  padding: 0.7rem;
+  border: 1px solid #e7e7e7;
+  border-radius: 0.45rem;
+  background: #fbfbfb;
+}
+
+.contentMetaRow {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  flex-wrap: wrap;
 }
 
 .thoughtList {
@@ -1407,6 +1445,7 @@
   .dashboardGrid,
   .placeholderGrid,
   .groupCardGrid,
+  .targetStrip,
   .productToolbar,
   .contentToolbar {
     grid-template-columns: 1fr;

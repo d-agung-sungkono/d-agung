@@ -1,10 +1,10 @@
-import AddContentDialog from '@/components/os/add-content-dialog'
 import ContentList from '@/components/os/content-list'
 import styles from '@/components/os/os-shell.module.css'
-import content from '@/data/os/content.json'
-import profiles from '@/data/os/profiles.json'
+import { getContentData } from '@/lib/os-content'
 
-export default function OsContentPage() {
+export default async function OsContentPage() {
+  const { posts, profiles, targets } = await getContentData()
+
   return (
     <>
       <section className={styles.pageHeader}>
@@ -15,10 +15,9 @@ export default function OsContentPage() {
             Drafts, scheduled posts, and publishing assets for personal brand and commerce channels.
           </p>
         </div>
-        <AddContentDialog profiles={profiles} />
       </section>
 
-      <ContentList content={content} profiles={profiles} />
+      <ContentList content={posts} profiles={profiles} targets={targets} />
     </>
   )
 }
