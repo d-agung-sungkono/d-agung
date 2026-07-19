@@ -45,7 +45,7 @@ export default async function OsHomePage() {
       </section>
 
       <section className={styles.summaryGrid} aria-label="Agung OS summary">
-        <SummaryCard hint="Ready or scheduled" label="Content Today" value={readyContentToday} />
+        <SummaryCard hint="Ready or scheduled" label="Contents Today" value={readyContentToday} />
         <SummaryCard hint="Across commerce channels" label="Products Monitored" value={products.length} />
         <SummaryCard hint="Systems in motion" label="Active Projects" value={3} />
         <SummaryCard hint="Ideas waiting for review" label="Open Thoughts" value={openThoughts} />
@@ -97,7 +97,7 @@ export default async function OsHomePage() {
           </div>
           <div className={styles.quickActions}>
             <Link className={styles.actionLink} href="/os/content">
-              Add Content
+              Add Contents
             </Link>
             <Link className={styles.actionLink} href="/os/products">
               Add Product

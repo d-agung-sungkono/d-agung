@@ -209,11 +209,11 @@ export default function ContentList({ content, profiles, targets }: ContentListP
     <Box component="section" className={styles.panel}>
       <Group justify="space-between" align="flex-start" gap="md" className={styles.panelHeader}>
         <Box>
-          <Text component="h3" className={styles.panelTitle}>Content Posts</Text>
+          <Text component="h3" className={styles.panelTitle}>Contents</Text>
           <Text className={styles.muted}>Manage drafts, schedules, links, and published posts from DB.</Text>
         </Box>
         <Button leftSection={<IconPlus size={18} stroke={1.8} />} loading={isPending} onClick={openCreateModal}>
-          Add Content
+          Add Contents
         </Button>
       </Group>
 
@@ -223,6 +223,7 @@ export default function ContentList({ content, profiles, targets }: ContentListP
             <Text className={styles.compactTitle}>{target.name}</Text>
             <Text className={styles.muted}>
               {target.platform} · @{target.account} · every {target.cadenceDays} days
+              {target.preferredTime ? ` · ${target.preferredTime.slice(0, 5)} WIB` : ''}
             </Text>
           </Card>
         ))}
@@ -308,14 +309,14 @@ export default function ContentList({ content, profiles, targets }: ContentListP
 
       {paginatedContent.length === 0 ? (
         <Card className={styles.emptyState} padding="md" radius="sm" withBorder>
-          <Text className={styles.compactTitle}>No content found.</Text>
+          <Text className={styles.compactTitle}>No contents found.</Text>
           <Text className={styles.muted}>Adjust filters or add a new content item.</Text>
         </Card>
       ) : null}
 
       <Group justify="flex-end" gap="xs" className={styles.pagination}>
         <Text>
-          Page {safePage} of {pageCount} · {filteredContent.length} content
+          Page {safePage} of {pageCount} · {filteredContent.length} contents
         </Text>
         <Select
           data={[
@@ -338,12 +339,12 @@ export default function ContentList({ content, profiles, targets }: ContentListP
         </Button>
       </Group>
 
-      <Modal opened={isOpen} onClose={() => setIsOpen(false)} title={isEditing ? 'Edit Content' : 'Add Content'} centered>
+      <Modal opened={isOpen} onClose={() => setIsOpen(false)} title={isEditing ? 'Edit Contents' : 'Add Contents'} centered>
         <Stack gap="sm">
           <TextInput
             label="Title"
             onChange={(event) => setForm((current) => ({ ...current, title: event.currentTarget.value }))}
-            placeholder="Content title"
+            placeholder="Contents title"
             value={form.title}
           />
           <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="sm">
@@ -362,7 +363,7 @@ export default function ContentList({ content, profiles, targets }: ContentListP
           </SimpleGrid>
           <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="sm">
             <TextInput
-              label="Content Link"
+              label="Contents Link"
               onChange={(event) => setForm((current) => ({ ...current, url: event.currentTarget.value }))}
               placeholder="https://"
               type="url"
@@ -386,7 +387,7 @@ export default function ContentList({ content, profiles, targets }: ContentListP
               Cancel
             </Button>
             <Button loading={isPending} onClick={saveContent}>
-              Save Content
+              Save Contents
             </Button>
           </Group>
         </Stack>

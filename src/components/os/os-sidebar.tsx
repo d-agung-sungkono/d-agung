@@ -21,10 +21,10 @@ import styles from './os-shell.module.css'
 const navigation = [
   { label: 'Home', href: '/os', icon: IconHome },
   { label: 'Today', href: '/os/today', icon: IconCalendar },
-  { label: 'Content', href: '/os/content', icon: IconArticle },
+  { label: 'Contents', href: '/os/content', icon: IconArticle },
   { label: 'Products', href: '/os/products', icon: IconPackage },
   { label: 'Thoughts', href: '/os/thoughts', icon: IconPencil },
-  { label: 'Socmeds', href: '/os/socmeds', icon: IconShare2 },
+  { label: 'Social Medias', href: '/os/socmeds', icon: IconShare2 },
 ] satisfies Array<{ href: string; icon: Icon; label: string }>
 
 export default function OsSidebar() {

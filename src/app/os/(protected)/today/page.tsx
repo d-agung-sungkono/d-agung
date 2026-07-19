@@ -3,10 +3,11 @@ import { Button } from '@mantine/core'
 import styles from '@/components/os/os-shell.module.css'
 import OsCalendar, { type OsCalendarEvent } from '@/components/os/os-calendar'
 import TodayList from '@/components/os/today-list'
-import content from '@/data/os/content.json'
 import today from '@/data/os/today.json'
+import { getContentData } from '@/lib/os-content'
 
-export default function OsTodayPage() {
+export default async function OsTodayPage() {
+  const { posts } = await getContentData()
   const calendarEvents: OsCalendarEvent[] = [
     ...today.map((item) => ({
       id: item.id,
@@ -16,7 +17,7 @@ export default function OsTodayPage() {
       completed: item.completed,
       source: 'Today',
     })),
-    ...content.map((item) => ({
+    ...posts.map((item) => ({
       id: item.id,
       title: item.title,
       start: item.scheduledAt,

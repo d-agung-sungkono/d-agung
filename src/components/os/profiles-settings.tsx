@@ -98,7 +98,7 @@ export default function ProfilesSettings({ groups, socmeds, userSocmeds }: Profi
       count: userSocmeds.length,
       id: 'all',
       meta: `${groups.length} groups`,
-      name: 'All Social Media',
+      name: 'All Social Medias',
     },
     ...groups.map((group) => {
       const accounts = userSocmeds.filter((profile) => profile.accountGroupId === group.id)
@@ -174,14 +174,14 @@ export default function ProfilesSettings({ groups, socmeds, userSocmeds }: Profi
     <>
       <Box component="section" className={styles.pageHeader}>
         <Box>
-          <Text className={styles.breadcrumb}>Agung OS / Social Media</Text>
-          <Text component="h2" className={styles.pageTitle}>Social Media</Text>
+          <Text className={styles.breadcrumb}>Agung OS / Social Medias</Text>
+          <Text component="h2" className={styles.pageTitle}>Social Medias</Text>
           <Text className={styles.pageDescription}>
             Platform accounts used to map content, publishing targets, and future embeds.
           </Text>
         </Box>
         <Button loading={isPending} onClick={openCreateModal}>
-          Add Social Account
+          Add Social Media Account
         </Button>
       </Box>
 
@@ -208,7 +208,7 @@ export default function ProfilesSettings({ groups, socmeds, userSocmeds }: Profi
       <Box component="section" className={styles.panel}>
         <Group justify="space-between" align="flex-start" className={styles.panelHeader}>
           <Box>
-            <Text component="h3" className={styles.panelTitle}>Social Accounts</Text>
+            <Text component="h3" className={styles.panelTitle}>Social Media Accounts</Text>
             <Text className={styles.muted}>Each account is linked to a master platform and an account group.</Text>
           </Box>
         </Group>
@@ -274,13 +274,13 @@ export default function ProfilesSettings({ groups, socmeds, userSocmeds }: Profi
 
         {visibleSocmeds.length === 0 ? (
           <Card className={styles.emptyState} padding="md" radius="sm" withBorder>
-            <Text className={styles.compactTitle}>No social accounts in this group.</Text>
+            <Text className={styles.compactTitle}>No social medias in this group.</Text>
             <Text className={styles.muted}>Add an account or choose another group.</Text>
           </Card>
         ) : null}
       </Box>
 
-      <Modal opened={isOpen} onClose={() => setIsOpen(false)} title={isEditing ? 'Edit Social Account' : 'Add Social Account'} centered>
+      <Modal opened={isOpen} onClose={() => setIsOpen(false)} title={isEditing ? 'Edit Social Media Account' : 'Add Social Media Account'} centered>
         <Stack gap="sm">
           <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="sm">
             <Select
