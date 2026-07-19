@@ -5,9 +5,9 @@ import DbUnavailable from '@/components/os/db-unavailable'
 import OsLiveClock from '@/components/os/os-live-clock'
 import styles from '@/components/os/os-shell.module.css'
 import SummaryCard from '@/components/os/summary-card'
-import products from '@/data/os/products.json'
 import thoughts from '@/data/os/thoughts.json'
 import { getContentData } from '@/lib/os-content'
+import { getProductsData } from '@/lib/os-products'
 
 function getGreeting() {
   const hour = new Intl.DateTimeFormat('en-US', {
@@ -39,21 +39,21 @@ function getJakartaDateKey(value: string | Date = new Date()) {
 
 async function getHomeContentState() {
   try {
-    const { posts, targets } = await getContentData()
+    const [{ posts, targets }, products] = await Promise.all([getContentData(), getProductsData()])
     const today = getJakartaDateKey()
     const targetsDueToday = targets
       .filter((target) => target.status === 'active' && getJakartaDateKey(target.nextDueAt) <= today)
       .sort((a, b) => a.nextDueAt.localeCompare(b.nextDueAt) || a.name.localeCompare(b.name))
 
-    return { dbError: false, posts, targetsDueToday }
+    return { dbError: false, posts, products, targetsDueToday }
   } catch (error) {
     console.error('Failed to load Agung OS home content data', error)
-    return { dbError: true, posts: [], targetsDueToday: [] }
+    return { dbError: true, posts: [], products: [], targetsDueToday: [] }
   }
 }
 
 export default async function OsHomePage() {
-  const { dbError, posts, targetsDueToday } = await getHomeContentState()
+  const { dbError, posts, products, targetsDueToday } = await getHomeContentState()
   const readyContentToday = posts.filter((item) => item.status === 'ready').length
   const openThoughts = thoughts.filter((item) => item.status === 'open').length
 

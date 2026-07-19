@@ -4,16 +4,30 @@ import { Fragment, useMemo, useState, useTransition } from 'react'
 import { ActionIcon, Box, Button, Card, Group, Modal, Select, SimpleGrid, Table, Text, Textarea, TextInput, Tooltip } from '@mantine/core'
 import { IconCopy, IconExternalLink, IconEye, IconPlus, IconRefresh, IconTestPipe, IconX } from '@tabler/icons-react'
 
-import { scrapeProductLink, type ScrapedProductResult } from '@/app/os/(protected)/products/actions'
+import { saveScrapedProduct, scrapeProductLink, type ScrapedProductResult } from '@/app/os/(protected)/products/actions'
 
 import styles from './os-shell.module.css'
 
 type Product = {
+  branchStocks: Array<{
+    branchName: string
+    isAvailable: boolean
+    stockText: string
+    stockType: string
+  }>
   id: string
   name: string
   sku: string
   platform: string
   category: string
+  originalPrice: number | null
+  discountAmount: number | null
+  discountPercent: number | null
+  previousOriginalPrice: number | null
+  previousDiscountAmount: number | null
+  previousDiscountPercent: number | null
+  previousSnapshotAt: string | null
+  variant: string | null
   snapshotA: {
     date: string
     price: number
@@ -63,6 +77,14 @@ function getPercentageDifference(previousValue: number, currentValue: number) {
   }
 
   return ((currentValue - previousValue) / previousValue) * 100
+}
+
+function formatDiscount(percent: number | null, amount: number | null) {
+  if (!percent && !amount) {
+    return '-'
+  }
+
+  return `${percent ? `${percent}%` : '-'}${amount ? ` (${formatCurrency(amount)})` : ''}`
 }
 
 export default function ProductsTable({ products, shopeeExample }: ProductsTableProps) {
@@ -138,6 +160,21 @@ export default function ProductsTable({ products, shopeeExample }: ProductsTable
     window.setTimeout(() => setCopyState(null), 1300)
   }
 
+  function saveSnapshot() {
+    startTransition(async () => {
+      const formData = new FormData()
+      formData.set('url', productUrl)
+
+      try {
+        const result = await saveScrapedProduct(formData)
+        setScrapedProduct(result)
+        setTestResult('Snapshot tersimpan. Scrape berikutnya akan jadi pembanding trend.')
+      } catch (error) {
+        setTestResult(error instanceof Error ? error.message : 'Save failed.')
+      }
+    })
+  }
+
   return (
     <>
       <SimpleGrid cols={{ base: 1, sm: 2, lg: 8 }} spacing="xs" className={styles.productToolbar}>
@@ -195,8 +232,8 @@ export default function ProductsTable({ products, shopeeExample }: ProductsTable
           <Table.Thead>
             <Table.Tr>
               <Table.Th>Title</Table.Th>
-              <Table.Th>Minggu lalu dan stok</Table.Th>
-              <Table.Th>Hari ini dan stok</Table.Th>
+              <Table.Th>Snapshot sebelumnya</Table.Th>
+              <Table.Th>Snapshot terbaru</Table.Th>
               <Table.Th>Persentase</Table.Th>
               <Table.Th>Detail</Table.Th>
             </Table.Tr>
@@ -215,18 +252,27 @@ export default function ProductsTable({ products, shopeeExample }: ProductsTable
                         <Text className={styles.productSku}>SKU: {product.sku}</Text>
                         <Text className={styles.productMeta}>
                           {product.platform} · {product.category}
+                          {product.variant ? ` · ${product.variant}` : ''}
                         </Text>
                       </Box>
                     </Table.Td>
                     <Table.Td>
+                      <Text className={styles.productSku}>Awal {formatCurrency(product.previousOriginalPrice ?? product.snapshotA.price)}</Text>
+                      <Text className={styles.productSku}>
+                        Diskon {formatDiscount(product.previousDiscountPercent, product.previousDiscountAmount)}
+                      </Text>
                       <Text className={styles.productPrice}>{formatCurrency(product.snapshotA.price)}</Text>
                       <Text className={styles.productDate}>{formatDate(product.snapshotA.date)}</Text>
-                      <Text className={styles.productSku}>Stok {product.snapshotA.stock}</Text>
+                      <Text className={styles.productSku}>Stok {product.snapshotA.stock} cabang</Text>
                     </Table.Td>
                     <Table.Td>
+                      <Text className={styles.productSku}>Awal {formatCurrency(product.originalPrice ?? product.snapshotB.price)}</Text>
+                      <Text className={styles.productSku}>
+                        Diskon {formatDiscount(product.discountPercent, product.discountAmount)}
+                      </Text>
                       <Text className={styles.productPrice}>{formatCurrency(product.snapshotB.price)}</Text>
                       <Text className={styles.productDate}>{formatDate(product.snapshotB.date)}</Text>
-                      <Text className={styles.productSku}>Stok {product.snapshotB.stock}</Text>
+                      <Text className={styles.productSku}>Stok {product.snapshotB.stock} cabang</Text>
                     </Table.Td>
                     <Table.Td>
                       <Text component="span" className={percentage <= 0 ? styles.diffDown : styles.diffUp}>
@@ -246,6 +292,21 @@ export default function ProductsTable({ products, shopeeExample }: ProductsTable
                     <Table.Tr>
                       <Table.Td className={styles.productDetail} colSpan={5}>
                         <Text>{product.description}</Text>
+                        {product.branchStocks.length > 0 ? (
+                          <Box mt="sm">
+                            <Text className={styles.compactTitle}>Stok cabang</Text>
+                            <SimpleGrid cols={{ base: 1, sm: 2, lg: 3 }} spacing="xs" mt="xs">
+                              {product.branchStocks.map((branch) => (
+                                <Card key={branch.branchName} padding="xs" radius="sm" withBorder>
+                                  <Text className={styles.compactTitle}>{branch.branchName}</Text>
+                                  <Text className={branch.isAvailable ? styles.diffDown : styles.productSku}>
+                                    {branch.stockText}
+                                  </Text>
+                                </Card>
+                              ))}
+                            </SimpleGrid>
+                          </Box>
+                        ) : null}
                         <Button
                           component="a"
                           href={product.url}
@@ -302,6 +363,7 @@ export default function ProductsTable({ products, shopeeExample }: ProductsTable
           isPending={isPending}
           copyState={copyState}
           copyText={copyText}
+          saveSnapshot={saveSnapshot}
           close={() => setIsAddOpen(false)}
         />
       </Modal>
@@ -315,6 +377,7 @@ function StackLikeProductModal({
   copyText,
   isPending,
   productUrl,
+  saveSnapshot,
   scrapedProduct,
   setProductUrl,
   setScrapedProduct,
@@ -328,6 +391,7 @@ function StackLikeProductModal({
   copyText: (key: string, value: string) => void
   isPending: boolean
   productUrl: string
+  saveSnapshot: () => void
   scrapedProduct: ScrapedProductResult | null
   setProductUrl: (value: string) => void
   setScrapedProduct: (value: ScrapedProductResult | null) => void
@@ -366,8 +430,12 @@ function StackLikeProductModal({
             <Box>
               <Text className={styles.compactTitle}>{scrapedProduct.title}</Text>
               <Text className={styles.muted}>
-                {scrapedProduct.source} · SKU {scrapedProduct.sku || '-'} · {formatCurrency(scrapedProduct.price ?? 0)} ·{' '}
-                {scrapedProduct.stockStatus}
+                {scrapedProduct.source} · SKU {scrapedProduct.sku || '-'} · {scrapedProduct.stockStatus}
+              </Text>
+              <Text className={styles.productSku}>
+                Awal {formatCurrency(scrapedProduct.originalPrice ?? 0)} · Diskon{' '}
+                {formatDiscount(scrapedProduct.discountPercent, scrapedProduct.discountAmount)} · Jadi{' '}
+                {formatCurrency(scrapedProduct.finalPrice ?? 0)}
               </Text>
             </Box>
             <Button
@@ -385,6 +453,19 @@ function StackLikeProductModal({
               <Text className={styles.muted}>
                 {matchingShopeeProduct.title} · {matchingShopeeProduct.price ?? '-'}
               </Text>
+            </Box>
+          ) : null}
+          {scrapedProduct.branchStocks.length > 0 ? (
+            <Box mt="xs">
+              <Text className={styles.profileMeta}>Supplier branch stock</Text>
+              <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="xs" mt="xs">
+                {scrapedProduct.branchStocks.map((branch) => (
+                  <Card key={branch.branchName} padding="xs" radius="sm" withBorder>
+                    <Text className={styles.compactTitle}>{branch.branchName}</Text>
+                    <Text className={branch.isAvailable ? styles.diffDown : styles.productSku}>{branch.stockText}</Text>
+                  </Card>
+                ))}
+              </SimpleGrid>
             </Box>
           ) : null}
           <Textarea
@@ -414,7 +495,10 @@ function StackLikeProductModal({
         <Button leftSection={<IconTestPipe size={18} stroke={1.8} />} loading={isPending} onClick={testProductUrl} variant="default">
           Test Scrape
         </Button>
-        <Button onClick={close}>Simpan Link</Button>
+        <Button disabled={!scrapedProduct} loading={isPending} onClick={saveSnapshot}>
+          Simpan Snapshot
+        </Button>
+        <Button onClick={close} variant="default">Tutup</Button>
       </Group>
     </Box>
   )

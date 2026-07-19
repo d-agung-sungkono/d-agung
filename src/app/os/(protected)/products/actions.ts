@@ -1,174 +1,117 @@
 'use server'
 
-type JsonLdProduct = {
-  '@type'?: string
-  color?: string
-  description?: string
-  image?: string | string[]
-  name?: string
-  offers?: {
-    availability?: string
-    price?: number | string
-    priceCurrency?: string
-    url?: string
-  }
-  size?: string
-  sku?: string
-}
+import { revalidatePath } from 'next/cache'
 
-export type ScrapedProductResult = {
-  category: string | null
-  currency: string
-  description: string
-  images: string[]
-  price: number | null
-  shopeeCopy: string
-  sku: string
-  source: string
-  stockStatus: string
-  title: string
-  url: string
-  variant: string | null
-}
+import { query } from '@/lib/db'
+import { scrapeSupplierProduct, type ScrapedProductResult } from '@/lib/os-product-scraper'
+import { getOsUserId } from '@/lib/os-settings'
 
-function decodeHtml(value: string) {
-  return value
-    .replaceAll('&amp;', '&')
-    .replaceAll('&quot;', '"')
-    .replaceAll('&#x27;', "'")
-    .replaceAll('&#39;', "'")
-    .replaceAll('&lt;', '<')
-    .replaceAll('&gt;', '>')
-}
-
-function getMetaContent(html: string, property: string) {
-  const pattern = new RegExp(`<meta[^>]+property=["']${property}["'][^>]+content=["']([^"']+)["'][^>]*>`, 'i')
-  return decodeHtml(html.match(pattern)?.[1] ?? '')
-}
-
-function getJsonLdProducts(html: string) {
-  const products: JsonLdProduct[] = []
-  const scriptPattern = /<script[^>]+type=["']application\/ld\+json["'][^>]*>([\s\S]*?)<\/script>/gi
-  let match: RegExpExecArray | null
-
-  while ((match = scriptPattern.exec(html))) {
-    try {
-      const parsed = JSON.parse(decodeHtml(match[1]))
-      const entries = Array.isArray(parsed) ? parsed : [parsed]
-
-      for (const entry of entries) {
-        if (entry?.['@type'] === 'Product') {
-          products.push(entry)
-        }
-      }
-    } catch {
-      // Ignore non-product structured data blocks.
-    }
-  }
-
-  return products
-}
-
-function normalizeAllowedSource(value: string) {
-  const url = new URL(value)
-  const hostname = url.hostname.replace(/^www\./, '')
-  const isSupported =
-    hostname === 'jakartanotebook.com' ||
-    hostname === 'jackmall.com' ||
-    hostname === 'jacknote.com'
-
-  if (!isSupported) {
-    throw new Error('Only JakartaNotebook, Jackmall, or Jacknote product links are supported for now.')
-  }
-
-  return url
-}
-
-function formatRupiah(value: number | null) {
-  if (value === null) {
-    return '-'
-  }
-
-  return new Intl.NumberFormat('id-ID', {
-    currency: 'IDR',
-    maximumFractionDigits: 0,
-    style: 'currency',
-  }).format(value)
-}
-
-function buildShopeeCopy(product: Omit<ScrapedProductResult, 'shopeeCopy'>) {
-  return [
-    product.title,
-    '',
-    product.description,
-    '',
-    `SKU Supplier: ${product.sku || '-'}`,
-    `Varian: ${product.variant || '-'}`,
-    `Harga Supplier: ${formatRupiah(product.price)}`,
-    `Stok Supplier: ${product.stockStatus}`,
-    `Source: ${product.url}`,
-  ].join('\n')
-}
+export type { ScrapedProductResult } from '@/lib/os-product-scraper'
 
 export async function scrapeProductLink(formData: FormData): Promise<ScrapedProductResult> {
   const sourceUrl = String(formData.get('url') ?? '').trim()
+  return scrapeSupplierProduct(sourceUrl)
+}
 
-  if (!sourceUrl) {
-    throw new Error('Product URL is required.')
-  }
-
-  const url = normalizeAllowedSource(sourceUrl)
-  const response = await fetch(url.toString(), {
-    headers: {
-      accept: 'text/html,application/xhtml+xml',
-      'accept-language': 'id-ID,id;q=0.9,en-US;q=0.8,en;q=0.7',
-      'user-agent':
-        'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0 Safari/537.36',
-    },
-    next: { revalidate: 900 },
-  })
-
-  if (!response.ok) {
-    throw new Error(`Scrape failed with HTTP ${response.status}.`)
-  }
-
-  const html = await response.text()
-  const products = getJsonLdProducts(html)
-  const product =
-    products.find((item) => item.offers?.url === url.toString()) ??
-    products.find((item) => item.offers?.url && url.toString().startsWith(item.offers.url)) ??
-    products[0]
-
-  if (!product) {
-    throw new Error('Product structured data was not found.')
-  }
-
-  const metaImages = Array.from(
-    new Set(Array.from(html.matchAll(/<meta[^>]+property=["']og:image["'][^>]+content=["']([^"']+)["'][^>]*>/gi)).map((item) => decodeHtml(item[1])))
+export async function saveScrapedProduct(formData: FormData) {
+  const userId = await getOsUserId()
+  const product = await scrapeSupplierProduct(String(formData.get('url') ?? '').trim())
+  const productResult = await query<{ id: string }>(
+    `
+      INSERT INTO os_products (
+        user_id,
+        source,
+        source_url,
+        sku,
+        title,
+        category,
+        description,
+        variant,
+        currency,
+        images
+      )
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10::jsonb)
+      ON CONFLICT (user_id, source_url)
+      DO UPDATE SET
+        source = EXCLUDED.source,
+        sku = EXCLUDED.sku,
+        title = EXCLUDED.title,
+        category = EXCLUDED.category,
+        description = EXCLUDED.description,
+        variant = EXCLUDED.variant,
+        currency = EXCLUDED.currency,
+        images = EXCLUDED.images,
+        status = 'active',
+        updated_at = now()
+      RETURNING id
+    `,
+    [
+      userId,
+      product.source,
+      product.url,
+      product.sku,
+      product.title,
+      product.category,
+      product.description,
+      product.variant,
+      product.currency,
+      JSON.stringify(product.images),
+    ]
   )
-  const productImages = Array.isArray(product.image) ? product.image : product.image ? [product.image] : []
-  const images = Array.from(new Set([...productImages, ...metaImages])).filter(Boolean)
-  const price = product.offers?.price === undefined ? null : Number(product.offers.price)
-  const stockStatus = product.offers?.availability?.includes('InStock') ? 'available' : 'limited'
-  const title = `${product.name ?? getMetaContent(html, 'og:title')}${product.size ? ` - ${product.size}` : ''}${
-    product.color ? ` - ${product.color}` : ''
-  }`
-  const result = {
-    category: null,
-    currency: product.offers?.priceCurrency ?? 'IDR',
-    description: product.description ?? getMetaContent(html, 'og:description'),
-    images,
-    price: Number.isFinite(price) ? price : null,
-    sku: product.sku ?? '',
-    source: 'JakartaNotebook',
-    stockStatus,
-    title,
-    url: url.toString(),
-    variant: [product.size, product.color].filter(Boolean).join(' / ') || null,
+
+  const snapshotResult = await query<{ id: string }>(
+    `
+      INSERT INTO os_product_snapshots (
+        product_id,
+        original_price,
+        final_price,
+        discount_amount,
+        discount_percent,
+        stock_status,
+        stock_available_count,
+        raw_payload
+      )
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8::jsonb)
+      RETURNING id
+    `,
+    [
+      productResult.rows[0].id,
+      product.originalPrice,
+      product.finalPrice,
+      product.discountAmount,
+      product.discountPercent,
+      product.stockStatus,
+      product.stockAvailableCount,
+      JSON.stringify(product),
+    ]
+  )
+
+  for (const branch of product.branchStocks) {
+    await query(
+      `
+        INSERT INTO os_product_branch_stocks (
+          snapshot_id,
+          branch_id,
+          branch_name,
+          stock_text,
+          stock_type,
+          is_available
+        )
+        VALUES ($1, $2, $3, $4, $5, $6)
+      `,
+      [
+        snapshotResult.rows[0].id,
+        branch.branchId,
+        branch.branchName,
+        branch.stockText,
+        branch.stockType,
+        branch.isAvailable,
+      ]
+    )
   }
 
-  return {
-    ...result,
-    shopeeCopy: buildShopeeCopy(result),
-  }
+  revalidatePath('/os')
+  revalidatePath('/os/products')
+
+  return product
 }
