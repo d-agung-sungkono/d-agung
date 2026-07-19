@@ -1,5 +1,6 @@
 import Link from 'next/link'
 
+import DbUnavailable from '@/components/os/db-unavailable'
 import OsLiveClock from '@/components/os/os-live-clock'
 import styles from '@/components/os/os-shell.module.css'
 import SummaryCard from '@/components/os/summary-card'
@@ -28,8 +29,18 @@ function getGreeting() {
   return 'Good evening'
 }
 
+async function getHomeContentState() {
+  try {
+    const [{ posts }, targetsDueToday] = await Promise.all([getContentData(), getContentTargetsDueToday()])
+    return { dbError: false, posts, targetsDueToday }
+  } catch (error) {
+    console.error('Failed to load Agung OS home content data', error)
+    return { dbError: true, posts: [], targetsDueToday: [] }
+  }
+}
+
 export default async function OsHomePage() {
-  const [{ posts }, targetsDueToday] = await Promise.all([getContentData(), getContentTargetsDueToday()])
+  const { dbError, posts, targetsDueToday } = await getHomeContentState()
   const readyContentToday = posts.filter((item) => item.status === 'ready').length
   const openThoughts = thoughts.filter((item) => item.status === 'open').length
 
@@ -43,6 +54,7 @@ export default async function OsHomePage() {
         </div>
         <OsLiveClock />
       </section>
+      {dbError ? <DbUnavailable message="Database connection unavailable. Contents and targets could not be loaded." /> : null}
 
       <section className={styles.summaryGrid} aria-label="Agung OS summary">
         <SummaryCard hint="Ready or scheduled" label="Contents Today" value={readyContentToday} />

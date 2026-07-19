@@ -1,9 +1,16 @@
+import DbUnavailable from '@/components/os/db-unavailable'
 import ContentList from '@/components/os/content-list'
 import styles from '@/components/os/os-shell.module.css'
 import { getContentData } from '@/lib/os-content'
 
 export default async function OsContentPage() {
-  const { posts, profiles, targets } = await getContentData()
+  let contentData: Awaited<ReturnType<typeof getContentData>> | null = null
+
+  try {
+    contentData = await getContentData()
+  } catch (error) {
+    console.error('Failed to load Agung OS contents data', error)
+  }
 
   return (
     <>
@@ -17,7 +24,14 @@ export default async function OsContentPage() {
         </div>
       </section>
 
-      <ContentList content={posts} profiles={profiles} targets={targets} />
+      {contentData ? (
+        <ContentList content={contentData.posts} profiles={contentData.profiles} targets={contentData.targets} />
+      ) : (
+        <section className={styles.panel}>
+          <h3 className={styles.panelTitle}>Contents unavailable</h3>
+          <DbUnavailable message="Database connection unavailable. Contents, targets, and account mappings could not be loaded." />
+        </section>
+      )}
     </>
   )
 }

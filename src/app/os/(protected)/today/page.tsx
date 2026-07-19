@@ -1,5 +1,6 @@
 import { Button } from '@mantine/core'
 
+import DbUnavailable from '@/components/os/db-unavailable'
 import styles from '@/components/os/os-shell.module.css'
 import OsCalendar, { type OsCalendarEvent } from '@/components/os/os-calendar'
 import TodayList from '@/components/os/today-list'
@@ -7,7 +8,16 @@ import today from '@/data/os/today.json'
 import { getContentData } from '@/lib/os-content'
 
 export default async function OsTodayPage() {
-  const { posts } = await getContentData()
+  let posts: Awaited<ReturnType<typeof getContentData>>['posts'] = []
+  let dbError = false
+
+  try {
+    posts = (await getContentData()).posts
+  } catch (error) {
+    dbError = true
+    console.error('Failed to load Agung OS calendar content data', error)
+  }
+
   const calendarEvents: OsCalendarEvent[] = [
     ...today.map((item) => ({
       id: item.id,
@@ -40,6 +50,7 @@ export default async function OsTodayPage() {
           Add Activity
         </Button>
       </section>
+      {dbError ? <DbUnavailable message="Database connection unavailable. Calendar is showing local today data only." /> : null}
 
       <section className={styles.panel}>
         <div className={styles.panelHeader}>
