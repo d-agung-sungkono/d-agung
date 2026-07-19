@@ -1,8 +1,10 @@
 'use client'
 
-import { Fragment, useMemo, useState } from 'react'
-import { ActionIcon, Box, Button, Group, Modal, Select, SimpleGrid, Table, Text, TextInput, Tooltip } from '@mantine/core'
-import { IconExternalLink, IconEye, IconPlus, IconRefresh, IconTestPipe, IconX } from '@tabler/icons-react'
+import { Fragment, useMemo, useState, useTransition } from 'react'
+import { ActionIcon, Box, Button, Card, Group, Modal, Select, SimpleGrid, Table, Text, Textarea, TextInput, Tooltip } from '@mantine/core'
+import { IconCopy, IconExternalLink, IconEye, IconPlus, IconRefresh, IconTestPipe, IconX } from '@tabler/icons-react'
+
+import { scrapeProductLink, type ScrapedProductResult } from '@/app/os/(protected)/products/actions'
 
 import styles from './os-shell.module.css'
 
@@ -29,6 +31,14 @@ type Product = {
 
 type ProductsTableProps = {
   products: Product[]
+  shopeeExample: {
+    similarProducts?: Array<{
+      image?: string
+      price?: string
+      title: string
+      url: string
+    }>
+  }
 }
 
 function formatCurrency(value: number) {
@@ -55,7 +65,8 @@ function getPercentageDifference(previousValue: number, currentValue: number) {
   return ((currentValue - previousValue) / previousValue) * 100
 }
 
-export default function ProductsTable({ products }: ProductsTableProps) {
+export default function ProductsTable({ products, shopeeExample }: ProductsTableProps) {
+  const [isPending, startTransition] = useTransition()
   const defaultWeekStart = products[0]?.snapshotA.date ?? ''
   const defaultWeekEnd = products[0]?.snapshotA.date ?? ''
   const [query, setQuery] = useState('')
@@ -70,6 +81,8 @@ export default function ProductsTable({ products }: ProductsTableProps) {
   const [isAddOpen, setIsAddOpen] = useState(false)
   const [productUrl, setProductUrl] = useState('')
   const [testResult, setTestResult] = useState<string | null>(null)
+  const [scrapedProduct, setScrapedProduct] = useState<ScrapedProductResult | null>(null)
+  const [copyState, setCopyState] = useState<string | null>(null)
   const pageSizeNumber = Number(pageSize)
 
   const categories = useMemo(() => ['all', ...Array.from(new Set(products.map((product) => product.category)))], [products])
@@ -103,19 +116,26 @@ export default function ProductsTable({ products }: ProductsTableProps) {
   }
 
   function testProductUrl() {
-    try {
-      const url = new URL(productUrl)
-      const hostname = url.hostname.replace('www.', '')
-      const isSupported = hostname.includes('jacknote.com') || hostname.includes('jackmall.com')
+    startTransition(async () => {
+      const formData = new FormData()
+      formData.set('url', productUrl)
+      setScrapedProduct(null)
+      setTestResult(null)
 
-      setTestResult(
-        isSupported
-          ? 'Link looks supported for scraping test.'
-          : 'Only Jacknote or Jackmall links are supported for now.'
-      )
-    } catch {
-      setTestResult('Enter a valid product URL first.')
-    }
+      try {
+        const result = await scrapeProductLink(formData)
+        setScrapedProduct(result)
+        setTestResult('Scrape berhasil. Data siap dicopy ke Shopee.')
+      } catch (error) {
+        setTestResult(error instanceof Error ? error.message : 'Scrape failed.')
+      }
+    })
+  }
+
+  async function copyText(key: string, value: string) {
+    await navigator.clipboard.writeText(value)
+    setCopyState(key)
+    window.setTimeout(() => setCopyState(null), 1300)
   }
 
   return (
@@ -272,10 +292,16 @@ export default function ProductsTable({ products }: ProductsTableProps) {
       <Modal opened={isAddOpen} onClose={() => setIsAddOpen(false)} title="Tambah Produk" centered>
         <StackLikeProductModal
           productUrl={productUrl}
+          scrapedProduct={scrapedProduct}
           setProductUrl={setProductUrl}
+          setScrapedProduct={setScrapedProduct}
           setTestResult={setTestResult}
+          shopeeExample={shopeeExample}
           testProductUrl={testProductUrl}
           testResult={testResult}
+          isPending={isPending}
+          copyState={copyState}
+          copyText={copyText}
           close={() => setIsAddOpen(false)}
         />
       </Modal>
@@ -285,37 +311,108 @@ export default function ProductsTable({ products }: ProductsTableProps) {
 
 function StackLikeProductModal({
   close,
+  copyState,
+  copyText,
+  isPending,
   productUrl,
+  scrapedProduct,
   setProductUrl,
+  setScrapedProduct,
   setTestResult,
+  shopeeExample,
   testProductUrl,
   testResult,
 }: {
   close: () => void
+  copyState: string | null
+  copyText: (key: string, value: string) => void
+  isPending: boolean
   productUrl: string
+  scrapedProduct: ScrapedProductResult | null
   setProductUrl: (value: string) => void
+  setScrapedProduct: (value: ScrapedProductResult | null) => void
   setTestResult: (value: string | null) => void
+  shopeeExample: ProductsTableProps['shopeeExample']
   testProductUrl: () => void
   testResult: string | null
 }) {
+  const matchingShopeeProduct = scrapedProduct
+    ? shopeeExample.similarProducts?.find((item) =>
+        item.title.toLowerCase().includes(scrapedProduct.sku.toLowerCase())
+      ) ??
+      shopeeExample.similarProducts?.find((item) =>
+        item.title.toLowerCase().includes('toples kaca penyimpanan biji kopi vacuum sealed lid')
+      )
+    : null
+
   return (
     <Box>
       <TextInput
-        label="Link Jacknote atau Jackmall"
+        label="Link JakartaNotebook, Jacknote, atau Jackmall"
         onChange={(event) => {
           setProductUrl(event.currentTarget.value)
+          setScrapedProduct(null)
           setTestResult(null)
         }}
-        placeholder="https://www.jackmall.com/..."
+        placeholder="https://www.jakartanotebook.com/p/..."
         type="url"
         value={productUrl}
       />
 
       {testResult ? <Text className={styles.testResult} mt="sm">{testResult}</Text> : null}
+      {scrapedProduct ? (
+        <Card mt="sm" padding="sm" radius="sm" withBorder>
+          <Group justify="space-between" align="flex-start" gap="sm">
+            <Box>
+              <Text className={styles.compactTitle}>{scrapedProduct.title}</Text>
+              <Text className={styles.muted}>
+                {scrapedProduct.source} · SKU {scrapedProduct.sku || '-'} · {formatCurrency(scrapedProduct.price ?? 0)} ·{' '}
+                {scrapedProduct.stockStatus}
+              </Text>
+            </Box>
+            <Button
+              leftSection={<IconCopy size={17} stroke={1.8} />}
+              onClick={() => copyText('shopee-copy', scrapedProduct.shopeeCopy)}
+              size="xs"
+              variant="default"
+            >
+              {copyState === 'shopee-copy' ? 'Copied' : 'Copy Shopee'}
+            </Button>
+          </Group>
+          {matchingShopeeProduct ? (
+            <Box mt="xs">
+              <Text className={styles.profileMeta}>Shopee reference</Text>
+              <Text className={styles.muted}>
+                {matchingShopeeProduct.title} · {matchingShopeeProduct.price ?? '-'}
+              </Text>
+            </Box>
+          ) : null}
+          <Textarea
+            autosize
+            label="Shopee copy draft"
+            maxRows={8}
+            minRows={5}
+            mt="sm"
+            readOnly
+            value={scrapedProduct.shopeeCopy}
+          />
+          {scrapedProduct.images.length > 0 ? (
+            <Textarea
+              autosize
+              label="Image URLs"
+              maxRows={4}
+              minRows={2}
+              mt="sm"
+              readOnly
+              value={scrapedProduct.images.join('\n')}
+            />
+          ) : null}
+        </Card>
+      ) : null}
 
       <Group justify="flex-end" mt="md">
-        <Button leftSection={<IconTestPipe size={18} stroke={1.8} />} onClick={testProductUrl} variant="default">
-          Test
+        <Button leftSection={<IconTestPipe size={18} stroke={1.8} />} loading={isPending} onClick={testProductUrl} variant="default">
+          Test Scrape
         </Button>
         <Button onClick={close}>Simpan Link</Button>
       </Group>

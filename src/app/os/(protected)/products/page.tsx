@@ -1,6 +1,7 @@
 import ProductsTable from '@/components/os/products-table'
 import styles from '@/components/os/os-shell.module.css'
 import products from '@/data/os/products.json'
+import shopeeExample from '@/data/os/shopee-example.json'
 
 export default function OsProductsPage() {
   return (
@@ -15,7 +16,7 @@ export default function OsProductsPage() {
         </div>
       </section>
 
-      <ProductsTable products={products} />
+      <ProductsTable products={products} shopeeExample={shopeeExample} />
     </>
   )
 }
