@@ -1,0 +1,26 @@
+[
+  {
+    "id": "thought-1",
+    "title": "Make Agung OS the daily capture layer before building automation.",
+    "body": "Before adding integrations and automation, the capture flow has to be fast enough for daily use. Start with content, products, and thoughts as the core inbox.",
+    "category": "Product",
+    "status": "open",
+    "createdAt": "2026-07-17T07:10:00+07:00"
+  },
+  {
+    "id": "thought-2",
+    "title": "Turn content review into a weekly operating ritual.",
+    "body": "Every week should have a short review of what got posted, which account it mapped to, and what kind of content should be repeated.",
+    "category": "Content",
+    "status": "open",
+    "createdAt": "2026-07-17T08:25:00+07:00"
+  },
+  {
+    "id": "thought-3",
+    "title": "Separate personal brand ideas from commerce experiments.",
+    "body": "Personal brand content and commerce experiments can overlap, but the dashboard should make their intent clear so metrics do not get mixed.",
+    "category": "Systems",
+    "status": "archived",
+    "createdAt": "2026-07-16T21:40:00+07:00"
+  }
+]

@@ -1,0 +1,74 @@
+[
+  {
+    "id": "profile-tiktok-personal",
+    "platform": "TikTok",
+    "account": "d.agung.sungkono",
+    "label": "Personal Brand",
+    "url": "https://www.tiktok.com/@d.agung.sungkono",
+    "status": "active"
+  },
+  {
+    "id": "profile-linkedin",
+    "platform": "LinkedIn",
+    "account": "d-agung-sungkono",
+    "label": "Professional",
+    "url": "https://www.linkedin.com/in/d-agung-sungkono",
+    "status": "active"
+  },
+  {
+    "id": "profile-instagram-amb",
+    "platform": "Instagram",
+    "account": "amb_great",
+    "label": "AMB Great",
+    "url": "https://www.instagram.com/amb_great",
+    "status": "active"
+  },
+  {
+    "id": "profile-threads-amb",
+    "platform": "Threads",
+    "account": "amb_great",
+    "label": "AMB Great",
+    "url": "https://www.threads.net/@amb_great",
+    "status": "active"
+  },
+  {
+    "id": "profile-facebook-amb",
+    "platform": "Facebook",
+    "account": "amb_great",
+    "label": "AMB Great",
+    "url": "https://www.facebook.com/amb.d.agung",
+    "status": "active"
+  },
+  {
+    "id": "profile-youtube-personal",
+    "platform": "YouTube",
+    "account": "d.agung.sungkono",
+    "label": "Personal Brand",
+    "url": "https://www.youtube.com/@d.agung.sungkono",
+    "status": "active"
+  },
+  {
+    "id": "profile-x-personal",
+    "platform": "X",
+    "account": "dagungsungkono",
+    "label": "Personal Brand",
+    "url": "https://x.com/dagungsungkono",
+    "status": "active"
+  },
+  {
+    "id": "profile-shopee-discount",
+    "platform": "Shopee",
+    "account": "keranjang.diskon",
+    "label": "Keranjang Diskon",
+    "url": "https://shopee.co.id/keranjang.diskon",
+    "status": "active"
+  },
+  {
+    "id": "profile-tiktok-doit",
+    "platform": "TikTok",
+    "account": "das.agung",
+    "label": "Do-it",
+    "url": "https://www.tiktok.com/@das.agung",
+    "status": "active"
+  }
+]

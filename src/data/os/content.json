@@ -1,0 +1,102 @@
+[
+  {
+    "id": "content-1",
+    "title": "Ngoding Itu Pekerjaan Murahan?",
+    "account": "Personal Brand",
+    "platform": "TikTok",
+    "profileId": "profile-tiktok-personal",
+    "url": "https://www.tiktok.com/@d.agung.sungkono/video/placeholder-1",
+    "scheduledAt": "2026-07-17T19:00:00+07:00",
+    "status": "ready"
+  },
+  {
+    "id": "content-2",
+    "title": "Behind the Build: Warungkit",
+    "account": "Builder Notes",
+    "platform": "LinkedIn",
+    "profileId": "profile-linkedin",
+    "url": "https://www.linkedin.com/feed/update/placeholder-2",
+    "scheduledAt": "2026-07-17T20:30:00+07:00",
+    "status": "planned"
+  },
+  {
+    "id": "content-3",
+    "title": "3 Produk Simple yang Bisa Dibundling",
+    "account": "Commerce Lab",
+    "platform": "Shopee",
+    "profileId": "profile-shopee-discount",
+    "url": "https://shopee.co.id/keranjang.diskon",
+    "scheduledAt": "2026-07-18T09:00:00+07:00",
+    "status": "planned"
+  },
+  {
+    "id": "content-tiktok-20260715-1",
+    "title": "Kenapa Developer Harus Punya Distribution",
+    "account": "Personal Brand",
+    "platform": "TikTok",
+    "profileId": "profile-tiktok-personal",
+    "url": "https://www.tiktok.com/@d.agung.sungkono/video/2026071501",
+    "scheduledAt": "2026-07-15T19:00:00+07:00",
+    "status": "published"
+  },
+  {
+    "id": "content-tiktok-20260712-1",
+    "title": "Bangun Produk Jangan Nunggu Sempurna",
+    "account": "Personal Brand",
+    "platform": "TikTok",
+    "profileId": "profile-tiktok-personal",
+    "url": "https://www.tiktok.com/@d.agung.sungkono/video/2026071201",
+    "scheduledAt": "2026-07-12T19:00:00+07:00",
+    "status": "published"
+  },
+  {
+    "id": "content-tiktok-20260708-1",
+    "title": "Cara Baca Peluang dari Masalah Kecil",
+    "account": "Personal Brand",
+    "platform": "TikTok",
+    "profileId": "profile-tiktok-personal",
+    "url": "https://www.tiktok.com/@d.agung.sungkono/video/2026070801",
+    "scheduledAt": "2026-07-08T19:00:00+07:00",
+    "status": "published"
+  },
+  {
+    "id": "content-tiktok-20260705-1",
+    "title": "Ngoding Bukan Cuma Soal Syntax",
+    "account": "Personal Brand",
+    "platform": "TikTok",
+    "profileId": "profile-tiktok-personal",
+    "url": "https://www.tiktok.com/@d.agung.sungkono/video/2026070501",
+    "scheduledAt": "2026-07-05T19:00:00+07:00",
+    "status": "published"
+  },
+  {
+    "id": "content-tiktok-20260702-1",
+    "title": "Kenapa Aku Bikin Personal Operating System",
+    "account": "Personal Brand",
+    "platform": "TikTok",
+    "profileId": "profile-tiktok-personal",
+    "url": "https://www.tiktok.com/@d.agung.sungkono/video/2026070201",
+    "scheduledAt": "2026-07-02T19:00:00+07:00",
+    "status": "published"
+  },
+  {
+    "id": "content-tiktok-20260629-1",
+    "title": "Produk Kecil Bisa Jadi Mesin Belajar",
+    "account": "Personal Brand",
+    "platform": "TikTok",
+    "profileId": "profile-tiktok-personal",
+    "url": "https://www.tiktok.com/@d.agung.sungkono/video/2026062901",
+    "scheduledAt": "2026-06-29T19:00:00+07:00",
+    "status": "published"
+  },
+  {
+    "id": "content-tiktok-20260626-1",
+    "title": "Jangan Cuma Build, Catat Juga Polanya",
+    "account": "Personal Brand",
+    "platform": "TikTok",
+    "profileId": "profile-tiktok-personal",
+    "url": "https://www.tiktok.com/@d.agung.sungkono/video/2026062601",
+    "scheduledAt": "2026-06-26T19:00:00+07:00",
+    "status": "published"
+  }
+]
