@@ -162,7 +162,10 @@ export default function ThoughtsManager({ thoughts }: ThoughtsManagerProps) {
       <Box component="section" className={styles.panel}>
         <SimpleGrid cols={{ base: 1, sm: 2, lg: 4 }} spacing="xs" className={styles.contentToolbar}>
           <TextInput
-            onChange={(event) => resetPagination(() => setQuery(event.currentTarget.value))}
+            onChange={(event) => {
+              const { value } = event.currentTarget
+              resetPagination(() => setQuery(value))
+            }}
             placeholder="Cari thought, kategori, catatan"
             type="search"
             value={query}
@@ -258,13 +261,19 @@ export default function ThoughtsManager({ thoughts }: ThoughtsManagerProps) {
         <Stack gap="sm">
           <TextInput
             label="Title"
-            onChange={(event) => setForm((current) => ({ ...current, title: event.currentTarget.value }))}
+            onChange={(event) => {
+              const { value } = event.currentTarget
+              setForm((current) => ({ ...current, title: value }))
+            }}
             placeholder="Short thought title"
             value={form.title}
           />
           <Textarea
             label="Note"
-            onChange={(event) => setForm((current) => ({ ...current, body: event.currentTarget.value }))}
+            onChange={(event) => {
+              const { value } = event.currentTarget
+              setForm((current) => ({ ...current, body: value }))
+            }}
             placeholder="Capture the context, why it matters, or what to do next."
             rows={5}
             value={form.body}
@@ -272,7 +281,10 @@ export default function ThoughtsManager({ thoughts }: ThoughtsManagerProps) {
           <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="sm">
             <TextInput
               label="Category"
-              onChange={(event) => setForm((current) => ({ ...current, category: event.currentTarget.value }))}
+              onChange={(event) => {
+                const { value } = event.currentTarget
+                setForm((current) => ({ ...current, category: value }))
+              }}
               placeholder="Product"
               value={form.category}
             />

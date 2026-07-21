@@ -300,20 +300,29 @@ export default function ProfilesSettings({ groups, socmeds, userSocmeds }: Profi
           <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="sm">
             <TextInput
               label="Account"
-              onChange={(event) => setForm((current) => ({ ...current, account: event.currentTarget.value }))}
+              onChange={(event) => {
+                const { value } = event.currentTarget
+                setForm((current) => ({ ...current, account: value }))
+              }}
               placeholder="das.agung"
               value={form.account}
             />
             <TextInput
               label="Label"
-              onChange={(event) => setForm((current) => ({ ...current, label: event.currentTarget.value }))}
+              onChange={(event) => {
+                const { value } = event.currentTarget
+                setForm((current) => ({ ...current, label: value }))
+              }}
               placeholder="Personal Brand"
               value={form.label}
             />
           </SimpleGrid>
           <TextInput
             label="Profile URL"
-            onChange={(event) => setForm((current) => ({ ...current, url: event.currentTarget.value }))}
+            onChange={(event) => {
+              const { value } = event.currentTarget
+              setForm((current) => ({ ...current, url: value }))
+            }}
             placeholder="https://..."
             type="url"
             value={form.url}
@@ -321,14 +330,20 @@ export default function ProfilesSettings({ groups, socmeds, userSocmeds }: Profi
           <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="sm">
             <TextInput
               label="Linked Email"
-              onChange={(event) => setForm((current) => ({ ...current, linkedEmail: event.currentTarget.value }))}
+              onChange={(event) => {
+                const { value } = event.currentTarget
+                setForm((current) => ({ ...current, linkedEmail: value }))
+              }}
               placeholder="Optional"
               type="email"
               value={form.linkedEmail}
             />
             <TextInput
               label="Linked WhatsApp"
-              onChange={(event) => setForm((current) => ({ ...current, linkedWhatsapp: event.currentTarget.value }))}
+              onChange={(event) => {
+                const { value } = event.currentTarget
+                setForm((current) => ({ ...current, linkedWhatsapp: value }))
+              }}
               placeholder="Optional"
               value={form.linkedWhatsapp}
             />

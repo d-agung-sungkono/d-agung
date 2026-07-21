@@ -427,7 +427,10 @@ export default function ContentList({ content, profiles, targets }: ContentListP
 
       <SimpleGrid cols={{ base: 1, sm: 2, lg: 5 }} spacing="xs" className={styles.contentToolbar}>
         <TextInput
-          onChange={(event) => resetPagination(() => setQuery(event.currentTarget.value))}
+          onChange={(event) => {
+            const { value } = event.currentTarget
+            resetPagination(() => setQuery(value))
+          }}
           placeholder="Cari judul, akun, platform"
           type="search"
           value={query}
@@ -540,7 +543,10 @@ export default function ContentList({ content, profiles, targets }: ContentListP
         <Stack gap="sm">
           <TextInput
             label="Title"
-            onChange={(event) => setForm((current) => ({ ...current, title: event.currentTarget.value }))}
+            onChange={(event) => {
+              const { value } = event.currentTarget
+              setForm((current) => ({ ...current, title: value }))
+            }}
             placeholder="Contents title"
             value={form.title}
           />
@@ -561,21 +567,30 @@ export default function ContentList({ content, profiles, targets }: ContentListP
           <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="sm">
             <TextInput
               label="Contents Link"
-              onChange={(event) => setForm((current) => ({ ...current, url: event.currentTarget.value }))}
+              onChange={(event) => {
+                const { value } = event.currentTarget
+                setForm((current) => ({ ...current, url: value }))
+              }}
               placeholder="https://"
               type="url"
               value={form.url}
             />
             <TextInput
               label="Schedule WIB"
-              onChange={(event) => setForm((current) => ({ ...current, scheduledAt: event.currentTarget.value }))}
+              onChange={(event) => {
+                const { value } = event.currentTarget
+                setForm((current) => ({ ...current, scheduledAt: value }))
+              }}
               type="datetime-local"
               value={form.scheduledAt}
             />
           </SimpleGrid>
           <Textarea
             label="Notes"
-            onChange={(event) => setForm((current) => ({ ...current, notes: event.currentTarget.value }))}
+            onChange={(event) => {
+              const { value } = event.currentTarget
+              setForm((current) => ({ ...current, notes: value }))
+            }}
             placeholder="Optional"
             value={form.notes}
           />
@@ -594,7 +609,10 @@ export default function ContentList({ content, profiles, targets }: ContentListP
         <Stack gap="sm">
           <TextInput
             label="Schedule Name"
-            onChange={(event) => setScheduleForm((current) => ({ ...current, name: event.currentTarget.value }))}
+            onChange={(event) => {
+              const { value } = event.currentTarget
+              setScheduleForm((current) => ({ ...current, name: value }))
+            }}
             placeholder="Agung Branding Contents"
             value={scheduleForm.name}
           />
@@ -608,19 +626,28 @@ export default function ContentList({ content, profiles, targets }: ContentListP
             <TextInput
               label="Every"
               min={1}
-              onChange={(event) => setScheduleForm((current) => ({ ...current, cadenceDays: event.currentTarget.value }))}
+              onChange={(event) => {
+                const { value } = event.currentTarget
+                setScheduleForm((current) => ({ ...current, cadenceDays: value }))
+              }}
               type="number"
               value={scheduleForm.cadenceDays}
             />
             <TextInput
               label="Start Date"
-              onChange={(event) => setScheduleForm((current) => ({ ...current, startDate: event.currentTarget.value }))}
+              onChange={(event) => {
+                const { value } = event.currentTarget
+                setScheduleForm((current) => ({ ...current, startDate: value }))
+              }}
               type="date"
               value={scheduleForm.startDate}
             />
             <TextInput
               label="Time WIB"
-              onChange={(event) => setScheduleForm((current) => ({ ...current, preferredTime: event.currentTarget.value }))}
+              onChange={(event) => {
+                const { value } = event.currentTarget
+                setScheduleForm((current) => ({ ...current, preferredTime: value }))
+              }}
               type="time"
               value={scheduleForm.preferredTime}
             />
@@ -633,7 +660,10 @@ export default function ContentList({ content, profiles, targets }: ContentListP
           />
           <Textarea
             label="Notes"
-            onChange={(event) => setScheduleForm((current) => ({ ...current, notes: event.currentTarget.value }))}
+            onChange={(event) => {
+              const { value } = event.currentTarget
+              setScheduleForm((current) => ({ ...current, notes: value }))
+            }}
             placeholder="Optional"
             value={scheduleForm.notes}
           />

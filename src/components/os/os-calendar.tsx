@@ -16,6 +16,7 @@ export type OsCalendarEvent = {
   status: string
   source: string
   completed?: boolean
+  overdue?: boolean
 }
 
 type OsCalendarProps = {
@@ -45,6 +46,7 @@ export default function OsCalendar({ events }: OsCalendarProps) {
         classNames: [`os-calendar-event-${event.status}`, getSourceClassName(event.source)],
         extendedProps: {
           completed: event.completed ?? false,
+          overdue: event.overdue ?? false,
           source: event.source,
           status: event.status,
         },
@@ -106,6 +108,8 @@ export default function OsCalendar({ events }: OsCalendarProps) {
             <span className={styles.calendarEventTitle}>
               {eventInfo.event.extendedProps.completed ? (
                 <span className={styles.calendarCheck}>✓</span>
+              ) : eventInfo.event.extendedProps.overdue ? (
+                <span className={styles.calendarAlert}>!</span>
               ) : null}
               {eventInfo.event.title}
             </span>

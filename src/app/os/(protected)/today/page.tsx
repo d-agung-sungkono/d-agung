@@ -12,18 +12,32 @@ function addDays(value: string, days: number) {
   return date.toISOString()
 }
 
+function getJakartaDateKey(value: Date | string = new Date()) {
+  return new Intl.DateTimeFormat('en-CA', {
+    day: '2-digit',
+    month: '2-digit',
+    timeZone: 'Asia/Jakarta',
+    year: 'numeric',
+  }).format(new Date(value))
+}
+
 function buildScheduleEvents(targets: Awaited<ReturnType<typeof getContentData>>['targets']) {
+  const today = getJakartaDateKey()
+
   return targets
     .filter((target) => target.status === 'active')
     .flatMap((target) =>
       Array.from({ length: 8 }, (_, index) => {
         const start = addDays(target.nextDueAt, index * target.cadenceDays)
+        const overdue = getJakartaDateKey(start) < today
+
         return {
           id: `target-${target.id}-${index}`,
           title: target.name,
           start,
           status: index === 0 ? 'planned' : 'draft',
           source: `${target.platform} Target`,
+          overdue,
         }
       })
     )
@@ -71,12 +85,6 @@ export default async function OsTodayPage() {
       {dbError ? <DbUnavailable message="Database connection unavailable. Calendar is showing local today data only." /> : null}
 
       <section className={styles.panel}>
-        <div className={styles.panelHeader}>
-          <div>
-            <h3 className={styles.panelTitle}>Calendar</h3>
-            <p className={styles.muted}>Monthly by default. Switch view, click a day, or drag events to arrange.</p>
-          </div>
-        </div>
         <OsCalendar events={calendarEvents} />
       </section>
     </>
