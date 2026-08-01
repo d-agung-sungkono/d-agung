@@ -3,6 +3,7 @@
 import { revalidatePath } from 'next/cache'
 
 import { query } from '@/lib/db'
+import { scrapeContentLink, type ScrapedContentResult } from '@/lib/os-content-scraper'
 import { getOsUserId } from '@/lib/os-settings'
 
 function nullableValue(value: FormDataEntryValue | null) {
@@ -45,17 +46,41 @@ function revalidateContent() {
   revalidatePath('/os/today')
 }
 
+function buildScrapedMetadata(formData: FormData, fallbackUrl: string) {
+  const scrapedAt = nullableValue(formData.get('scrapedAt'))
+
+  if (!scrapedAt) {
+    return {}
+  }
+
+  return {
+    scrape: {
+      canonicalUrl: fallbackUrl,
+      description: nullableValue(formData.get('scrapeDescription')),
+      image: nullableValue(formData.get('scrapeImage')),
+      scrapedAt,
+      siteName: nullableValue(formData.get('scrapeSiteName')),
+      sourceUrl: nullableValue(formData.get('sourceUrl')) ?? fallbackUrl,
+      title: String(formData.get('title') ?? '').trim(),
+    },
+  }
+}
+
+export async function scrapeContentPostLink(formData: FormData): Promise<ScrapedContentResult> {
+  return scrapeContentLink(String(formData.get('url') ?? '').trim())
+}
+
 export async function createContentPost(formData: FormData) {
   const userId = await getOsUserId()
   const userSocmedId = nullableValue(formData.get('userSocmedId'))
+  const url = String(formData.get('url') ?? '').trim()
   const title = String(formData.get('title') ?? '').trim()
-  const url = nullableValue(formData.get('url'))
   const scheduledAt = normalizeJakartaDateTime(formData.get('scheduledAt'))
   const status = String(formData.get('status') ?? 'draft')
   const notes = nullableValue(formData.get('notes'))
 
-  if (!userSocmedId || !title || !scheduledAt) {
-    throw new Error('Account, title, and schedule are required.')
+  if (!userSocmedId || !url || !title || !scheduledAt) {
+    throw new Error('Account, content link, title, and schedule are required.')
   }
 
   await query(
@@ -69,11 +94,21 @@ export async function createContentPost(formData: FormData) {
         scheduled_at,
         published_at,
         status,
-        notes
+        notes,
+        metadata
       )
-      VALUES ($1, $2, gen_random_uuid()::text, $3, $4, $5, CASE WHEN $6 = 'published' THEN $5::timestamptz ELSE NULL END, $6, $7)
+      VALUES ($1, $2, gen_random_uuid()::text, $3, $4, $5, CASE WHEN $6 = 'published' THEN $5::timestamptz ELSE NULL END, $6, $7, $8::jsonb)
     `,
-    [userId, userSocmedId, title, url, scheduledAt, status, notes]
+    [
+      userId,
+      userSocmedId,
+      title,
+      url,
+      scheduledAt,
+      status,
+      notes,
+      JSON.stringify(buildScrapedMetadata(formData, url)),
+    ]
   )
 
   revalidateContent()
@@ -83,15 +118,17 @@ export async function updateContentPost(formData: FormData) {
   const userId = await getOsUserId()
   const id = String(formData.get('id') ?? '')
   const userSocmedId = nullableValue(formData.get('userSocmedId'))
+  const url = String(formData.get('url') ?? '').trim()
   const title = String(formData.get('title') ?? '').trim()
-  const url = nullableValue(formData.get('url'))
   const scheduledAt = normalizeJakartaDateTime(formData.get('scheduledAt'))
   const status = String(formData.get('status') ?? 'draft')
   const notes = nullableValue(formData.get('notes'))
 
-  if (!id || !userSocmedId || !title || !scheduledAt) {
-    throw new Error('id, account, title, and schedule are required.')
+  if (!id || !userSocmedId || !url || !title || !scheduledAt) {
+    throw new Error('id, account, content link, title, and schedule are required.')
   }
+
+  const metadata = buildScrapedMetadata(formData, url)
 
   await query(
     `
@@ -104,11 +141,22 @@ export async function updateContentPost(formData: FormData) {
         published_at = CASE WHEN $5 = 'published' THEN COALESCE(published_at, $4::timestamptz) ELSE NULL END,
         status = $5,
         notes = $6,
+        metadata = CASE WHEN $7::jsonb = '{}'::jsonb THEN metadata ELSE metadata || $7::jsonb END,
         updated_at = now()
-      WHERE id = $7
-        AND user_id = $8
+      WHERE id = $8
+        AND user_id = $9
     `,
-    [userSocmedId, title, url, scheduledAt, status, notes, id, userId]
+    [
+      userSocmedId,
+      title,
+      url,
+      scheduledAt,
+      status,
+      notes,
+      JSON.stringify(metadata),
+      id,
+      userId,
+    ]
   )
 
   revalidateContent()

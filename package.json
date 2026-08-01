@@ -9,6 +9,7 @@
     "lint": "eslint",
     "db:migrate": "node scripts/db/migrate.mjs",
     "db:import-tiktok": "node scripts/db/import-tiktok-profile.mjs",
+    "db:seed-products": "node scripts/db/seed-product-skus.mjs",
     "db:seed-os": "node scripts/db/seed-os-user.mjs"
   },
   "dependencies": {

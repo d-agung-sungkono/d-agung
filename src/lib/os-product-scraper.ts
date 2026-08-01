@@ -2,6 +2,19 @@ import 'server-only'
 
 type JsonLdProduct = {
   '@type'?: string
+  'http://schema.org/description'?: string
+  'http://schema.org/image'?: string
+  'http://schema.org/name'?: string
+  'http://schema.org/offers'?: {
+    'http://schema.org/highPrice'?: number
+    'http://schema.org/lowPrice'?: number
+    'http://schema.org/offers'?: Array<{
+      'http://schema.org/availability'?: string
+      'http://schema.org/price'?: number
+      'http://schema.org/sku'?: string
+    }>
+    'http://schema.org/priceCurrency'?: string
+  }
   color?: string
   description?: string
   image?: string | string[]
@@ -30,6 +43,31 @@ type ApolloSkuStockGroup = {
     text?: string
     type?: string
   }>
+}
+
+type JakmallSku = {
+  id?: string
+  images?: Array<{
+    detail?: string
+    thumbnail?: string
+  }>
+  in_stock?: boolean
+  price?: {
+    discount?: {
+      percentage?: number
+      value?: number
+    } | null
+    final?: number
+    list?: number
+    normal?: number
+  }
+  sku?: string
+  sku_display?: string
+  url?: string
+}
+
+type JakmallProductState = {
+  sku?: Record<string, JakmallSku>
 }
 
 export type ScrapedBranchStock = {
@@ -86,7 +124,7 @@ function getJsonLdProducts(html: string) {
       const entries = Array.isArray(parsed) ? parsed : [parsed]
 
       for (const entry of entries) {
-        if (entry?.['@type'] === 'Product') {
+        if (entry?.['@type'] === 'Product' || entry?.['@type'] === 'http://schema.org/Product') {
           products.push(entry)
         }
       }
@@ -96,6 +134,20 @@ function getJsonLdProducts(html: string) {
   }
 
   return products
+}
+
+function getJakmallProductState(html: string) {
+  const match = html.match(/\bvar\s+spdt\s*=\s*(\{[\s\S]*?\});\s*<\/script>/)
+
+  if (!match) {
+    return null
+  }
+
+  try {
+    return JSON.parse(match[1]) as JakmallProductState
+  } catch {
+    return null
+  }
 }
 
 function getApolloState(html: string) {
@@ -136,7 +188,7 @@ function getSourceName(url: URL) {
   }
 
   if (hostname === 'jackmall.com') {
-    return 'Jackmall'
+    return 'Jakmall'
   }
 
   return 'Jacknote'
@@ -194,7 +246,85 @@ function buildShopeeCopy(product: Omit<ScrapedProductResult, 'shopeeCopy'>) {
   ].join('\n')
 }
 
-export async function scrapeSupplierProduct(sourceUrl: string): Promise<ScrapedProductResult> {
+function getJsonLdName(product: JsonLdProduct) {
+  return product.name ?? product['http://schema.org/name']
+}
+
+function getJsonLdDescription(product: JsonLdProduct) {
+  return product.description ?? product['http://schema.org/description']
+}
+
+function getJsonLdImage(product: JsonLdProduct) {
+  return product.image ?? product['http://schema.org/image']
+}
+
+function getJsonLdOfferUrl(product: JsonLdProduct) {
+  return product.offers?.url
+}
+
+function getJsonLdOfferForSku(product: JsonLdProduct, expectedSku: string) {
+  const offers = product['http://schema.org/offers']?.['http://schema.org/offers'] ?? []
+  return offers.find((offer) => offer['http://schema.org/sku'] === expectedSku) ?? offers[0]
+}
+
+function buildJakmallResult({
+  expectedSku,
+  html,
+  product,
+  source,
+  url,
+}: {
+  expectedSku: string
+  html: string
+  product: JsonLdProduct
+  source: string
+  url: URL
+}) {
+  const state = getJakmallProductState(html)
+  const skuEntries = Object.values(state?.sku ?? {})
+  const selectedSku =
+    skuEntries.find((item) => item.sku_display === expectedSku || item.sku === expectedSku) ??
+    skuEntries.find((item) => item.id && url.hash === `#${item.id}`) ??
+    skuEntries[0]
+  const offer = selectedSku?.sku_display ? getJsonLdOfferForSku(product, selectedSku.sku_display) : getJsonLdOfferForSku(product, expectedSku)
+  const sku = selectedSku?.sku_display ?? selectedSku?.sku ?? offer?.['http://schema.org/sku'] ?? expectedSku
+  const finalPrice = selectedSku?.price?.final ?? offer?.['http://schema.org/price'] ?? product['http://schema.org/offers']?.['http://schema.org/lowPrice'] ?? null
+  const originalPrice = selectedSku?.price?.list ?? selectedSku?.price?.normal ?? product['http://schema.org/offers']?.['http://schema.org/highPrice'] ?? finalPrice
+  const discountAmount =
+    selectedSku?.price?.discount?.value ??
+    (originalPrice && finalPrice && originalPrice > finalPrice ? originalPrice - finalPrice : null)
+  const discountPercent =
+    selectedSku?.price?.discount?.percentage ?? getDiscountPercent(originalPrice ?? null, finalPrice ?? null)
+  const productImages = selectedSku?.images?.map((image) => image.detail ?? image.thumbnail).filter((image): image is string => Boolean(image)) ?? []
+  const metaImages = Array.from(
+    new Set(Array.from(html.matchAll(/<meta[^>]+property=["']og:image["'][^>]+content=["']([^"']+)["'][^>]*>/gi)).map((item) => decodeHtml(item[1])))
+  )
+  const result = {
+    branchStocks: [],
+    category: null,
+    currency: product['http://schema.org/offers']?.['http://schema.org/priceCurrency'] ?? 'IDR',
+    description: getJsonLdDescription(product) ?? getMetaContent(html, 'og:description'),
+    discountAmount,
+    discountPercent,
+    finalPrice: Number.isFinite(finalPrice) ? finalPrice : null,
+    images: Array.from(new Set([...productImages, ...metaImages])).filter(Boolean),
+    originalPrice: Number.isFinite(originalPrice) ? originalPrice ?? null : null,
+    sku,
+    source,
+    stockAvailableCount: selectedSku?.in_stock || offer?.['http://schema.org/availability']?.includes('InStock') ? 1 : 0,
+    stockStatus: selectedSku?.in_stock || offer?.['http://schema.org/availability']?.includes('InStock') ? 'available' : 'sold-out',
+    title: getJsonLdName(product) ?? getMetaContent(html, 'og:title'),
+    url: selectedSku?.url ?? url.toString(),
+    variant: null,
+  }
+
+  return {
+    ...result,
+    shopeeCopy: buildShopeeCopy(result),
+  }
+}
+
+export async function scrapeSupplierProduct(sourceUrl: string, expectedSku = ''): Promise<ScrapedProductResult> {
   if (!sourceUrl) {
     throw new Error('Product URL is required.')
   }
@@ -216,18 +346,27 @@ export async function scrapeSupplierProduct(sourceUrl: string): Promise<ScrapedP
 
   const html = await response.text()
   const products = getJsonLdProducts(html)
+  const source = getSourceName(url)
   const product =
-    products.find((item) => item.offers?.url === url.toString()) ??
-    products.find((item) => item.offers?.url && url.toString().startsWith(item.offers.url)) ??
+    products.find((item) => getJsonLdOfferUrl(item) === url.toString()) ??
+    products.find((item) => {
+      const offerUrl = getJsonLdOfferUrl(item)
+      return offerUrl && url.toString().startsWith(offerUrl)
+    }) ??
     products[0]
 
   if (!product) {
     throw new Error('Product structured data was not found.')
   }
 
+  if (source === 'Jakmall') {
+    return buildJakmallResult({ expectedSku, html, product, source, url })
+  }
+
+  const sku = expectedSku || product.sku || ''
   const apolloState = getApolloState(html)
-  const apolloSku = product.sku ? (apolloState?.[`ProductVariantSku:${product.sku}`] as ApolloProductSku | undefined) : undefined
-  const apolloStock = product.sku ? (apolloState?.[`SkuStockGroup:${product.sku}`] as ApolloSkuStockGroup | undefined) : undefined
+  const apolloSku = sku ? (apolloState?.[`ProductVariantSku:${sku}`] as ApolloProductSku | undefined) : undefined
+  const apolloStock = sku ? (apolloState?.[`SkuStockGroup:${sku}`] as ApolloSkuStockGroup | undefined) : undefined
   const branchStocks =
     apolloStock?.stockGroups?.map((stock) => ({
       branchId: stock.branchNearbyGroupId ?? null,
@@ -239,29 +378,31 @@ export async function scrapeSupplierProduct(sourceUrl: string): Promise<ScrapedP
   const metaImages = Array.from(
     new Set(Array.from(html.matchAll(/<meta[^>]+property=["']og:image["'][^>]+content=["']([^"']+)["'][^>]*>/gi)).map((item) => decodeHtml(item[1])))
   )
-  const productImages = Array.isArray(product.image) ? product.image : product.image ? [product.image] : []
+  const productImage = getJsonLdImage(product)
+  const productImages = Array.isArray(productImage) ? productImage : productImage ? [productImage] : []
   const images = Array.from(new Set([...productImages, ...metaImages])).filter(Boolean)
-  const finalPrice = product.offers?.price === undefined ? null : Number(product.offers.price)
+  const offers = product.offers
+  const finalPrice = offers?.price === undefined ? null : Number(offers.price)
   const originalPrice = apolloSku?.price?.top ?? finalPrice
   const discountAmount =
     originalPrice && finalPrice && originalPrice > finalPrice ? originalPrice - finalPrice : null
   const discountPercent = getDiscountPercent(originalPrice ?? null, finalPrice ?? null)
-  const fallbackStockStatus = product.offers?.availability?.includes('InStock') ? 'available' : 'limited'
-  const title = `${product.name ?? getMetaContent(html, 'og:title')}${product.size ? ` - ${product.size}` : ''}${
+  const fallbackStockStatus = offers?.availability?.includes('InStock') ? 'available' : 'limited'
+  const title = `${getJsonLdName(product) ?? getMetaContent(html, 'og:title')}${product.size ? ` - ${product.size}` : ''}${
     product.color ? ` - ${product.color}` : ''
   }`
   const result = {
     branchStocks,
     category: null,
-    currency: product.offers?.priceCurrency ?? 'IDR',
-    description: product.description ?? getMetaContent(html, 'og:description'),
+    currency: offers?.priceCurrency ?? 'IDR',
+    description: getJsonLdDescription(product) ?? getMetaContent(html, 'og:description'),
     discountAmount,
     discountPercent,
     finalPrice: Number.isFinite(finalPrice) ? finalPrice : null,
     images,
     originalPrice: Number.isFinite(originalPrice) ? originalPrice ?? null : null,
-    sku: product.sku ?? '',
-    source: getSourceName(url),
+    sku,
+    source,
     stockAvailableCount: branchStocks.filter((branch) => branch.isAvailable).length,
     stockStatus: getStockStatus(branchStocks, fallbackStockStatus),
     title,

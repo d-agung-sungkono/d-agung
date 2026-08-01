@@ -9,6 +9,7 @@ import {
   createContentTarget,
   deleteContentPost,
   deleteContentTarget,
+  scrapeContentPostLink,
   updateContentPost,
   updateContentTarget,
 } from '@/app/os/(protected)/content/actions'
@@ -66,6 +67,11 @@ type ContentForm = {
   id: string
   notes: string
   scheduledAt: string
+  scrapeDescription: string
+  scrapeImage: string
+  scrapeSiteName: string
+  scrapedAt: string
+  sourceUrl: string
   status: string
   title: string
   url: string
@@ -130,6 +136,11 @@ function buildFormData(form: ContentForm) {
   formData.set('id', form.id)
   formData.set('notes', form.notes)
   formData.set('scheduledAt', form.scheduledAt)
+  formData.set('scrapeDescription', form.scrapeDescription)
+  formData.set('scrapeImage', form.scrapeImage)
+  formData.set('scrapeSiteName', form.scrapeSiteName)
+  formData.set('scrapedAt', form.scrapedAt)
+  formData.set('sourceUrl', form.sourceUrl)
   formData.set('status', form.status)
   formData.set('title', form.title)
   formData.set('url', form.url)
@@ -155,6 +166,11 @@ function getEmptyForm(profileId = ''): ContentForm {
     id: '',
     notes: '',
     scheduledAt: '',
+    scrapeDescription: '',
+    scrapeImage: '',
+    scrapeSiteName: '',
+    scrapedAt: '',
+    sourceUrl: '',
     status: 'draft',
     title: '',
     url: '',
@@ -178,6 +194,41 @@ function getEmptyScheduleForm(profileId = ''): ScheduleForm {
     status: 'active',
     userSocmedId: profileId,
   }
+}
+
+function inferPlatformFromUrl(value: string) {
+  try {
+    const hostname = new URL(value).hostname.replace(/^www\./, '').toLowerCase()
+
+    if (hostname.includes('tiktok.com')) {
+      return 'TikTok'
+    }
+
+    if (hostname.includes('shopee.')) {
+      return 'Shopee'
+    }
+  } catch {
+    return null
+  }
+
+  return null
+}
+
+function buildScrapedNotes(scraped: {
+  canonicalUrl: string
+  description: string | null
+  image: string | null
+  siteName: string | null
+  title: string
+}) {
+  return [
+    scraped.description,
+    scraped.siteName ? `Site: ${scraped.siteName}` : null,
+    `Source: ${scraped.canonicalUrl}`,
+    scraped.image ? `Image: ${scraped.image}` : null,
+  ]
+    .filter((item): item is string => Boolean(item))
+    .join('\n')
 }
 
 export default function ContentList({ content, profiles, targets }: ContentListProps) {
@@ -294,6 +345,11 @@ export default function ContentList({ content, profiles, targets }: ContentListP
       id: item.id,
       notes: item.notes ?? '',
       scheduledAt: formatInputDate(item.scheduledAt),
+      scrapeDescription: '',
+      scrapeImage: '',
+      scrapeSiteName: '',
+      scrapedAt: '',
+      sourceUrl: item.url ?? '',
       status: item.status,
       title: item.title,
       url: item.url ?? '',
@@ -325,6 +381,35 @@ export default function ContentList({ content, profiles, targets }: ContentListP
       }
 
       setIsOpen(false)
+    })
+  }
+
+  function scrapeContent() {
+    startTransition(async () => {
+      const formData = new FormData()
+      formData.set('url', form.url)
+      const scraped = await scrapeContentPostLink(formData)
+      const inferredPlatform = inferPlatformFromUrl(scraped.canonicalUrl)
+      const inferredProfile = inferredPlatform
+        ? profiles.find((profile) => profile.platform.toLowerCase() === inferredPlatform.toLowerCase())
+        : null
+      const inferredTarget = inferredProfile
+        ? targets.find((target) => target.status === 'active' && target.userSocmedId === inferredProfile.id)
+        : null
+
+      setForm((current) => ({
+        ...current,
+        notes: buildScrapedNotes(scraped),
+        scheduledAt: current.scheduledAt || (inferredTarget ? formatInputDate(inferredTarget.nextDueAt) : ''),
+        scrapeDescription: scraped.description ?? '',
+        scrapeImage: scraped.image ?? '',
+        scrapeSiteName: scraped.siteName ?? '',
+        scrapedAt: new Date().toISOString(),
+        sourceUrl: current.url,
+        title: scraped.title,
+        url: scraped.canonicalUrl,
+        userSocmedId: inferredProfile?.id ?? current.userSocmedId,
+      }))
     })
   }
 
@@ -542,12 +627,36 @@ export default function ContentList({ content, profiles, targets }: ContentListP
       <Modal opened={isOpen} onClose={() => setIsOpen(false)} title={isEditing ? 'Edit Contents' : 'Add Contents'} centered>
         <Stack gap="sm">
           <TextInput
+            label="Contents Link"
+            onChange={(event) => {
+              const { value } = event.currentTarget
+              setForm((current) => ({
+                ...current,
+                scrapeDescription: '',
+                scrapeImage: '',
+                scrapeSiteName: '',
+                scrapedAt: '',
+                sourceUrl: '',
+                title: '',
+                url: value,
+              }))
+            }}
+            placeholder="https://"
+            type="url"
+            value={form.url}
+          />
+          <Group justify="flex-end">
+            <Button disabled={!form.url || isPending} leftSection={<IconRefresh size={18} stroke={1.8} />} loading={isPending} onClick={scrapeContent} variant="default">
+              Scrape
+            </Button>
+          </Group>
+          <TextInput
             label="Title"
             onChange={(event) => {
               const { value } = event.currentTarget
               setForm((current) => ({ ...current, title: value }))
             }}
-            placeholder="Contents title"
+            placeholder="Click Scrape to fill"
             value={form.title}
           />
           <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="sm">
@@ -564,27 +673,23 @@ export default function ContentList({ content, profiles, targets }: ContentListP
               value={form.status}
             />
           </SimpleGrid>
-          <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="sm">
-            <TextInput
-              label="Contents Link"
-              onChange={(event) => {
-                const { value } = event.currentTarget
-                setForm((current) => ({ ...current, url: value }))
-              }}
-              placeholder="https://"
-              type="url"
-              value={form.url}
-            />
-            <TextInput
-              label="Schedule WIB"
-              onChange={(event) => {
-                const { value } = event.currentTarget
-                setForm((current) => ({ ...current, scheduledAt: value }))
-              }}
-              type="datetime-local"
-              value={form.scheduledAt}
-            />
-          </SimpleGrid>
+          <TextInput
+            label="Schedule WIB"
+            onChange={(event) => {
+              const { value } = event.currentTarget
+              setForm((current) => ({ ...current, scheduledAt: value }))
+            }}
+            type="datetime-local"
+            value={form.scheduledAt}
+          />
+          {form.scrapedAt ? (
+            <Box>
+              <Text className={styles.profileMeta}>
+                Scraped from {form.scrapeSiteName || 'linked page'}
+                {form.scrapeDescription ? ` · ${form.scrapeDescription}` : ''}
+              </Text>
+            </Box>
+          ) : null}
           <Textarea
             label="Notes"
             onChange={(event) => {
