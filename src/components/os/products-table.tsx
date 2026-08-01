@@ -239,6 +239,21 @@ export default function ProductsTable({ products, shopeeExample }: ProductsTable
     })
   }
 
+  function scrapeSingleLink(sku: string, url: string) {
+    startTransition(async () => {
+      const formData = new FormData()
+      formData.set('sku', sku)
+      formData.set('url', url)
+
+      try {
+        await saveScrapedProduct(formData)
+        setTestResult(`Snapshot ${sku} tersimpan dari link supplier.`)
+      } catch (error) {
+        setTestResult(error instanceof Error ? error.message : 'Supplier scrape failed.')
+      }
+    })
+  }
+
   return (
     <>
       <SimpleGrid cols={{ base: 1, sm: 2, lg: 6 }} spacing="xs" className={styles.productToolbar}>

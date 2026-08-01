@@ -101,18 +101,25 @@ type ProductRow = {
   previous_discount_amount: number | null
   previous_discount_percent: string | null
   previous_stock_available_count: number | null
-  supplier_links: Array<{
-    discountAmount: number | null
-    discountPercent: string | null
-    finalPrice: number | null
-    originalPrice: number | null
-    scrapedAt: string | null
-    snapshotId: string | null
-    source: string
-    stockAvailableCount: number | null
-    stockStatus: string | null
-    url: string
-  }> | null
+  supplier_links: ProductRowSupplierLink[] | null
+}
+
+type ProductRowSupplierSnapshot = {
+  discountAmount: number | null
+  discountPercent: string | null
+  finalPrice: number | null
+  originalPrice: number | null
+  scrapedAt: string | null
+  snapshotId: string | null
+  stockAvailableCount: number | null
+  stockStatus: string | null
+}
+
+type ProductRowSupplierLink = {
+  current: ProductRowSupplierSnapshot | null
+  previous: ProductRowSupplierSnapshot | null
+  source: string
+  url: string
 }
 
 type BranchStockRow = {
@@ -262,19 +269,51 @@ LEFT JOIN LATERAL (
   }
 
   return productsResult.rows.map((row) => {
-    const supplierSnapshots = (row.supplier_links ?? []).map((link) => ({
-      discountAmount: link.discountAmount,
-      discountPercent: link.discountPercent ? Number(link.discountPercent) : null,
-      finalPrice: link.finalPrice,
-      isAvailable: (link.stockAvailableCount ?? 0) > 0 || link.stockStatus === 'available',
-      originalPrice: link.originalPrice,
-      scrapedAt: link.scrapedAt,
-      snapshotId: link.snapshotId,
+    const supplierLinks = (row.supplier_links ?? []).map((link) => ({
+      current: link.current
+        ? {
+            discountAmount: link.current.discountAmount,
+            discountPercent: link.current.discountPercent,
+            finalPrice: link.current.finalPrice,
+            originalPrice: link.current.originalPrice,
+            scrapedAt: link.current.scrapedAt,
+            snapshotId: link.current.snapshotId,
+            stockAvailableCount: link.current.stockAvailableCount ?? 0,
+            stockStatus: link.current.stockStatus ?? 'not-scraped',
+            branchStocks: link.current.snapshotId ? branchStocksBySnapshotId.get(link.current.snapshotId) ?? [] : [],
+          }
+        : null,
+      previous: link.previous
+        ? {
+            discountAmount: link.previous.discountAmount,
+            discountPercent: link.previous.discountPercent,
+            finalPrice: link.previous.finalPrice,
+            originalPrice: link.previous.originalPrice,
+            scrapedAt: link.previous.scrapedAt,
+            snapshotId: link.previous.snapshotId,
+            stockAvailableCount: link.previous.stockAvailableCount ?? 0,
+            stockStatus: link.previous.stockStatus ?? 'not-scraped',
+            branchStocks: link.previous.snapshotId ? branchStocksBySnapshotId.get(link.previous.snapshotId) ?? [] : [],
+          }
+        : null,
       source: link.source,
-      stockAvailableCount: link.stockAvailableCount ?? 0,
-      stockStatus: link.stockStatus ?? 'not-scraped',
       url: link.url,
     }))
+    const supplierSnapshots = supplierLinks
+      .filter((link) => link.current)
+      .map((link) => ({
+        discountAmount: link.current?.discountAmount ?? null,
+        discountPercent: link.current?.discountPercent ? Number(link.current.discountPercent) : null,
+        finalPrice: link.current?.finalPrice ?? null,
+        isAvailable: (link.current?.stockAvailableCount ?? 0) > 0 || link.current?.stockStatus === 'available',
+        originalPrice: link.current?.originalPrice ?? null,
+        scrapedAt: link.current?.scrapedAt ?? null,
+        snapshotId: link.current?.snapshotId ?? null,
+        source: link.source,
+        stockAvailableCount: link.current?.stockAvailableCount ?? 0,
+        stockStatus: link.current?.stockStatus ?? 'not-scraped',
+        url: link.url,
+      }))
     const latestPrice = row.latest_final_price ?? 0
     const previousPrice = row.previous_final_price ?? latestPrice
     const latestStock = row.latest_stock_available_count ?? 0
@@ -308,7 +347,7 @@ LEFT JOIN LATERAL (
       },
       stockStatus: supplierSnapshots.length === 0 ? 'not-scraped' : latestStock > 0 ? 'available' : 'sold-out',
       supplierSnapshots,
-      supplierLinks: row.supplier_links ?? [],
+      supplierLinks,
       url: row.source_url,
       variant: row.variant,
     }
