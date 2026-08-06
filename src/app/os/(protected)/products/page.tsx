@@ -1,15 +1,14 @@
 import DbUnavailable from '@/components/os/db-unavailable'
 import ProductsTable from '@/components/os/products-table'
 import styles from '@/components/os/os-shell.module.css'
-import shopeeExample from '@/data/os/shopee-example.json'
 import { getProductsData } from '@/lib/os-products'
 
 export default async function OsProductsPage() {
-  let products: Awaited<ReturnType<typeof getProductsData>> = []
+  let productsData: Awaited<ReturnType<typeof getProductsData>> = { products: [], snapshots: [] }
   let dbError = false
 
   try {
-    products = await getProductsData()
+    productsData = await getProductsData()
   } catch (error) {
     dbError = true
     console.error('Failed to load Agung OS products data', error)
@@ -28,7 +27,7 @@ export default async function OsProductsPage() {
       </section>
       {dbError ? <DbUnavailable message="Database connection unavailable. Products could not be loaded." /> : null}
 
-      <ProductsTable products={products} shopeeExample={shopeeExample} />
+      <ProductsTable products={productsData.products} snapshots={productsData.snapshots} />
     </>
   )
 }

@@ -15,7 +15,7 @@ export type BatchScrapeResult = {
     source: string
     url: string
   }>
-  saved: ScrapedProductResult[]
+  scraped: ScrapedProductResult[]
 }
 
 export async function scrapeProductLink(formData: FormData): Promise<ScrapedProductResult> {
@@ -108,7 +108,54 @@ function getSourceNameFromUrl(value: string) {
   throw new Error('Only JakartaNotebook, Jacknote, or Jakmall product links are supported.')
 }
 
+async function getPrimaryProductImage(product: ScrapedProductResult) {
+  if (product.source !== 'Jakmall') {
+    return null
+  }
+
+  const imageUrl = product.images[0]
+
+  if (!imageUrl) {
+    return null
+  }
+
+  try {
+    const response = await fetch(imageUrl, {
+      headers: {
+        accept: 'image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8',
+        'user-agent':
+          'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0 Safari/537.36',
+      },
+    })
+
+    if (!response.ok) {
+      return null
+    }
+
+    const contentType = response.headers.get('content-type')?.split(';')[0]?.trim() || 'application/octet-stream'
+
+    if (!contentType.startsWith('image/')) {
+      return null
+    }
+
+    const arrayBuffer = await response.arrayBuffer()
+
+    if (arrayBuffer.byteLength === 0 || arrayBuffer.byteLength > 5_000_000) {
+      return null
+    }
+
+    return {
+      data: Buffer.from(arrayBuffer),
+      mimeType: contentType,
+      sourceUrl: imageUrl,
+    }
+  } catch {
+    return null
+  }
+}
+
 async function upsertProduct(userId: string, product: ScrapedProductResult) {
+  const primaryImage = await getPrimaryProductImage(product)
   const existing = await query<{ id: string }>(
     `
       SELECT id
@@ -126,14 +173,16 @@ async function upsertProduct(userId: string, product: ScrapedProductResult) {
       `
         UPDATE os_products
         SET
-          source = $3,
-          source_url = $4,
-          title = $5,
-          category = $6,
-          description = $7,
-          variant = $8,
-          currency = $9,
-          images = $10::jsonb,
+          title = $3,
+          category = $4,
+          description = $5,
+          variant = $6,
+          currency = $7,
+          images = $8::jsonb,
+          primary_image = COALESCE($9::bytea, primary_image),
+          primary_image_mime_type = CASE WHEN $9::bytea IS NULL THEN primary_image_mime_type ELSE $10 END,
+          primary_image_source_url = CASE WHEN $9::bytea IS NULL THEN primary_image_source_url ELSE $11 END,
+          primary_image_updated_at = CASE WHEN $9::bytea IS NULL THEN primary_image_updated_at ELSE now() END,
           status = 'active',
           updated_at = now()
         WHERE id = $1
@@ -142,14 +191,15 @@ async function upsertProduct(userId: string, product: ScrapedProductResult) {
       [
         existing.rows[0].id,
         userId,
-        product.source,
-        product.url,
         product.title,
         product.category,
         product.description,
         product.variant,
         product.currency,
         JSON.stringify(product.images),
+        primaryImage?.data ?? null,
+        primaryImage?.mimeType ?? null,
+        primaryImage?.sourceUrl ?? null,
       ]
     )
 
@@ -160,23 +210,23 @@ async function upsertProduct(userId: string, product: ScrapedProductResult) {
     `
       INSERT INTO os_products (
         user_id,
-        source,
-        source_url,
         sku,
         title,
         category,
         description,
         variant,
         currency,
-        images
+        images,
+        primary_image,
+        primary_image_mime_type,
+        primary_image_source_url,
+        primary_image_updated_at
       )
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10::jsonb)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8::jsonb, $9::bytea, $10, $11, CASE WHEN $9::bytea IS NULL THEN NULL ELSE now() END)
       RETURNING id
     `,
     [
       userId,
-      product.source,
-      product.url,
       product.sku,
       product.title,
       product.category,
@@ -184,6 +234,9 @@ async function upsertProduct(userId: string, product: ScrapedProductResult) {
       product.variant,
       product.currency,
       JSON.stringify(product.images),
+      primaryImage?.data ?? null,
+      primaryImage?.mimeType ?? null,
+      primaryImage?.sourceUrl ?? null,
     ]
   )
 
@@ -233,35 +286,206 @@ async function upsertRawProductLink(productId: string, sourceUrl: string) {
   )
 }
 
-async function insertProductSnapshot(productId: string, productLinkId: string, product: ScrapedProductResult) {
-  const snapshotResult = await query<{ id: string }>(
+async function createProductScrapeRun(userId: string, source: 'batch' | 'manual') {
+  const existing = await query<{ id: string }>(
     `
-      INSERT INTO os_product_snapshots (
-        product_id,
-        product_link_id,
-        original_price,
-        final_price,
-        discount_amount,
-        discount_percent,
-        stock_status,
-        stock_available_count,
-        raw_payload
+      SELECT id
+      FROM os_product_scrape_runs
+      WHERE user_id = $1
+        AND (started_at AT TIME ZONE 'Asia/Jakarta')::date = (now() AT TIME ZONE 'Asia/Jakarta')::date
+      ORDER BY started_at DESC, run_number DESC
+      LIMIT 1
+    `,
+    [userId]
+  )
+
+  if (existing.rows[0]) {
+    return existing.rows[0].id
+  }
+
+  const result = await query<{ id: string }>(
+    `
+      INSERT INTO os_product_scrape_runs (
+        user_id,
+        run_number,
+        source
       )
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9::jsonb)
+      SELECT
+        $1,
+        COALESCE(MAX(run_number), 0) + 1,
+        $2
+      FROM os_product_scrape_runs
+      WHERE user_id = $1
       RETURNING id
     `,
-    [
-      productId,
-      productLinkId,
-      product.originalPrice,
-      product.finalPrice,
-      product.discountAmount,
-      product.discountPercent,
-      product.stockStatus,
-      product.stockAvailableCount,
-      JSON.stringify(product),
-    ]
+    [userId, source]
   )
+
+  return result.rows[0].id
+}
+
+async function completeProductScrapeRun(scrapeRunId: string, status: 'completed' | 'failed') {
+  await query(
+    `
+      UPDATE os_product_scrape_runs
+      SET
+        status = $2,
+        completed_at = now()
+      WHERE id = $1
+    `,
+    [scrapeRunId, status]
+  )
+}
+
+async function insertProductSnapshot(productId: string, productLinkId: string, product: ScrapedProductResult, scrapeRunId: string | null) {
+  const existing = scrapeRunId
+    ? await query<{ id: string }>(
+        `
+          SELECT id
+          FROM os_product_snapshots
+          WHERE product_id = $1
+            AND scrape_run_id = $2::uuid
+          LIMIT 1
+        `,
+        [productId, scrapeRunId]
+      )
+    : await query<{ id: string }>(
+        `
+          SELECT id
+          FROM os_product_snapshots
+          WHERE product_id = $1
+            AND scrape_run_id IS NULL
+          LIMIT 1
+        `,
+        [productId]
+      )
+
+  if (existing.rows[0]) {
+    const snapshotId = existing.rows[0].id
+
+    await query(
+      `
+        UPDATE os_product_snapshots
+        SET
+          product_link_id = $2,
+          original_price = $3,
+          final_price = $4,
+          discount_amount = $5,
+          discount_percent = $6,
+          stock_status = $7,
+          stock_available_count = $8,
+          raw_payload = $9::jsonb,
+          scraped_at = now()
+        WHERE id = $1
+      `,
+      [
+        snapshotId,
+        productLinkId,
+        product.originalPrice,
+        product.finalPrice,
+        product.discountAmount,
+        product.discountPercent,
+        product.stockStatus,
+        product.stockAvailableCount,
+        JSON.stringify(product),
+      ]
+    )
+
+    await query(
+      `
+        DELETE FROM os_product_branch_stocks
+        WHERE snapshot_id = $1
+      `,
+      [snapshotId]
+    )
+
+    for (const branch of product.branchStocks) {
+      await query(
+        `
+          INSERT INTO os_product_branch_stocks (
+            snapshot_id,
+            branch_id,
+            branch_name,
+            stock_text,
+            stock_type,
+            is_available
+          )
+          VALUES ($1, $2, $3, $4, $5, $6)
+        `,
+        [
+          snapshotId,
+          branch.branchId,
+          branch.branchName,
+          branch.stockText,
+          branch.stockType,
+          branch.isAvailable,
+        ]
+      )
+    }
+
+    return
+  }
+
+  const snapshotResult = scrapeRunId
+    ? await query<{ id: string }>(
+        `
+          INSERT INTO os_product_snapshots (
+            product_id,
+            product_link_id,
+            scrape_run_id,
+            original_price,
+            final_price,
+            discount_amount,
+            discount_percent,
+            stock_status,
+            stock_available_count,
+            raw_payload
+          )
+          VALUES ($1, $2, $3::uuid, $4, $5, $6, $7, $8, $9, $10::jsonb)
+          RETURNING id
+        `,
+        [
+          productId,
+          productLinkId,
+          scrapeRunId,
+          product.originalPrice,
+          product.finalPrice,
+          product.discountAmount,
+          product.discountPercent,
+          product.stockStatus,
+          product.stockAvailableCount,
+          JSON.stringify(product),
+        ]
+      )
+    : await query<{ id: string }>(
+        `
+          INSERT INTO os_product_snapshots (
+            product_id,
+            product_link_id,
+            scrape_run_id,
+            original_price,
+            final_price,
+            discount_amount,
+            discount_percent,
+            stock_status,
+            stock_available_count,
+            raw_payload
+          )
+          VALUES ($1, $2, NULL::uuid, $3, $4, $5, $6, $7, $8, $9::jsonb)
+          RETURNING id
+        `,
+        [
+          productId,
+          productLinkId,
+          product.originalPrice,
+          product.finalPrice,
+          product.discountAmount,
+          product.discountPercent,
+          product.stockStatus,
+          product.stockAvailableCount,
+          JSON.stringify(product),
+        ]
+      )
 
   for (const branch of product.branchStocks) {
     await query(
@@ -288,21 +512,28 @@ async function insertProductSnapshot(productId: string, productLinkId: string, p
   }
 }
 
-async function saveScrapedProductResult(userId: string, product: ScrapedProductResult) {
+async function saveScrapedProductResult(userId: string, product: ScrapedProductResult, scrapeRunId: string | null = null) {
   const productId = await upsertProduct(userId, product)
   const productLinkId = await upsertProductLink(productId, product)
-  await insertProductSnapshot(productId, productLinkId, product)
+  await insertProductSnapshot(productId, productLinkId, product, scrapeRunId)
   return product
 }
 
 export async function saveScrapedProduct(formData: FormData) {
   const userId = await getOsUserId()
+  const scrapeRunId = await createProductScrapeRun(userId, 'manual')
   const product = await scrapeSupplierProduct(
     String(formData.get('url') ?? '').trim(),
     String(formData.get('sku') ?? '').trim()
   )
 
-  await saveScrapedProductResult(userId, product)
+  try {
+    await saveScrapedProductResult(userId, product, scrapeRunId)
+    await completeProductScrapeRun(scrapeRunId, 'completed')
+  } catch (error) {
+    await completeProductScrapeRun(scrapeRunId, 'failed')
+    throw error
+  }
 
   revalidatePath('/os')
   revalidatePath('/os/products')
@@ -327,7 +558,6 @@ export async function saveProductSupplierLinks(formData: FormData) {
     throw new Error('At least one supplier URL is required.')
   }
 
-  const source = getSourceNameFromUrl(urls[0])
   const existing = await query<{ id: string }>(
     `
       SELECT id
@@ -346,16 +576,14 @@ export async function saveProductSupplierLinks(formData: FormData) {
         `
           INSERT INTO os_products (
             user_id,
-            source,
-            source_url,
             sku,
             title,
             currency
           )
-          VALUES ($1, $2, $3, $4, $5, 'IDR')
+          VALUES ($1, $2, $3, 'IDR')
           RETURNING id
         `,
-        [userId, source, urls[0], sku, title || sku]
+        [userId, sku, title || sku]
       )
     ).rows[0].id
 
@@ -403,13 +631,13 @@ export async function scrapeAllProductLinks(): Promise<BatchScrapeResult> {
     `,
     [userId]
   )
-  const saved: ScrapedProductResult[] = []
+  const scraped: ScrapedProductResult[] = []
   const failed: BatchScrapeResult['failed'] = []
 
   for (const link of linksResult.rows) {
     try {
       const product = await scrapeSupplierProduct(link.source_url, link.sku)
-      saved.push(await saveScrapedProductResult(userId, product))
+      scraped.push(product)
     } catch (error) {
       failed.push({
         error: error instanceof Error ? error.message : 'Scrape failed.',
@@ -420,8 +648,33 @@ export async function scrapeAllProductLinks(): Promise<BatchScrapeResult> {
     }
   }
 
+  return { failed, scraped }
+}
+
+export async function saveScrapedProductBatch(formData: FormData) {
+  const userId = await getOsUserId()
+  const rawProducts = String(formData.get('products') ?? '')
+  const products = JSON.parse(rawProducts) as ScrapedProductResult[]
+
+  if (!Array.isArray(products) || products.length === 0) {
+    throw new Error('No scraped products to save.')
+  }
+
+  const scrapeRunId = await createProductScrapeRun(userId, 'batch')
+
+  try {
+    for (const product of products) {
+      await saveScrapedProductResult(userId, product, scrapeRunId)
+    }
+
+    await completeProductScrapeRun(scrapeRunId, 'completed')
+  } catch (error) {
+    await completeProductScrapeRun(scrapeRunId, 'failed')
+    throw error
+  }
+
   revalidatePath('/os')
   revalidatePath('/os/products')
 
-  return { failed, saved }
+  return { saved: products.length }
 }

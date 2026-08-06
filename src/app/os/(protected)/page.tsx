@@ -39,13 +39,13 @@ function getJakartaDateKey(value: string | Date = new Date()) {
 
 async function getHomeContentState() {
   try {
-    const [{ posts, targets }, products] = await Promise.all([getContentData(), getProductsData()])
+    const [{ posts, targets }, productsData] = await Promise.all([getContentData(), getProductsData()])
     const today = getJakartaDateKey()
     const targetsDueToday = targets
       .filter((target) => target.status === 'active' && getJakartaDateKey(target.nextDueAt) <= today)
       .sort((a, b) => a.nextDueAt.localeCompare(b.nextDueAt) || a.name.localeCompare(b.name))
 
-    return { dbError: false, posts, products, targetsDueToday }
+    return { dbError: false, posts, products: productsData.products, targetsDueToday }
   } catch (error) {
     console.error('Failed to load Agung OS home content data', error)
     return { dbError: true, posts: [], products: [], targetsDueToday: [] }
