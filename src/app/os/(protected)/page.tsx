@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { IconPlus } from '@tabler/icons-react'
+import { connection } from 'next/server'
 
 import DbUnavailable from '@/components/os/db-unavailable'
 import OsLiveClock from '@/components/os/os-live-clock'
@@ -39,13 +40,13 @@ function getJakartaDateKey(value: string | Date = new Date()) {
 
 async function getHomeContentState() {
   try {
-    const [{ posts, targets }, products] = await Promise.all([getContentData(), getProductsData()])
+    const [{ posts, targets }, productsData] = await Promise.all([getContentData(), getProductsData()])
     const today = getJakartaDateKey()
     const targetsDueToday = targets
       .filter((target) => target.status === 'active' && getJakartaDateKey(target.nextDueAt) <= today)
       .sort((a, b) => a.nextDueAt.localeCompare(b.nextDueAt) || a.name.localeCompare(b.name))
 
-    return { dbError: false, posts, products, targetsDueToday }
+    return { dbError: false, posts, products: productsData.products, targetsDueToday }
   } catch (error) {
     console.error('Failed to load Agung OS home content data', error)
     return { dbError: true, posts: [], products: [], targetsDueToday: [] }
@@ -53,6 +54,8 @@ async function getHomeContentState() {
 }
 
 export default async function OsHomePage() {
+  await connection()
+
   const { dbError, posts, products, targetsDueToday } = await getHomeContentState()
   const readyContentToday = posts.filter((item) => item.status === 'ready').length
   const openThoughts = thoughts.filter((item) => item.status === 'open').length

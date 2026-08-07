@@ -304,16 +304,14 @@ async function upsertProduct(client, userId, product) {
     await client.query(
       `
         UPDATE os_products
-        SET title = $3, source = $4, source_url = $5, category = $6, description = $7, variant = $8,
-            currency = $9, images = $10::jsonb, status = 'active', updated_at = now()
+        SET title = $3, category = $4, description = $5, variant = $6,
+            currency = $7, images = $8::jsonb, status = 'active', updated_at = now()
         WHERE id = $1 AND user_id = $2
       `,
       [
         existing.rows[0].id,
         userId,
         product.title,
-        product.source,
-        product.url,
         product.category,
         product.description,
         product.variant,
@@ -324,16 +322,14 @@ async function upsertProduct(client, userId, product) {
     return existing.rows[0].id
   }
 
-  const result = await client.query(
+	  const result = await client.query(
     `
-      INSERT INTO os_products (user_id, source, source_url, sku, title, category, description, variant, currency, images)
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10::jsonb)
+      INSERT INTO os_products (user_id, sku, title, category, description, variant, currency, images)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8::jsonb)
       RETURNING id
     `,
     [
       userId,
-      product.source,
-      product.url,
       product.sku,
       product.title,
       product.category,
@@ -360,15 +356,13 @@ async function upsertMasterProduct(client, userId, item) {
     return existing.rows[0].id
   }
 
-  const firstUrl = Object.values(item.links)[0] ?? `sku:${item.sku}`
-  const firstSource = firstUrl.startsWith('http') ? sourceFromUrl(firstUrl) : 'Manual'
   const result = await client.query(
     `
-      INSERT INTO os_products (user_id, source, source_url, sku, title, currency)
-      VALUES ($1, $2, $3, $4, $5, 'IDR')
+      INSERT INTO os_products (user_id, sku, title, currency)
+      VALUES ($1, $2, $3, 'IDR')
       RETURNING id
     `,
-    [userId, firstSource, firstUrl, item.sku, item.title]
+    [userId, item.sku, item.title]
   )
   return result.rows[0].id
 }

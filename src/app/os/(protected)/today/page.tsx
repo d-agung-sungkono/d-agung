@@ -1,5 +1,6 @@
 import { Button } from '@mantine/core'
 import { IconPlus } from '@tabler/icons-react'
+import { connection } from 'next/server'
 
 import DbUnavailable from '@/components/os/db-unavailable'
 import styles from '@/components/os/os-shell.module.css'
@@ -44,6 +45,8 @@ function buildScheduleEvents(targets: Awaited<ReturnType<typeof getContentData>>
 }
 
 export default async function OsTodayPage() {
+  await connection()
+
   let posts: Awaited<ReturnType<typeof getContentData>>['posts'] = []
   let targets: Awaited<ReturnType<typeof getContentData>>['targets'] = []
   let dbError = false

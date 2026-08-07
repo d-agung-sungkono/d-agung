@@ -52,6 +52,8 @@ type JakmallSku = {
     thumbnail?: string
   }>
   in_stock?: boolean
+  is_limited_stock?: boolean
+  limited_stock?: number
   price?: {
     discount?: {
       percentage?: number
@@ -89,6 +91,7 @@ export type ScrapedProductResult = {
   images: string[]
   originalPrice: number | null
   shopeeCopy: string
+  sellerName: string | null
   sku: string
   source: string
   stockAvailableCount: number
@@ -111,6 +114,12 @@ function decodeHtml(value: string) {
 function getMetaContent(html: string, property: string) {
   const pattern = new RegExp(`<meta[^>]+property=["']${property}["'][^>]+content=["']([^"']+)["'][^>]*>`, 'i')
   return decodeHtml(html.match(pattern)?.[1] ?? '')
+}
+
+function getTextContent(html: string) {
+  return decodeHtml(html.replace(/<script[\s\S]*?<\/script>/gi, ' ').replace(/<style[\s\S]*?<\/style>/gi, ' ').replace(/<[^>]+>/g, ' '))
+    .replace(/\s+/g, ' ')
+    .trim()
 }
 
 function getJsonLdProducts(html: string) {
@@ -137,17 +146,132 @@ function getJsonLdProducts(html: string) {
 }
 
 function getJakmallProductState(html: string) {
-  const match = html.match(/\bvar\s+spdt\s*=\s*(\{[\s\S]*?\});\s*<\/script>/)
+  const startMatch = html.match(/\bvar\s+spdt\s*=/)
 
-  if (!match) {
+  if (startMatch?.index == null) {
     return null
   }
 
-  try {
-    return JSON.parse(match[1]) as JakmallProductState
-  } catch {
+  const objectStart = html.indexOf('{', startMatch.index)
+
+  if (objectStart === -1) {
     return null
   }
+
+  let depth = 0
+  let inString: '"' | "'" | null = null
+  let isEscaped = false
+
+  for (let index = objectStart; index < html.length; index += 1) {
+    const char = html[index]
+
+    if (inString) {
+      if (isEscaped) {
+        isEscaped = false
+      } else if (char === '\\') {
+        isEscaped = true
+      } else if (char === inString) {
+        inString = null
+      }
+
+      continue
+    }
+
+    if (char === '"' || char === "'") {
+      inString = char
+      continue
+    }
+
+    if (char === '{') {
+      depth += 1
+    } else if (char === '}') {
+      depth -= 1
+
+      if (depth === 0) {
+        try {
+          return JSON.parse(html.slice(objectStart, index + 1)) as JakmallProductState
+        } catch {
+          return null
+        }
+      }
+    }
+  }
+
+  return null
+}
+
+function getJakmallSkuStockCount(html: string, selectedSku: JakmallSku | undefined, isAvailable: boolean) {
+  if (selectedSku) {
+    if (selectedSku.in_stock === false) {
+      return 0
+    }
+
+    if (selectedSku.is_limited_stock && typeof selectedSku.limited_stock === 'number') {
+      return Math.max(0, selectedSku.limited_stock)
+    }
+
+    if (selectedSku.in_stock === true) {
+      return 10
+    }
+  }
+
+  const text = getTextContent(html)
+  const limitedText = text.match(/\bStok\s+Tinggal\s+(\d+)\b/i)
+  const explicitAvailableText = /\bStok\s+Tersedia\b/i.test(text)
+  const soldOutText = /\bStok\s+(?:tidak\s+tersedia|Habis)\b/i.test(text)
+
+  if (limitedText) {
+    return Number(limitedText[1])
+  }
+
+  if (isAvailable && explicitAvailableText) {
+    return 10
+  }
+
+  if (soldOutText) {
+    return 0
+  }
+
+  return 0
+}
+
+function getJakmallSelectedSku(skuEntries: JakmallSku[], expectedSku: string, url: URL) {
+  const normalizedExpectedSku = expectedSku.trim().toLowerCase()
+
+  if (normalizedExpectedSku) {
+    const exactMatch = skuEntries.find((item) => {
+      const itemSku = (item.sku_display ?? item.sku ?? '').toLowerCase()
+      return itemSku === normalizedExpectedSku
+    })
+
+    if (exactMatch) {
+      return exactMatch
+    }
+  }
+
+  const normalizedPath = url.pathname.replace(/\/+$/, '')
+  const pathMatch = skuEntries.find((item) => {
+    if (!item.url) {
+      return false
+    }
+
+    try {
+      return new URL(item.url).pathname.replace(/\/+$/, '') === normalizedPath
+    } catch {
+      return false
+    }
+  })
+
+  if (pathMatch) {
+    return pathMatch
+  }
+
+  const availableMatch = skuEntries.find((item) => item.in_stock === true)
+  if (availableMatch) {
+    return availableMatch
+  }
+
+  return skuEntries[0] ?? null
 }
 
 function getApolloState(html: string) {
@@ -170,11 +294,11 @@ function normalizeAllowedSource(value: string) {
   const hostname = url.hostname.replace(/^www\./, '')
   const isSupported =
     hostname === 'jakartanotebook.com' ||
-    hostname === 'jackmall.com' ||
+    hostname === 'jakmall.com' ||
     hostname === 'jacknote.com'
 
   if (!isSupported) {
-    throw new Error('Only JakartaNotebook, Jackmall, or Jacknote product links are supported for now.')
+    throw new Error('Only JakartaNotebook, Jakmall, or Jacknote product links are supported for now.')
   }
 
   return url
@@ -187,7 +311,7 @@ function getSourceName(url: URL) {
     return 'JakartaNotebook'
   }
 
-  if (hostname === 'jackmall.com') {
+  if (hostname === 'jakmall.com') {
     return 'Jakmall'
   }
 
@@ -240,10 +364,18 @@ function buildShopeeCopy(product: Omit<ScrapedProductResult, 'shopeeCopy'>) {
       product.discountAmount ? ` (${formatRupiah(product.discountAmount)})` : ''
     }`,
     `Harga Jadi Supplier: ${formatRupiah(product.finalPrice)}`,
+    `Penjual Supplier: ${product.sellerName || '-'}`,
     `Stok Supplier: ${product.stockStatus}`,
     `Cabang Tersedia: ${availableBranches || '-'}`,
     `Source: ${product.url}`,
   ].join('\n')
+}
+
+function getJakmallSellerName(html: string) {
+  const text = getTextContent(html)
+  const sellerMatch = text.match(/Informasi Penjual\s+(.+?)\s+(?:Chat Penjual|[\d.]+\/5|Data penjualan|Dukungan Pengiriman)/i)
+
+  return sellerMatch?.[1]?.trim() || null
 }
 
 function getJsonLdName(product: JsonLdProduct) {
@@ -264,7 +396,7 @@ function getJsonLdOfferUrl(product: JsonLdProduct) {
 
 function getJsonLdOfferForSku(product: JsonLdProduct, expectedSku: string) {
   const offers = product['http://schema.org/offers']?.['http://schema.org/offers'] ?? []
-  return offers.find((offer) => offer['http://schema.org/sku'] === expectedSku) ?? offers[0]
+  return offers.find((offer) => offer['http://schema.org/sku'] === expectedSku) ?? null
 }
 
 function buildJakmallResult({
@@ -282,10 +414,7 @@ function buildJakmallResult({
 }) {
   const state = getJakmallProductState(html)
   const skuEntries = Object.values(state?.sku ?? {})
-  const selectedSku =
-    skuEntries.find((item) => item.sku_display === expectedSku || item.sku === expectedSku) ??
-    skuEntries.find((item) => item.id && url.hash === `#${item.id}`) ??
-    skuEntries[0]
+  const selectedSku = getJakmallSelectedSku(skuEntries, expectedSku, url)
   const offer = selectedSku?.sku_display ? getJsonLdOfferForSku(product, selectedSku.sku_display) : getJsonLdOfferForSku(product, expectedSku)
   const sku = selectedSku?.sku_display ?? selectedSku?.sku ?? offer?.['http://schema.org/sku'] ?? expectedSku
   const finalPrice = selectedSku?.price?.final ?? offer?.['http://schema.org/price'] ?? product['http://schema.org/offers']?.['http://schema.org/lowPrice'] ?? null
@@ -299,9 +428,22 @@ function buildJakmallResult({
   const metaImages = Array.from(
     new Set(Array.from(html.matchAll(/<meta[^>]+property=["']og:image["'][^>]+content=["']([^"']+)["'][^>]*>/gi)).map((item) => decodeHtml(item[1])))
   )
+  const isAvailable = Boolean(selectedSku?.in_stock || offer?.['http://schema.org/availability']?.includes('InStock'))
+  const stockAvailableCount = getJakmallSkuStockCount(html, selectedSku ?? undefined, isAvailable)
+  const sellerName = getJakmallSellerName(html)
   const result = {
-    branchStocks: [],
-    category: null,
+    branchStocks: sellerName
+      ? [
+          {
+            branchId: null,
+            branchName: sellerName,
+            isAvailable: stockAvailableCount > 0,
+            stockText: stockAvailableCount > 0 ? String(stockAvailableCount) : 'Habis',
+            stockType: stockAvailableCount > 0 ? 'AVAILABLE' : 'SOLD_OUT',
+          },
+        ]
+      : [],
+    category: sellerName,
     currency: product['http://schema.org/offers']?.['http://schema.org/priceCurrency'] ?? 'IDR',
     description: getJsonLdDescription(product) ?? getMetaContent(html, 'og:description'),
     discountAmount,
@@ -309,10 +451,11 @@ function buildJakmallResult({
     finalPrice: Number.isFinite(finalPrice) ? finalPrice : null,
     images: Array.from(new Set([...productImages, ...metaImages])).filter(Boolean),
     originalPrice: Number.isFinite(originalPrice) ? originalPrice ?? null : null,
+    sellerName,
     sku,
     source,
-    stockAvailableCount: selectedSku?.in_stock || offer?.['http://schema.org/availability']?.includes('InStock') ? 1 : 0,
-    stockStatus: selectedSku?.in_stock || offer?.['http://schema.org/availability']?.includes('InStock') ? 'available' : 'sold-out',
+    stockAvailableCount,
+    stockStatus: stockAvailableCount > 0 ? 'available' : 'sold-out',
     title: getJsonLdName(product) ?? getMetaContent(html, 'og:title'),
     url: selectedSku?.url ?? url.toString(),
     variant: null,
@@ -401,6 +544,7 @@ export async function scrapeSupplierProduct(sourceUrl: string, expectedSku = '')
     finalPrice: Number.isFinite(finalPrice) ? finalPrice : null,
     images,
     originalPrice: Number.isFinite(originalPrice) ? originalPrice ?? null : null,
+    sellerName: null,
     sku,
     source,
     stockAvailableCount: branchStocks.filter((branch) => branch.isAvailable).length,
