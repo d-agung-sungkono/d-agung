@@ -2,8 +2,11 @@ import DbUnavailable from '@/components/os/db-unavailable'
 import ContentList from '@/components/os/content-list'
 import styles from '@/components/os/os-shell.module.css'
 import { getContentData } from '@/lib/os-content'
+import { connection } from 'next/server'
 
 export default async function OsContentPage() {
+  await connection()
+
   let contentData: Awaited<ReturnType<typeof getContentData>> | null = null
 
   try {

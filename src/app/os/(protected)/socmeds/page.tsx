@@ -2,8 +2,11 @@ import DbUnavailable from '@/components/os/db-unavailable'
 import styles from '@/components/os/os-shell.module.css'
 import ProfilesSettings from '@/components/os/profiles-settings'
 import { getSettingsData } from '@/lib/os-settings'
+import { connection } from 'next/server'
 
 export default async function OsSocmedsPage() {
+  await connection()
+
   let settingsData: Awaited<ReturnType<typeof getSettingsData>> | null = null
 
   try {

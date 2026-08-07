@@ -1144,6 +1144,157 @@
   font-size: 0.76rem;
 }
 
+.productProfitTableWrap {
+  max-height: min(68vh, 48rem);
+  overflow: auto;
+  border: 1px solid #d8dde5;
+  border-radius: 0.45rem;
+}
+
+.productProfitTable {
+  width: 100%;
+  min-width: 1180px;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+
+.productProfitTable th,
+.productProfitTable td {
+  padding: 0.48rem 0.58rem;
+  border-bottom: 1px solid #e5e8ee;
+  text-align: left;
+  vertical-align: middle;
+}
+
+.productProfitTable th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background: #fbfcfd;
+  color: #141414;
+  font-size: 0.78rem;
+  font-weight: 800;
+}
+
+.productProfitTable th:nth-child(1) {
+  width: 29%;
+}
+
+.productProfitTable th:nth-child(2) {
+  width: 11%;
+}
+
+.productProfitTable th:nth-child(3),
+.productProfitTable th:nth-child(4),
+.productProfitTable th:nth-child(5),
+.productProfitTable th:nth-child(7),
+.productProfitTable th:nth-child(9) {
+  width: 11%;
+}
+
+.productProfitTable th:nth-child(6),
+.productProfitTable th:nth-child(8) {
+  width: 8%;
+}
+
+.productProfitTable tr:last-child td {
+  border-bottom: 0;
+}
+
+.productProfitMain {
+  min-width: 0;
+}
+
+.productProfitControls {
+  align-items: flex-end;
+}
+
+.productProfitSearchInput {
+  width: min(100%, 20rem);
+}
+
+.productProfitSearchInput :global(input) {
+  min-height: 2.1rem;
+  font-size: 0.86rem;
+}
+
+.productProfitThumbWrap,
+.productProfitThumbFallback {
+  flex: 0 0 auto;
+  width: 2.38rem;
+  height: 2.38rem;
+  overflow: hidden;
+  border: 1px solid #dfe5ec;
+  border-radius: 0.38rem;
+  background: #f7f8fa;
+}
+
+.productProfitThumb {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.productProfitThumbFallback {
+  display: grid;
+  place-items: center;
+  color: rgba(31, 31, 31, 0.4);
+  font-size: 0.82rem;
+  font-weight: 800;
+}
+
+.productProfitTitle {
+  min-width: 0;
+  margin: 0;
+  overflow: hidden;
+  color: #141414;
+  font-size: 0.82rem;
+  font-weight: 750;
+  line-height: 1.2;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.productProfitSku {
+  margin: 0;
+  color: rgba(31, 31, 31, 0.58);
+  font-size: 0.76rem;
+  font-weight: 650;
+}
+
+.productProfitMoney,
+.productProfitTotal {
+  margin: 0;
+  color: #141414;
+  font-size: 0.82rem;
+  font-weight: 750;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.productProfitTotal {
+  color: #1769d2;
+  font-weight: 850;
+}
+
+.productProfitInput :global(input) {
+  min-height: 2rem;
+  padding-inline: 0.55rem;
+  font-size: 0.82rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.productProfitPercentInput {
+  width: 8.8rem;
+}
+
+.productProfitPercentInput :global(input) {
+  min-height: 2.1rem;
+  font-size: 0.86rem;
+  font-variant-numeric: tabular-nums;
+}
+
 .productTable {
   width: 100%;
   min-width: 980px;
@@ -1942,6 +2093,10 @@
 
   .productInsightList {
     grid-template-columns: 1fr;
+  }
+
+  .productProfitTable {
+    min-width: 1080px;
   }
 
   .thoughtMain {

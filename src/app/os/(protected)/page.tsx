@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { IconPlus } from '@tabler/icons-react'
+import { connection } from 'next/server'
 
 import DbUnavailable from '@/components/os/db-unavailable'
 import OsLiveClock from '@/components/os/os-live-clock'
@@ -53,6 +54,8 @@ async function getHomeContentState() {
 }
 
 export default async function OsHomePage() {
+  await connection()
+
   const { dbError, posts, products, targetsDueToday } = await getHomeContentState()
   const readyContentToday = posts.filter((item) => item.status === 'ready').length
   const openThoughts = thoughts.filter((item) => item.status === 'open').length
