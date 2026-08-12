@@ -8,8 +8,12 @@ export type SocmedOption = {
 }
 
 export type AccountGroupOption = {
+  description: string | null
   id: string
   name: string
+  slug: string
+  sortOrder: number
+  status: string
 }
 
 export type UserSocmed = {
@@ -28,6 +32,15 @@ export type UserSocmed = {
 
 type UserRow = {
   id: string
+}
+
+type AccountGroupRow = {
+  description: string | null
+  id: string
+  name: string
+  slug: string
+  sort_order: number
+  status: string
 }
 
 type UserSocmedRow = {
@@ -60,9 +73,14 @@ export async function getSettingsData() {
   const userId = await getOsUserId()
   const [socmedsResult, groupsResult, userSocmedsResult] = await Promise.all([
     query<SocmedOption>('SELECT id, name FROM socmeds WHERE status = $1 ORDER BY sort_order, name', ['active']),
-    query<AccountGroupOption>(
-      'SELECT id, name FROM account_groups WHERE user_id = $1 AND status = $2 ORDER BY sort_order, name',
-      [userId, 'active']
+    query<AccountGroupRow>(
+      `
+        SELECT id, name, slug, description, status, sort_order
+        FROM account_groups
+        WHERE user_id = $1
+        ORDER BY sort_order, name
+      `,
+      [userId]
     ),
     query<UserSocmedRow>(
       `
@@ -89,7 +107,14 @@ export async function getSettingsData() {
   ])
 
   return {
-    groups: groupsResult.rows,
+    groups: groupsResult.rows.map((row) => ({
+      description: row.description,
+      id: row.id,
+      name: row.name,
+      slug: row.slug,
+      sortOrder: row.sort_order,
+      status: row.status,
+    })),
     socmeds: socmedsResult.rows,
     userSocmeds: userSocmedsResult.rows.map((row) => ({
       account: row.account,

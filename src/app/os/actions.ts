@@ -7,12 +7,13 @@ import { clearOsSession, createOsSession, validateOsCredentials } from '@/lib/os
 export async function loginToOs(formData: FormData) {
   const username = String(formData.get('username') ?? '')
   const password = String(formData.get('password') ?? '')
+  const user = await validateOsCredentials(username, password)
 
-  if (!validateOsCredentials(username, password)) {
+  if (!user) {
     redirect('/os/login?error=invalid')
   }
 
-  await createOsSession(username)
+  await createOsSession(user)
   redirect('/os')
 }
 

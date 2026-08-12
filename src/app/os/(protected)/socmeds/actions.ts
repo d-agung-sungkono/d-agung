@@ -14,6 +14,86 @@ function revalidateSocmeds() {
   revalidatePath('/os/socmeds')
 }
 
+function slugifyGroupName(value: string) {
+  return value
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+}
+
+export async function createAccountGroup(formData: FormData) {
+  const userId = await getOsUserId()
+  const name = String(formData.get('name') ?? '').trim()
+  const description = nullableValue(formData.get('description'))
+  const status = String(formData.get('status') ?? 'active')
+  const slug = slugifyGroupName(name)
+
+  if (!name || !slug) {
+    throw new Error('name is required.')
+  }
+
+  const sortOrderResult = await query<{ next_sort_order: number }>(
+    `
+      SELECT COALESCE(MAX(sort_order), -1) + 1 AS next_sort_order
+      FROM account_groups
+      WHERE user_id = $1
+    `,
+    [userId]
+  )
+
+  await query(
+    `
+      INSERT INTO account_groups (user_id, name, slug, description, status, sort_order)
+      VALUES ($1, $2, $3, $4, $5, $6)
+    `,
+    [userId, name, slug, description, status, sortOrderResult.rows[0]?.next_sort_order ?? 0]
+  )
+
+  revalidateSocmeds()
+}
+
+export async function updateAccountGroup(formData: FormData) {
+  const userId = await getOsUserId()
+  const id = String(formData.get('id') ?? '')
+  const name = String(formData.get('name') ?? '').trim()
+  const description = nullableValue(formData.get('description'))
+  const status = String(formData.get('status') ?? 'active')
+  const slug = slugifyGroupName(name)
+
+  if (!id || !name || !slug) {
+    throw new Error('id and name are required.')
+  }
+
+  await query(
+    `
+      UPDATE account_groups
+      SET
+        name = $1,
+        slug = $2,
+        description = $3,
+        status = $4,
+        updated_at = now()
+      WHERE id = $5
+        AND user_id = $6
+    `,
+    [name, slug, description, status, id, userId]
+  )
+
+  revalidateSocmeds()
+}
+
+export async function deleteAccountGroup(formData: FormData) {
+  const userId = await getOsUserId()
+  const id = String(formData.get('id') ?? '')
+
+  if (!id) {
+    throw new Error('id is required.')
+  }
+
+  await query('DELETE FROM account_groups WHERE id = $1 AND user_id = $2', [id, userId])
+  revalidateSocmeds()
+}
+
 export async function createUserSocmed(formData: FormData) {
   const userId = await getOsUserId()
   const socmedId = String(formData.get('socmedId') ?? '')

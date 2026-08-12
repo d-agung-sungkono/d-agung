@@ -20,7 +20,14 @@ import {
   type Icon,
 } from '@tabler/icons-react'
 
-import { createUserSocmed, deleteUserSocmed, updateUserSocmed } from '@/app/os/(protected)/socmeds/actions'
+import {
+  createAccountGroup,
+  createUserSocmed,
+  deleteAccountGroup,
+  deleteUserSocmed,
+  updateAccountGroup,
+  updateUserSocmed,
+} from '@/app/os/(protected)/socmeds/actions'
 import type { AccountGroupOption, SocmedOption, UserSocmed } from '@/lib/os-settings'
 
 import styles from './os-shell.module.css'
@@ -43,6 +50,13 @@ type SocmedForm = {
   url: string
 }
 
+type GroupForm = {
+  description: string
+  id: string
+  name: string
+  status: string
+}
+
 const emptyForm: SocmedForm = {
   account: '',
   accountGroupId: '',
@@ -53,6 +67,13 @@ const emptyForm: SocmedForm = {
   socmedId: '',
   status: 'active',
   url: '',
+}
+
+const emptyGroupForm: GroupForm = {
+  description: '',
+  id: '',
+  name: '',
+  status: 'active',
 }
 
 const platformIcons: Record<string, Icon> = {
@@ -80,16 +101,28 @@ function buildFormData(form: SocmedForm) {
   return formData
 }
 
+function buildGroupFormData(form: GroupForm) {
+  const formData = new FormData()
+  formData.set('description', form.description)
+  formData.set('id', form.id)
+  formData.set('name', form.name)
+  formData.set('status', form.status)
+  return formData
+}
+
 export default function ProfilesSettings({ groups, socmeds, userSocmeds }: ProfilesSettingsProps) {
   const [isPending, startTransition] = useTransition()
   const [isOpen, setIsOpen] = useState(false)
+  const [isGroupModalOpen, setIsGroupModalOpen] = useState(false)
   const [copyState, setCopyState] = useState<string | null>(null)
   const [selectedGroupId, setSelectedGroupId] = useState('all')
   const [form, setForm] = useState<SocmedForm>({
     ...emptyForm,
     socmedId: socmeds[0]?.id ?? '',
   })
+  const [groupForm, setGroupForm] = useState<GroupForm>(emptyGroupForm)
   const isEditing = Boolean(form.id)
+  const isEditingGroup = Boolean(groupForm.id)
   const visibleSocmeds =
     selectedGroupId === 'all'
       ? userSocmeds
@@ -98,10 +131,10 @@ export default function ProfilesSettings({ groups, socmeds, userSocmeds }: Profi
     {
       count: userSocmeds.length,
       id: 'all',
-      meta: `${groups.length} groups`,
+      meta: `${groups.filter((group) => group.status === 'active').length} groups`,
       name: 'All Social Medias',
     },
-    ...groups.map((group) => {
+    ...groups.filter((group) => group.status === 'active').map((group) => {
       const accounts = userSocmeds.filter((profile) => profile.accountGroupId === group.id)
       return {
         count: accounts.length,
@@ -114,7 +147,7 @@ export default function ProfilesSettings({ groups, socmeds, userSocmeds }: Profi
   const socmedOptions = socmeds.map((socmed) => ({ label: socmed.name, value: socmed.id }))
   const groupOptions = [
     { label: 'No group', value: 'none' },
-    ...groups.map((group) => ({ label: group.name, value: group.id })),
+    ...groups.filter((group) => group.status === 'active').map((group) => ({ label: group.name, value: group.id })),
   ]
 
   async function copyProfileUrl(profile: UserSocmed) {
@@ -129,6 +162,21 @@ export default function ProfilesSettings({ groups, socmeds, userSocmeds }: Profi
       socmedId: socmeds[0]?.id ?? '',
     })
     setIsOpen(true)
+  }
+
+  function openCreateGroupModal() {
+    setGroupForm(emptyGroupForm)
+    setIsGroupModalOpen(true)
+  }
+
+  function openEditGroupModal(group: AccountGroupOption) {
+    setGroupForm({
+      description: group.description ?? '',
+      id: group.id,
+      name: group.name,
+      status: group.status,
+    })
+    setIsGroupModalOpen(true)
   }
 
   function openEditModal(profile: UserSocmed) {
@@ -163,11 +211,36 @@ export default function ProfilesSettings({ groups, socmeds, userSocmeds }: Profi
     })
   }
 
+  function saveGroup() {
+    startTransition(async () => {
+      if (isEditingGroup) {
+        await updateAccountGroup(buildGroupFormData(groupForm))
+      } else {
+        await createAccountGroup(buildGroupFormData(groupForm))
+      }
+
+      setIsGroupModalOpen(false)
+      setGroupForm(emptyGroupForm)
+    })
+  }
+
   function deleteSocmed(profile: UserSocmed) {
     startTransition(async () => {
       const formData = new FormData()
       formData.set('id', profile.id)
       await deleteUserSocmed(formData)
+    })
+  }
+
+  function removeGroup(group: AccountGroupOption) {
+    startTransition(async () => {
+      const formData = new FormData()
+      formData.set('id', group.id)
+      await deleteAccountGroup(formData)
+
+      if (selectedGroupId === group.id) {
+        setSelectedGroupId('all')
+      }
     })
   }
 
@@ -181,9 +254,14 @@ export default function ProfilesSettings({ groups, socmeds, userSocmeds }: Profi
             Platform accounts used to map content, publishing targets, and future embeds.
           </Text>
         </Box>
-        <Button leftSection={<IconPlus size={18} stroke={1.8} />} loading={isPending} onClick={openCreateModal}>
-          Add Social Media Account
-        </Button>
+        <Group gap="sm">
+          <Button disabled={isPending} onClick={openCreateGroupModal} variant="default">
+            Manage Account Groups
+          </Button>
+          <Button leftSection={<IconPlus size={18} stroke={1.8} />} loading={isPending} onClick={openCreateModal}>
+            Add Social Media Account
+          </Button>
+        </Group>
       </Box>
 
       <SimpleGrid cols={{ base: 1, sm: 2, lg: 4 }} spacing="xs" className={styles.groupCardGrid}>
@@ -365,6 +443,79 @@ export default function ProfilesSettings({ groups, socmeds, userSocmeds }: Profi
               Save Account
             </Button>
           </Group>
+        </Stack>
+      </Modal>
+
+      <Modal opened={isGroupModalOpen} onClose={() => setIsGroupModalOpen(false)} title={isEditingGroup ? 'Edit Account Group' : 'Add Account Group'} centered>
+        <Stack gap="sm">
+          <TextInput
+            label="Group Name"
+            onChange={(event) => {
+              const { value } = event.currentTarget
+              setGroupForm((current) => ({ ...current, name: value }))
+            }}
+            placeholder="Laviumhub"
+            value={groupForm.name}
+          />
+          <TextInput
+            label="Description"
+            onChange={(event) => {
+              const { value } = event.currentTarget
+              setGroupForm((current) => ({ ...current, description: value }))
+            }}
+            placeholder="Optional"
+            value={groupForm.description}
+          />
+          <Select
+            data={[
+              { label: 'Active', value: 'active' },
+              { label: 'Archived', value: 'archived' },
+            ]}
+            label="Status"
+            onChange={(value) => setGroupForm((current) => ({ ...current, status: value ?? 'active' }))}
+            value={groupForm.status}
+          />
+          <Group justify="flex-end">
+            <Button disabled={isPending} onClick={() => setIsGroupModalOpen(false)} variant="default">
+              Cancel
+            </Button>
+            <Button loading={isPending} onClick={saveGroup}>
+              Save Group
+            </Button>
+          </Group>
+
+          <Stack gap="xs" mt="sm">
+            {groups.map((group) => (
+              <Card className={styles.profileItem} key={group.id} padding="sm" radius="sm" withBorder>
+                <Box className={styles.profileBody}>
+                  <Group justify="space-between" align="flex-start" gap="sm">
+                    <Box>
+                      <Group gap="xs" wrap="nowrap" className={styles.profileTitleRow}>
+                        <Text className={styles.compactTitle}>{group.name}</Text>
+                        <Badge className={styles.badge} data-status={group.status} variant="light">
+                          {group.status}
+                        </Badge>
+                      </Group>
+                      <Text className={styles.muted}>{group.slug}</Text>
+                      {group.description ? <Text className={styles.profileMeta}>{group.description}</Text> : null}
+                    </Box>
+                    <Group gap="xs" wrap="nowrap">
+                      <Tooltip label="Edit group">
+                        <ActionIcon aria-label="Edit account group" disabled={isPending} onClick={() => openEditGroupModal(group)} variant="default">
+                          <IconEdit size={18} stroke={1.8} />
+                        </ActionIcon>
+                      </Tooltip>
+                      <Tooltip label="Delete group">
+                        <ActionIcon aria-label="Delete account group" color="red" disabled={isPending} onClick={() => removeGroup(group)} variant="light">
+                          <IconTrash size={18} stroke={1.8} />
+                        </ActionIcon>
+                      </Tooltip>
+                    </Group>
+                  </Group>
+                </Box>
+              </Card>
+            ))}
+          </Stack>
         </Stack>
       </Modal>
     </>

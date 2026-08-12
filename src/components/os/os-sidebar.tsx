@@ -16,6 +16,7 @@ import {
 
 import { logoutFromOs } from '@/app/os/actions'
 
+import OsNavPending from './os-nav-pending'
 import styles from './os-shell.module.css'
 
 const navigation = [
@@ -48,6 +49,7 @@ export default function OsSidebar() {
               <span aria-hidden="true" className={styles.navIcon}>
                 <NavIcon size={17} stroke={1.8} />
               </span>
+              <OsNavPending />
               <span className={styles.navLabel}>{item.label}</span>
             </Link>
           )
