@@ -131,6 +131,10 @@ function formatInputDate(value: string) {
   return `${parts.year}-${parts.month}-${parts.day}T${parts.hour}:${parts.minute}`
 }
 
+function getCurrentJakartaDateTimeInput() {
+  return formatInputDate(new Date().toISOString())
+}
+
 function buildFormData(form: ContentForm) {
   const formData = new FormData()
   formData.set('id', form.id)
@@ -165,13 +169,13 @@ function getEmptyForm(profileId = ''): ContentForm {
   return {
     id: '',
     notes: '',
-    scheduledAt: '',
+    scheduledAt: getCurrentJakartaDateTimeInput(),
     scrapeDescription: '',
     scrapeImage: '',
     scrapeSiteName: '',
     scrapedAt: '',
     sourceUrl: '',
-    status: 'draft',
+    status: 'published',
     title: '',
     url: '',
     userSocmedId: profileId,
