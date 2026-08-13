@@ -254,11 +254,11 @@ export default function ProfilesSettings({ groups, socmeds, userSocmeds }: Profi
             Platform accounts used to map content, publishing targets, and future embeds.
           </Text>
         </Box>
-        <Group gap="sm">
-          <Button disabled={isPending} onClick={openCreateGroupModal} variant="default">
+        <Group gap="sm" className={styles.pageActions}>
+          <Button className={styles.neutralAction} disabled={isPending} onClick={openCreateGroupModal} variant="default">
             Manage Account Groups
           </Button>
-          <Button leftSection={<IconPlus size={18} stroke={1.8} />} loading={isPending} onClick={openCreateModal}>
+          <Button className={styles.primaryAction} leftSection={<IconPlus size={18} stroke={1.8} />} loading={isPending} onClick={openCreateModal}>
             Add Social Media Account
           </Button>
         </Group>
@@ -286,7 +286,7 @@ export default function ProfilesSettings({ groups, socmeds, userSocmeds }: Profi
 
       <Box component="section" className={styles.panel}>
         <Group justify="space-between" align="flex-start" className={styles.panelHeader}>
-          <Box>
+          <Box className={styles.panelIntro}>
             <Text component="h3" className={styles.panelTitle}>Social Media Accounts</Text>
             <Text className={styles.muted}>Each account is linked to a master platform and an account group.</Text>
           </Box>
@@ -318,28 +318,29 @@ export default function ProfilesSettings({ groups, socmeds, userSocmeds }: Profi
                         Email: {profile.linkedEmail ?? '-'} · WA: {profile.linkedWhatsapp ?? '-'}
                       </Text>
                     </Box>
-                    <Group gap="xs" wrap="nowrap">
+                    <Group gap="xs" wrap="nowrap" className={styles.listActionGroup}>
                       <Tooltip label={copyState === profile.id ? 'Copied' : 'Copy URL'}>
                         <ActionIcon
                           aria-label={copyState === profile.id ? 'Copied profile URL' : 'Copy profile URL'}
                           onClick={() => copyProfileUrl(profile)}
+                          className={styles.neutralIconAction}
                           variant="default"
                         >
                           {copyState === profile.id ? <IconCheck size={18} stroke={1.8} /> : <IconCopy size={18} stroke={1.8} />}
                         </ActionIcon>
                       </Tooltip>
                       <Tooltip label="Edit">
-                        <ActionIcon aria-label="Edit social account" disabled={isPending} onClick={() => openEditModal(profile)} variant="default">
+                        <ActionIcon aria-label="Edit social account" className={styles.accentIconAction} disabled={isPending} onClick={() => openEditModal(profile)} variant="default">
                           <IconEdit size={18} stroke={1.8} />
                         </ActionIcon>
                       </Tooltip>
                       <Tooltip label="Delete">
-                        <ActionIcon aria-label="Delete social account" color="red" disabled={isPending} onClick={() => deleteSocmed(profile)} variant="light">
+                        <ActionIcon aria-label="Delete social account" className={styles.dangerIconAction} disabled={isPending} onClick={() => deleteSocmed(profile)} variant="light">
                           <IconTrash size={18} stroke={1.8} />
                         </ActionIcon>
                       </Tooltip>
                       <Tooltip label="Open">
-                        <ActionIcon aria-label="Open social profile" component="a" href={profile.url} rel="noreferrer" target="_blank" variant="default">
+                        <ActionIcon aria-label="Open social profile" className={styles.accentIconAction} component="a" href={profile.url} rel="noreferrer" target="_blank" variant="default">
                           <IconExternalLink size={18} stroke={1.8} />
                         </ActionIcon>
                       </Tooltip>
@@ -359,8 +360,14 @@ export default function ProfilesSettings({ groups, socmeds, userSocmeds }: Profi
         ) : null}
       </Box>
 
-      <Modal opened={isOpen} onClose={() => setIsOpen(false)} title={isEditing ? 'Edit Social Media Account' : 'Add Social Media Account'} centered>
-        <Stack gap="sm">
+      <Modal
+        classNames={{ body: styles.osModalBody, content: styles.osModalContent, header: styles.osModalHeader, title: styles.osModalTitle }}
+        opened={isOpen}
+        onClose={() => setIsOpen(false)}
+        title={isEditing ? 'Edit Social Media Account' : 'Add Social Media Account'}
+        centered
+      >
+        <Stack gap="sm" className={styles.modalSection}>
           <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="sm">
             <Select
               data={socmedOptions}
@@ -436,18 +443,27 @@ export default function ProfilesSettings({ groups, socmeds, userSocmeds }: Profi
             value={form.status}
           />
           <Group justify="flex-end">
-            <Button disabled={isPending} onClick={() => setIsOpen(false)} variant="default">
+            <Button className={styles.neutralAction} disabled={isPending} onClick={() => setIsOpen(false)} variant="default">
               Cancel
             </Button>
-            <Button loading={isPending} onClick={saveSocmed}>
+            <Button className={styles.primaryAction} loading={isPending} onClick={saveSocmed}>
               Save Account
             </Button>
           </Group>
         </Stack>
       </Modal>
 
-      <Modal opened={isGroupModalOpen} onClose={() => setIsGroupModalOpen(false)} title={isEditingGroup ? 'Edit Account Group' : 'Add Account Group'} centered>
-        <Stack gap="sm">
+      <Modal
+        classNames={{ body: styles.osModalBody, content: styles.osModalContent, header: styles.osModalHeader, title: styles.osModalTitle }}
+        opened={isGroupModalOpen}
+        onClose={() => setIsGroupModalOpen(false)}
+        title={isEditingGroup ? 'Edit Account Group' : 'Add Account Group'}
+        centered
+      >
+        <Stack gap="sm" className={styles.modalSection}>
+          <Text className={styles.modalSectionHint}>
+            Manage account-group naming in one place so social media mapping stays consistent.
+          </Text>
           <TextInput
             label="Group Name"
             onChange={(event) => {
@@ -476,15 +492,16 @@ export default function ProfilesSettings({ groups, socmeds, userSocmeds }: Profi
             value={groupForm.status}
           />
           <Group justify="flex-end">
-            <Button disabled={isPending} onClick={() => setIsGroupModalOpen(false)} variant="default">
+            <Button className={styles.neutralAction} disabled={isPending} onClick={() => setIsGroupModalOpen(false)} variant="default">
               Cancel
             </Button>
-            <Button loading={isPending} onClick={saveGroup}>
+            <Button className={styles.primaryAction} loading={isPending} onClick={saveGroup}>
               Save Group
             </Button>
           </Group>
 
-          <Stack gap="xs" mt="sm">
+          <Stack gap="xs" mt="sm" className={`${styles.modalSection} ${styles.modalSectionMuted}`}>
+            <Text component="h3" className={styles.modalSectionTitle}>Existing Account Groups</Text>
             {groups.map((group) => (
               <Card className={styles.profileItem} key={group.id} padding="sm" radius="sm" withBorder>
                 <Box className={styles.profileBody}>
@@ -499,14 +516,14 @@ export default function ProfilesSettings({ groups, socmeds, userSocmeds }: Profi
                       <Text className={styles.muted}>{group.slug}</Text>
                       {group.description ? <Text className={styles.profileMeta}>{group.description}</Text> : null}
                     </Box>
-                    <Group gap="xs" wrap="nowrap">
+                    <Group gap="xs" wrap="nowrap" className={styles.listActionGroup}>
                       <Tooltip label="Edit group">
-                        <ActionIcon aria-label="Edit account group" disabled={isPending} onClick={() => openEditGroupModal(group)} variant="default">
+                        <ActionIcon aria-label="Edit account group" className={styles.accentIconAction} disabled={isPending} onClick={() => openEditGroupModal(group)} variant="default">
                           <IconEdit size={18} stroke={1.8} />
                         </ActionIcon>
                       </Tooltip>
                       <Tooltip label="Delete group">
-                        <ActionIcon aria-label="Delete account group" color="red" disabled={isPending} onClick={() => removeGroup(group)} variant="light">
+                        <ActionIcon aria-label="Delete account group" className={styles.dangerIconAction} disabled={isPending} onClick={() => removeGroup(group)} variant="light">
                           <IconTrash size={18} stroke={1.8} />
                         </ActionIcon>
                       </Tooltip>

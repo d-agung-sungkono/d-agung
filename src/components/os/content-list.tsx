@@ -448,15 +448,15 @@ export default function ContentList({ content, profiles, targets }: ContentListP
   return (
     <Box component="section" className={styles.panel}>
       <Group justify="space-between" align="flex-start" gap="md" className={styles.panelHeader}>
-        <Box>
+        <Box className={styles.panelIntro}>
           <Text component="h3" className={styles.panelTitle}>Contents</Text>
           <Text className={styles.muted}>Manage drafts, schedules, links, and published posts from DB.</Text>
         </Box>
-        <Group gap="xs">
-          <Button leftSection={<IconPlus size={18} stroke={1.8} />} loading={isPending} onClick={openCreateScheduleModal} variant="default">
+        <Group gap="xs" className={styles.pageActions}>
+          <Button className={styles.accentAction} leftSection={<IconPlus size={18} stroke={1.8} />} loading={isPending} onClick={openCreateScheduleModal} variant="default">
             Add Schedule
           </Button>
-          <Button leftSection={<IconPlus size={18} stroke={1.8} />} loading={isPending} onClick={openCreateModal}>
+          <Button className={styles.primaryAction} leftSection={<IconPlus size={18} stroke={1.8} />} loading={isPending} onClick={openCreateModal}>
             Add Contents
           </Button>
         </Group>
@@ -479,12 +479,12 @@ export default function ContentList({ content, profiles, targets }: ContentListP
               </Box>
               <Group gap={4} wrap="nowrap">
                 <Tooltip label="Edit schedule">
-                  <ActionIcon aria-label="Edit schedule" disabled={isPending} onClick={() => openEditScheduleModal(target)} variant="default">
+                  <ActionIcon aria-label="Edit schedule" className={styles.accentIconAction} disabled={isPending} onClick={() => openEditScheduleModal(target)} variant="default">
                     <IconEdit size={17} stroke={1.8} />
                   </ActionIcon>
                 </Tooltip>
                 <Tooltip label="Delete schedule">
-                  <ActionIcon aria-label="Delete schedule" color="red" disabled={isPending} onClick={() => removeSchedule(target)} variant="light">
+                  <ActionIcon aria-label="Delete schedule" className={styles.dangerIconAction} disabled={isPending} onClick={() => removeSchedule(target)} variant="light">
                     <IconTrash size={17} stroke={1.8} />
                   </ActionIcon>
                 </Tooltip>
@@ -514,7 +514,7 @@ export default function ContentList({ content, profiles, targets }: ContentListP
         ))}
       </SimpleGrid>
 
-      <SimpleGrid cols={{ base: 1, sm: 2, lg: 5 }} spacing="xs" className={styles.contentToolbar}>
+      <SimpleGrid cols={{ base: 1, sm: 2, lg: 5 }} spacing="xs" className={`${styles.contentToolbar} ${styles.toolbarPanel}`}>
         <TextInput
           onChange={(event) => {
             const { value } = event.currentTarget
@@ -540,6 +540,7 @@ export default function ContentList({ content, profiles, targets }: ContentListP
           value={status}
         />
         <Button
+          className={styles.neutralAction}
           leftSection={<IconRefresh size={18} stroke={1.8} />}
           onClick={() => {
             setQuery('')
@@ -566,21 +567,21 @@ export default function ContentList({ content, profiles, targets }: ContentListP
                   {item.groupName ? ` · ${item.groupName}` : ''} · {formatDate(item.scheduledAt)}
                 </Text>
               </Box>
-              <Group gap="xs" wrap="nowrap">
+              <Group gap="xs" wrap="nowrap" className={styles.listActionGroup}>
                 {item.url ? (
                   <Tooltip label="Open">
-                    <ActionIcon aria-label="Open content link" component="a" href={item.url} rel="noreferrer" target="_blank" variant="default">
+                    <ActionIcon aria-label="Open content link" className={styles.accentIconAction} component="a" href={item.url} rel="noreferrer" target="_blank" variant="default">
                       <IconExternalLink size={18} stroke={1.8} />
                     </ActionIcon>
                   </Tooltip>
                 ) : null}
                 <Tooltip label="Edit">
-                  <ActionIcon aria-label="Edit content" disabled={isPending} onClick={() => openEditModal(item)} variant="default">
+                  <ActionIcon aria-label="Edit content" className={styles.accentIconAction} disabled={isPending} onClick={() => openEditModal(item)} variant="default">
                     <IconEdit size={18} stroke={1.8} />
                   </ActionIcon>
                 </Tooltip>
                 <Tooltip label="Delete">
-                  <ActionIcon aria-label="Delete content" color="red" disabled={isPending} onClick={() => removeContent(item)} variant="light">
+                  <ActionIcon aria-label="Delete content" className={styles.dangerIconAction} disabled={isPending} onClick={() => removeContent(item)} variant="light">
                     <IconTrash size={18} stroke={1.8} />
                   </ActionIcon>
                 </Tooltip>
@@ -620,16 +621,22 @@ export default function ContentList({ content, profiles, targets }: ContentListP
           value={pageSize}
           w={110}
         />
-        <Button disabled={safePage <= 1} onClick={() => setPage((current) => Math.max(1, current - 1))} variant="default">
+        <Button className={styles.neutralAction} disabled={safePage <= 1} onClick={() => setPage((current) => Math.max(1, current - 1))} variant="default">
           Prev
         </Button>
-        <Button disabled={safePage >= pageCount} onClick={() => setPage((current) => Math.min(pageCount, current + 1))} variant="default">
+        <Button className={styles.neutralAction} disabled={safePage >= pageCount} onClick={() => setPage((current) => Math.min(pageCount, current + 1))} variant="default">
           Next
         </Button>
       </Group>
 
-      <Modal opened={isOpen} onClose={() => setIsOpen(false)} title={isEditing ? 'Edit Contents' : 'Add Contents'} centered>
-        <Stack gap="sm">
+      <Modal
+        classNames={{ body: styles.osModalBody, content: styles.osModalContent, header: styles.osModalHeader, title: styles.osModalTitle }}
+        opened={isOpen}
+        onClose={() => setIsOpen(false)}
+        title={isEditing ? 'Edit Contents' : 'Add Contents'}
+        centered
+      >
+        <Stack gap="sm" className={styles.modalSection}>
           <TextInput
             label="Contents Link"
             onChange={(event) => {
@@ -650,7 +657,7 @@ export default function ContentList({ content, profiles, targets }: ContentListP
             value={form.url}
           />
           <Group justify="flex-end">
-            <Button disabled={!form.url || isPending} leftSection={<IconRefresh size={18} stroke={1.8} />} loading={isPending} onClick={scrapeContent} variant="default">
+            <Button className={styles.accentAction} disabled={!form.url || isPending} leftSection={<IconRefresh size={18} stroke={1.8} />} loading={isPending} onClick={scrapeContent} variant="default">
               Scrape
             </Button>
           </Group>
@@ -704,18 +711,24 @@ export default function ContentList({ content, profiles, targets }: ContentListP
             value={form.notes}
           />
           <Group justify="flex-end">
-            <Button disabled={isPending} onClick={() => setIsOpen(false)} variant="default">
+            <Button className={styles.neutralAction} disabled={isPending} onClick={() => setIsOpen(false)} variant="default">
               Cancel
             </Button>
-            <Button loading={isPending} onClick={saveContent}>
+            <Button className={styles.primaryAction} loading={isPending} onClick={saveContent}>
               Save Contents
             </Button>
           </Group>
         </Stack>
       </Modal>
 
-      <Modal opened={isScheduleOpen} onClose={() => setIsScheduleOpen(false)} title={isEditingSchedule ? 'Edit Schedule' : 'Add Schedule'} centered>
-        <Stack gap="sm">
+      <Modal
+        classNames={{ body: styles.osModalBody, content: styles.osModalContent, header: styles.osModalHeader, title: styles.osModalTitle }}
+        opened={isScheduleOpen}
+        onClose={() => setIsScheduleOpen(false)}
+        title={isEditingSchedule ? 'Edit Schedule' : 'Add Schedule'}
+        centered
+      >
+        <Stack gap="sm" className={styles.modalSection}>
           <TextInput
             label="Schedule Name"
             onChange={(event) => {
@@ -777,10 +790,10 @@ export default function ContentList({ content, profiles, targets }: ContentListP
             value={scheduleForm.notes}
           />
           <Group justify="flex-end">
-            <Button disabled={isPending} onClick={() => setIsScheduleOpen(false)} variant="default">
+            <Button className={styles.neutralAction} disabled={isPending} onClick={() => setIsScheduleOpen(false)} variant="default">
               Cancel
             </Button>
-            <Button loading={isPending} onClick={saveSchedule}>
+            <Button className={styles.primaryAction} loading={isPending} onClick={saveSchedule}>
               Save Schedule
             </Button>
           </Group>
