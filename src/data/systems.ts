@@ -2,7 +2,7 @@ import type { SystemItem } from '../types/system'
 
 export const systems: SystemItem[] = [
   {
-    slug: 'umkm-kit',
+    slug: 'warungkit',
     title: 'WarungKit',
     summary:
       'A practical operating layer for UMKM: catalog, orders, and daily flow in one place.',

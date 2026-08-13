@@ -7,19 +7,17 @@ export type SocmedOption = {
   name: string
 }
 
-export type AccountGroupOption = {
-  description: string | null
+export type BrandOption = {
   id: string
   name: string
-  slug: string
-  sortOrder: number
   status: string
 }
 
 export type UserSocmed = {
+  brandIds: string[]
+  brandNames: string[]
   id: string
   socmedId: string
-  accountGroupId: string | null
   platform: string
   account: string
   label: string
@@ -27,26 +25,23 @@ export type UserSocmed = {
   linkedEmail: string | null
   linkedWhatsapp: string | null
   status: string
-  groupName: string | null
 }
 
 type UserRow = {
   id: string
 }
 
-type AccountGroupRow = {
-  description: string | null
+type BrandRow = {
   id: string
   name: string
-  slug: string
-  sort_order: number
   status: string
 }
 
 type UserSocmedRow = {
+  brand_ids: string[] | null
+  brand_names: string[] | null
   id: string
   socmed_id: string
-  account_group_id: string | null
   platform: string
   account: string
   label: string
@@ -54,7 +49,6 @@ type UserSocmedRow = {
   linked_email: string | null
   linked_whatsapp: string | null
   status: string
-  group_name: string | null
 }
 
 export async function getOsUserId() {
@@ -71,14 +65,20 @@ export async function getOsUserId() {
 
 export async function getSettingsData() {
   const userId = await getOsUserId()
-  const [socmedsResult, groupsResult, userSocmedsResult] = await Promise.all([
+  const [socmedsResult, brandsResult, userSocmedsResult] = await Promise.all([
     query<SocmedOption>('SELECT id, name FROM socmeds WHERE status = $1 ORDER BY sort_order, name', ['active']),
-    query<AccountGroupRow>(
+    query<BrandRow>(
       `
-        SELECT id, name, slug, description, status, sort_order
-        FROM account_groups
+        SELECT id, title AS name, status
+        FROM os_brands
         WHERE user_id = $1
-        ORDER BY sort_order, name
+        ORDER BY
+          CASE status
+            WHEN 'ACTIVE' THEN 0
+            WHEN 'PAUSED' THEN 1
+            ELSE 2
+          END,
+          title
       `,
       [userId]
     ),
@@ -87,7 +87,6 @@ export async function getSettingsData() {
         SELECT
           us.id,
           us.socmed_id,
-          us.account_group_id,
           s.name AS platform,
           us.account,
           us.label,
@@ -95,11 +94,14 @@ export async function getSettingsData() {
           us.linked_email,
           us.linked_whatsapp,
           us.status,
-          ag.name AS group_name
+          ARRAY_REMOVE(ARRAY_AGG(DISTINCT b.id), NULL) AS brand_ids,
+          ARRAY_REMOVE(ARRAY_AGG(DISTINCT b.title), NULL) AS brand_names
         FROM user_socmeds us
         INNER JOIN socmeds s ON s.id = us.socmed_id
-        LEFT JOIN account_groups ag ON ag.id = us.account_group_id
+        LEFT JOIN os_brand_social_media_accounts rel ON rel.user_socmed_id = us.id
+        LEFT JOIN os_brands b ON b.id = rel.brand_id
         WHERE us.user_id = $1
+        GROUP BY us.id, s.name
         ORDER BY us.sort_order, s.name, us.account
       `,
       [userId]
@@ -107,19 +109,16 @@ export async function getSettingsData() {
   ])
 
   return {
-    groups: groupsResult.rows.map((row) => ({
-      description: row.description,
+    brands: brandsResult.rows.map((row) => ({
       id: row.id,
       name: row.name,
-      slug: row.slug,
-      sortOrder: row.sort_order,
       status: row.status,
     })),
     socmeds: socmedsResult.rows,
     userSocmeds: userSocmedsResult.rows.map((row) => ({
       account: row.account,
-      accountGroupId: row.account_group_id,
-      groupName: row.group_name,
+      brandIds: row.brand_ids ?? [],
+      brandNames: row.brand_names ?? [],
       id: row.id,
       label: row.label,
       linkedEmail: row.linked_email,

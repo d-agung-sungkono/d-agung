@@ -6,6 +6,7 @@ import { ActionIcon, Tooltip } from '@mantine/core'
 import {
   IconArticle,
   IconBrain,
+  IconBuildingStore,
   IconCalendar,
   IconHome,
   IconLogout,
@@ -23,6 +24,7 @@ const navigation = [
   { label: 'Home', href: '/os', icon: IconHome },
   { label: 'Today', href: '/os/today', icon: IconCalendar },
   { label: 'Contents', href: '/os/content', icon: IconArticle },
+  { label: 'Brands', href: '/os/brands', icon: IconBuildingStore },
   { label: 'Products', href: '/os/products', icon: IconPackage },
   { label: 'Thoughts', href: '/os/thoughts', icon: IconBrain },
   { label: 'Social Medias', href: '/os/socmeds', icon: IconShare2 },
