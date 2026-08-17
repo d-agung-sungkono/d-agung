@@ -297,6 +297,24 @@
     width: 50%;
   }
 
+  .productGrid {
+    grid-template-columns: repeat(auto-fill, minmax(min(9.25rem, 100%), 1fr));
+    gap: 0.62rem;
+  }
+
+  .productGrid .productInfo {
+    padding: 0.68rem 0.68rem 0;
+  }
+
+  .productGrid .productActions {
+    padding: 0.68rem;
+  }
+
+  .productGrid .productName {
+    font-size: 0.94rem;
+    line-height: 1.2;
+  }
+
   .productList .productCard {
     grid-template-columns: 4.7rem minmax(0, 1fr);
     gap: 0.68rem;
