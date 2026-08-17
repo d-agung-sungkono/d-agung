@@ -15,6 +15,7 @@ import {
   Tooltip,
 } from '@mantine/core'
 import { IconArchive, IconEdit, IconExternalLink, IconPlus, IconRefresh, IconSearch, IconTrash } from '@tabler/icons-react'
+import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import { type FormEvent, useMemo, useState, useTransition } from 'react'
 
@@ -231,11 +232,12 @@ export default function AffiliateProductsManager({ products }: AffiliateProducts
           </Group>
         </Group>
 
-        <Table.ScrollContainer minWidth={920}>
+        <Table.ScrollContainer minWidth={980}>
           <Table highlightOnHover verticalSpacing="sm">
             <Table.Thead>
               <Table.Tr>
                 <Table.Th>Order</Table.Th>
+                <Table.Th>Image</Table.Th>
                 <Table.Th>Code</Table.Th>
                 <Table.Th>Name</Table.Th>
                 <Table.Th>Marketplace</Table.Th>
@@ -249,6 +251,18 @@ export default function AffiliateProductsManager({ products }: AffiliateProducts
               {filteredProducts.map((product) => (
                 <Table.Tr key={product.id}>
                   <Table.Td>{product.sortOrder}</Table.Td>
+                  <Table.Td>
+                    <div className={styles.productThumbWrap}>
+                      <Image
+                        alt={product.name}
+                        className={styles.productThumb}
+                        height={64}
+                        unoptimized
+                        src={`/os/affiliate/image/${product.id}`}
+                        width={64}
+                      />
+                    </div>
+                  </Table.Td>
                   <Table.Td>
                     <Text fw={700}>{product.code}</Text>
                   </Table.Td>
@@ -309,7 +323,7 @@ export default function AffiliateProductsManager({ products }: AffiliateProducts
               ))}
               {filteredProducts.length === 0 ? (
                 <Table.Tr>
-                  <Table.Td colSpan={8}>
+                  <Table.Td colSpan={9}>
                     <Text c="dimmed" ta="center">
                       No affiliate products found.
                     </Text>
