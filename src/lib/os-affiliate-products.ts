@@ -1,7 +1,12 @@
 import 'server-only'
 
 import { affiliateProducts as fallbackAffiliateProducts } from '@/data/affiliate-products'
-import type { AffiliateMarketplace, AffiliateProduct, AffiliateProductType } from '@/data/affiliate-products'
+import type {
+  AffiliateMarketplace,
+  AffiliateProduct,
+  AffiliateProductContentLink,
+  AffiliateProductType,
+} from '@/data/affiliate-products'
 import { query } from '@/lib/db'
 import { getOsUserId } from '@/lib/os-settings'
 
@@ -9,13 +14,6 @@ export type OsAffiliateProduct = AffiliateProduct & {
   contentLinks: AffiliateProductContentLink[]
   createdAt: string
   updatedAt: string
-}
-
-export type AffiliateProductContentLink = {
-  id: string
-  title: string | null
-  url: string
-  sortOrder: number
 }
 
 type AffiliateProductRow = {
@@ -128,9 +126,44 @@ export async function getPublicAffiliateProducts() {
         sort_order,
         created_at,
         updated_at,
-        '[]'::json AS content_links
-      FROM os_affiliate_products
-      WHERE user_id = $1
+        content_links
+      FROM (
+        SELECT
+          oap.id,
+          oap.code,
+          oap.name,
+          oap.image,
+          oap.image_uploaded_at,
+          oap.type,
+          oap.marketplace,
+          oap.destination_url,
+          oap.is_active,
+          oap.sort_order,
+          oap.created_at,
+          oap.updated_at,
+          COALESCE(content_links.links, '[]'::json) AS content_links
+        FROM os_affiliate_products oap
+        LEFT JOIN LATERAL (
+          SELECT json_agg(
+            json_build_object(
+              'id', oapcl.id,
+              'title', COALESCE(oapcl.title, cp.title),
+              'url', oapcl.url,
+              'sortOrder', oapcl.sort_order,
+              'platform', s.name,
+              'account', us.account,
+              'status', cp.status
+            )
+            ORDER BY oapcl.sort_order, oapcl.created_at
+          ) AS links
+          FROM os_affiliate_product_content_links oapcl
+          LEFT JOIN content_posts cp ON cp.user_id = oap.user_id AND cp.url = oapcl.url
+          LEFT JOIN user_socmeds us ON us.id = cp.user_socmed_id
+          LEFT JOIN socmeds s ON s.id = us.socmed_id
+          WHERE oapcl.product_id = oap.id
+        ) content_links ON true
+        WHERE oap.user_id = $1
+      ) products
       ORDER BY is_active DESC, sort_order ASC, created_at DESC
     `,
     [userId]

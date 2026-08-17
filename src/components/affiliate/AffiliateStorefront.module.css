@@ -183,6 +183,71 @@
   color: #2f695e;
 }
 
+.contentLinks {
+  margin-top: 0.72rem;
+  display: grid;
+  gap: 0.42rem;
+}
+
+.contentLinksLabel {
+  margin: 0;
+  font-size: 0.66rem;
+  font-weight: 650;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgba(17, 17, 17, 0.46);
+}
+
+.contentLinkList {
+  min-width: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.34rem;
+}
+
+.contentLinkList a,
+.contentLinkMore {
+  min-width: 0;
+  min-height: 1.86rem;
+  max-width: 100%;
+  border: 1px solid rgba(47, 105, 94, 0.18);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.28rem;
+  background: rgba(47, 105, 94, 0.07);
+  color: #2f695e;
+  font-size: 0.72rem;
+  font-weight: 650;
+  line-height: 1.1;
+}
+
+.contentLinkList a {
+  padding: 0 0.48rem;
+}
+
+.contentLinkList a:hover {
+  border-color: rgba(47, 105, 94, 0.36);
+  background: rgba(47, 105, 94, 0.11);
+}
+
+.contentLinkList a svg {
+  flex: 0 0 auto;
+}
+
+.contentLinkList a span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.contentLinkMore {
+  padding: 0 0.42rem;
+  border-color: rgba(17, 17, 17, 0.1);
+  background: rgba(17, 17, 17, 0.04);
+  color: rgba(17, 17, 17, 0.58);
+}
+
 .productName {
   margin: 0.38rem 0 0;
   color: rgba(17, 17, 17, 0.92);
@@ -345,6 +410,29 @@
 
   .productList .marketplace {
     margin-top: 0.42rem;
+  }
+
+  .productList .contentLinks {
+    margin-top: 0.5rem;
+  }
+
+  .productList .contentLinksLabel {
+    display: none;
+  }
+
+  .productList .contentLinkList {
+    gap: 0.26rem;
+  }
+
+  .productList .contentLinkList a,
+  .productList .contentLinkMore {
+    min-height: 1.66rem;
+    font-size: 0.68rem;
+  }
+
+  .productList .contentLinkList a {
+    max-width: min(100%, 12rem);
+    padding: 0 0.38rem;
   }
 
   .productList .productActions a {

@@ -1,6 +1,6 @@
 'use client'
 
-import { IconExternalLink, IconLayoutGrid, IconList, IconSearch } from '@tabler/icons-react'
+import { IconArticle, IconExternalLink, IconLayoutGrid, IconList, IconSearch } from '@tabler/icons-react'
 import Image from 'next/image'
 import { useMemo, useState } from 'react'
 
@@ -23,6 +23,28 @@ const marketplaceLabels: Record<AffiliateMarketplace, string> = {
   shopee: 'Shopee',
   tokopedia: 'Tokopedia',
   other: 'Marketplace',
+}
+
+function getContentLinkLabel(product: AffiliateProduct, index: number) {
+  const contentLink = product.contentLinks?.[index]
+
+  if (!contentLink) {
+    return ''
+  }
+
+  if (contentLink.title) {
+    return contentLink.title
+  }
+
+  if (contentLink.platform && contentLink.account) {
+    return `${contentLink.platform} @${contentLink.account}`
+  }
+
+  if (contentLink.platform) {
+    return contentLink.platform
+  }
+
+  return `Konten ${index + 1}`
 }
 
 function getAffiliateHref(query: string, page: number) {
@@ -112,24 +134,43 @@ export default function AffiliateStorefront({
 
       {products.length > 0 ? (
         <div className={viewMode === 'grid' ? styles.productGrid : styles.productList}>
-          {products.map((product) => (
-            <article className={styles.productCard} key={product.id}>
-              <div className={styles.imageWrap}>
-                <Image src={product.image} alt="" width={600} height={600} unoptimized />
-              </div>
-              <div className={styles.productInfo}>
-                <p className={styles.productCode}>{product.code}</p>
-                <h2 className={styles.productName}>{product.name}</h2>
-                <p className={styles.marketplace}>{marketplaceLabels[product.marketplace]}</p>
-              </div>
-              <div className={styles.productActions}>
-                <a href={product.destinationUrl} target="_blank" rel="noopener noreferrer">
-                  <IconExternalLink size={17} stroke={1.9} aria-hidden="true" />
-                  <span>Buka Produk</span>
-                </a>
-              </div>
-            </article>
-          ))}
+          {products.map((product) => {
+            const visibleContentLinks = product.contentLinks?.slice(0, 2) ?? []
+            const hiddenContentLinkCount = Math.max((product.contentLinks?.length ?? 0) - visibleContentLinks.length, 0)
+
+            return (
+              <article className={styles.productCard} key={product.id}>
+                <div className={styles.imageWrap}>
+                  <Image src={product.image} alt="" width={600} height={600} unoptimized />
+                </div>
+                <div className={styles.productInfo}>
+                  <p className={styles.productCode}>{product.code}</p>
+                  <h2 className={styles.productName}>{product.name}</h2>
+                  <p className={styles.marketplace}>{marketplaceLabels[product.marketplace]}</p>
+                  {visibleContentLinks.length > 0 ? (
+                    <div className={styles.contentLinks} aria-label={`Konten terkait ${product.name}`}>
+                      <p className={styles.contentLinksLabel}>Konten terkait</p>
+                      <div className={styles.contentLinkList}>
+                        {visibleContentLinks.map((contentLink, index) => (
+                          <a href={contentLink.url} key={contentLink.id} target="_blank" rel="noopener noreferrer">
+                            <IconArticle size={15} stroke={1.9} aria-hidden="true" />
+                            <span>{getContentLinkLabel(product, index)}</span>
+                          </a>
+                        ))}
+                        {hiddenContentLinkCount > 0 ? <span className={styles.contentLinkMore}>+{hiddenContentLinkCount}</span> : null}
+                      </div>
+                    </div>
+                  ) : null}
+                </div>
+                <div className={styles.productActions}>
+                  <a href={product.destinationUrl} target="_blank" rel="noopener noreferrer">
+                    <IconExternalLink size={17} stroke={1.9} aria-hidden="true" />
+                    <span>Buka Produk</span>
+                  </a>
+                </div>
+              </article>
+            )
+          })}
         </div>
       ) : (
         <div className={styles.emptyState}>

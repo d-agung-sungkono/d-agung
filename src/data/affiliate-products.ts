@@ -8,11 +8,22 @@ export type AffiliateProduct = {
   code: string
   name: string
   image: string
+  contentLinks?: AffiliateProductContentLink[]
   type: AffiliateProductType
   marketplace: AffiliateMarketplace
   destinationUrl: string
   isActive: boolean
   sortOrder: number
+}
+
+export type AffiliateProductContentLink = {
+  id: string
+  title: string | null
+  url: string
+  sortOrder: number
+  platform?: string | null
+  account?: string | null
+  status?: string | null
 }
 
 export const affiliateProducts = (products as AffiliateProduct[])
