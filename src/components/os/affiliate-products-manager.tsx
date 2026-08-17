@@ -342,9 +342,14 @@ export default function AffiliateProductsManager({ products }: AffiliateProducts
             <TextInput
               label="Image URL or path"
               name="image"
-              required
               defaultValue={selectedProduct.image}
               placeholder="/images/products/placeholder.svg"
+            />
+            <TextInput
+              accept="image/jpeg,image/png,image/webp,image/gif,image/svg+xml"
+              label="Upload image"
+              name="imageFile"
+              type="file"
             />
             <TextInput
               label="Destination URL"
