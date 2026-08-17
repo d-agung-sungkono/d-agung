@@ -1,7 +1,8 @@
 import type { Metadata } from 'next'
+import { connection } from 'next/server'
 
 import AffiliateStorefront from '@/components/affiliate/AffiliateStorefront'
-import { affiliateProducts } from '@/data/affiliate-products'
+import { fallbackAffiliateProducts, getPublicAffiliateProducts } from '@/lib/os-affiliate-products'
 
 import styles from './affiliate.module.css'
 
@@ -33,18 +34,28 @@ export default async function AffiliatePage({
 }: {
   searchParams: Promise<{ q?: SearchValue; page?: SearchValue }>
 }) {
+  await connection()
+
   const params = await searchParams
+  let products = fallbackAffiliateProducts
+
+  try {
+    products = await getPublicAffiliateProducts()
+  } catch (error) {
+    console.error('Failed to load public affiliate products from CMS', error)
+  }
+
   const query = normalizeQuery(params.q)
   const normalizedQuery = query.toLowerCase()
   const requestedPage = normalizePage(params.page)
   const filteredProducts = normalizedQuery
-    ? affiliateProducts.filter((product) => {
+    ? products.filter((product) => {
         const code = product.code.toLowerCase()
         const name = product.name.toLowerCase()
 
         return code.includes(normalizedQuery) || name.includes(normalizedQuery)
       })
-    : affiliateProducts
+    : products
   const totalPages = Math.max(1, Math.ceil(filteredProducts.length / PAGE_SIZE))
   const page = Math.min(requestedPage, totalPages)
   const visibleProducts = filteredProducts.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE)
@@ -57,8 +68,8 @@ export default async function AffiliatePage({
           <h1 className={styles.title}>Produk Pilihan</h1>
           <p className={styles.intro}>Barang yang saya rekomendasikan untukmu!</p>
         </div>
-        <div className={styles.summary} aria-label={`${affiliateProducts.length} produk aktif`}>
-          <strong>{affiliateProducts.length}</strong>
+        <div className={styles.summary} aria-label={`${products.length} produk aktif`}>
+          <strong>{products.length}</strong>
           <span>Produk aktif</span>
         </div>
       </header>
