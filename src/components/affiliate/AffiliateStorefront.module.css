@@ -316,19 +316,20 @@
   }
 
   .productList {
-    margin-inline: -0.35rem;
+    gap: 0.58rem;
+    margin-inline: -0.68rem;
   }
 
   .productList .productCard {
-    grid-template-columns: 4.7rem minmax(0, 1fr);
-    gap: 0.68rem;
+    grid-template-columns: 4.55rem minmax(0, 1fr);
+    gap: 0.58rem;
     align-items: start;
     min-height: 0;
-    padding: 0.5rem;
+    padding: 0.46rem;
   }
 
   .productList .imageWrap {
-    width: 4.7rem;
+    width: 4.55rem;
   }
 
   .productList .productActions {
@@ -364,8 +365,8 @@
   }
 
   .productList {
-    gap: 0.55rem;
-    margin-inline: -0.45rem;
+    gap: 0.52rem;
+    margin-inline: -0.68rem;
   }
 
   .pagination {
