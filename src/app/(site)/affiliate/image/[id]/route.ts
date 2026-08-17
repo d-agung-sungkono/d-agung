@@ -26,7 +26,7 @@ export async function GET(_request: Request, context: RouteContext<'/affiliate/i
 
   return new Response(new Uint8Array(product.image_blob), {
     headers: {
-      'Cache-Control': 'public, max-age=300, stale-while-revalidate=3600',
+      'Cache-Control': 'no-store',
       'Content-Length': String(product.image_blob.length),
       'Content-Type': product.image_mime_type,
     },

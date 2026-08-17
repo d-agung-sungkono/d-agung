@@ -115,7 +115,7 @@ export default function AffiliateStorefront({
           {products.map((product) => (
             <article className={styles.productCard} key={product.id}>
               <div className={styles.imageWrap}>
-                <Image src={product.image} alt="" width={600} height={600} />
+                <Image src={product.image} alt="" width={600} height={600} unoptimized />
               </div>
               <div className={styles.productInfo}>
                 <p className={styles.productCode}>{product.code}</p>

@@ -58,6 +58,7 @@ const emptyProduct = {
   name: '',
   sortOrder: 0,
   type: 'affiliate' as AffiliateProductType,
+  updatedAt: '',
 }
 
 function getMarketplaceLabel(value: AffiliateMarketplace) {
@@ -136,6 +137,7 @@ export default function AffiliateProductsManager({ products }: AffiliateProducts
       name: product.name,
       sortOrder: product.sortOrder,
       type: product.type,
+      updatedAt: product.updatedAt,
     })
     setIsModalOpen(true)
   }
@@ -280,7 +282,7 @@ export default function AffiliateProductsManager({ products }: AffiliateProducts
                         className={styles.productThumb}
                         height={64}
                         unoptimized
-                        src={`/os/affiliate/image/${product.id}`}
+                        src={`/os/affiliate/image/${product.id}?v=${encodeURIComponent(product.updatedAt)}`}
                         width={64}
                       />
                     </div>
@@ -395,7 +397,7 @@ export default function AffiliateProductsManager({ products }: AffiliateProducts
                     alt={selectedProduct.name || selectedProduct.code}
                     height={112}
                     unoptimized
-                    src={`/os/affiliate/image/${selectedProduct.id}`}
+                    src={`/os/affiliate/image/${selectedProduct.id}?v=${encodeURIComponent(selectedProduct.updatedAt)}`}
                     width={112}
                   />
                 ) : (

@@ -24,6 +24,7 @@ type AffiliateProductRow = {
   code: string
   name: string
   image: string
+  image_uploaded_at: string | null
   type: AffiliateProductType
   marketplace: AffiliateMarketplace
   destination_url: string
@@ -34,13 +35,16 @@ type AffiliateProductRow = {
 }
 
 function mapAffiliateProductRow(row: AffiliateProductRow): OsAffiliateProduct {
+  const imageVersion = row.image_uploaded_at ?? row.updated_at
+  const image = imageVersion ? `${row.image}?v=${encodeURIComponent(imageVersion)}` : row.image
+
   return {
     code: row.code,
     contentLinks: row.content_links ?? [],
     createdAt: row.created_at,
     destinationUrl: row.destination_url,
     id: row.id,
-    image: row.image,
+    image,
     isActive: row.is_active,
     marketplace: row.marketplace,
     name: row.name,
@@ -59,6 +63,7 @@ export async function getOsAffiliateProducts() {
         code,
         name,
         image,
+        image_uploaded_at,
         type,
         marketplace,
         destination_url,
@@ -73,6 +78,7 @@ export async function getOsAffiliateProducts() {
           oap.code,
           oap.name,
           oap.image,
+          oap.image_uploaded_at,
           oap.type,
           oap.marketplace,
           oap.destination_url,
@@ -114,6 +120,7 @@ export async function getPublicAffiliateProducts() {
         code,
         name,
         image,
+        image_uploaded_at,
         type,
         marketplace,
         destination_url,
