@@ -223,12 +223,6 @@ export default function AffiliateProductsManager({ products }: AffiliateProducts
         </Button>
       </section>
 
-      {error ? (
-        <div className={styles.error} role="alert">
-          {error}
-        </div>
-      ) : null}
-
       <section className={styles.panel}>
         <Group justify="space-between" mb="md">
           <Group gap="xs">
