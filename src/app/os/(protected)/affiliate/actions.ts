@@ -85,7 +85,6 @@ async function getUploadedImage(formData: FormData) {
 async function getProductPayload(formData: FormData) {
   const code = getText(formData, 'code').toUpperCase()
   const name = getText(formData, 'name')
-  const image = getText(formData, 'image') || '/images/products/placeholder.svg'
   const destinationUrl = getText(formData, 'destinationUrl')
   const type = getProductType(formData)
   const marketplace = getMarketplace(formData)
@@ -97,13 +96,11 @@ async function getProductPayload(formData: FormData) {
     throw new Error('Code, name, and destination URL are required.')
   }
 
-  validateUrl(image, 'Image')
   validateUrl(destinationUrl, 'Destination URL')
 
   return {
     code,
     destinationUrl,
-    image,
     isActive,
     marketplace,
     name,
@@ -122,6 +119,10 @@ export async function createAffiliateProduct(formData: FormData) {
   const userId = await getOsUserId()
   const product = await getProductPayload(formData)
 
+  if (!product.uploadedImage) {
+    throw new Error('Product image is required.')
+  }
+
   const result = await query<{ id: string }>(
     `
       INSERT INTO os_affiliate_products (
@@ -138,14 +139,13 @@ export async function createAffiliateProduct(formData: FormData) {
         image_mime_type,
         image_uploaded_at
       )
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10::bytea, $11, CASE WHEN $10::bytea IS NULL THEN NULL ELSE now() END)
+      VALUES ($1, $2, $3, '/images/products/placeholder.svg', $4, $5, $6, $7, $8, $9::bytea, $10, CASE WHEN $9::bytea IS NULL THEN NULL ELSE now() END)
       RETURNING id
     `,
     [
       userId,
       product.code,
       product.name,
-      product.image,
       product.type,
       product.marketplace,
       product.destinationUrl,
@@ -186,23 +186,21 @@ export async function updateAffiliateProduct(formData: FormData) {
       SET
         code = $1,
         name = $2,
-        image = $3,
-        type = $4,
-        marketplace = $5,
-        destination_url = $6,
-        is_active = $7,
-        sort_order = $8,
-        image_blob = COALESCE($9::bytea, image_blob),
-        image_mime_type = CASE WHEN $9::bytea IS NULL THEN image_mime_type ELSE $10 END,
-        image_uploaded_at = CASE WHEN $9::bytea IS NULL THEN image_uploaded_at ELSE now() END,
+        type = $3,
+        marketplace = $4,
+        destination_url = $5,
+        is_active = $6,
+        sort_order = $7,
+        image_blob = COALESCE($8::bytea, image_blob),
+        image_mime_type = CASE WHEN $8::bytea IS NULL THEN image_mime_type ELSE $9 END,
+        image_uploaded_at = CASE WHEN $8::bytea IS NULL THEN image_uploaded_at ELSE now() END,
         updated_at = now()
-      WHERE id = $11
-        AND user_id = $12
+      WHERE id = $10
+        AND user_id = $11
     `,
     [
       product.code,
       product.name,
-      product.image,
       product.type,
       product.marketplace,
       product.destinationUrl,

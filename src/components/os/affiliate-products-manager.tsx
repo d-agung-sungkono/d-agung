@@ -51,7 +51,6 @@ const emptyProduct = {
   code: '',
   destinationUrl: '',
   id: '',
-  image: '/images/products/placeholder.svg',
   isActive: true,
   marketplace: 'shopee' as AffiliateMarketplace,
   name: '',
@@ -119,7 +118,16 @@ export default function AffiliateProductsManager({ products }: AffiliateProducts
   function openEditModal(product: OsAffiliateProduct) {
     setError(null)
     setModalMode('edit')
-    setSelectedProduct(product)
+    setSelectedProduct({
+      code: product.code,
+      destinationUrl: product.destinationUrl,
+      id: product.id,
+      isActive: product.isActive,
+      marketplace: product.marketplace,
+      name: product.name,
+      sortOrder: product.sortOrder,
+      type: product.type,
+    })
     setIsModalOpen(true)
   }
 
@@ -340,15 +348,10 @@ export default function AffiliateProductsManager({ products }: AffiliateProducts
             </Group>
             <TextInput label="Product name" name="name" required defaultValue={selectedProduct.name} />
             <TextInput
-              label="Image URL or path"
-              name="image"
-              defaultValue={selectedProduct.image}
-              placeholder="/images/products/placeholder.svg"
-            />
-            <TextInput
               accept="image/jpeg,image/png,image/webp,image/gif,image/svg+xml"
-              label="Upload image"
+              label={modalMode === 'edit' ? 'Replace image' : 'Upload image'}
               name="imageFile"
+              required={modalMode === 'create'}
               type="file"
             />
             <TextInput
