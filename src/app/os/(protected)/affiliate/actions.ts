@@ -62,14 +62,16 @@ function validateUrl(value: string, fieldLabel: string) {
 }
 
 function getContentLinks(formData: FormData) {
-  return Array.from(
-    new Set(
-      getText(formData, 'contentLinks')
-        .split('\n')
-        .map((value) => value.trim())
-        .filter(Boolean)
-    )
-  )
+  const rawLinks = formData
+    .getAll('contentLinks')
+    .flatMap((value) => String(value ?? '').split('\n'))
+    .map((value) => value.trim())
+
+  if (rawLinks.some((value) => value.length === 0)) {
+    throw new Error('Content link cannot be empty. Fill it or remove the row.')
+  }
+
+  return Array.from(new Set(rawLinks))
 }
 
 function validateContentLinks(urls: string[]) {

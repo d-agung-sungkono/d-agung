@@ -11,7 +11,6 @@ import {
   Switch,
   Table,
   Text,
-  Textarea,
   TextInput,
   Tooltip,
 } from '@mantine/core'
@@ -88,6 +87,7 @@ export default function AffiliateProductsManager({ products }: AffiliateProducts
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [selectedImageFileName, setSelectedImageFileName] = useState('')
+  const [contentLinkDrafts, setContentLinkDrafts] = useState<string[]>([])
 
   const activeCount = products.filter((product) => product.isActive).length
   const archivedCount = products.length - activeCount
@@ -112,6 +112,7 @@ export default function AffiliateProductsManager({ products }: AffiliateProducts
   function openCreateModal() {
     setError(null)
     setSelectedImageFileName('')
+    setContentLinkDrafts([])
     setModalMode('create')
     setSelectedProduct({
       ...emptyProduct,
@@ -123,6 +124,7 @@ export default function AffiliateProductsManager({ products }: AffiliateProducts
   function openEditModal(product: OsAffiliateProduct) {
     setError(null)
     setSelectedImageFileName('')
+    setContentLinkDrafts(product.contentLinks.map((link) => link.url))
     setModalMode('edit')
     setSelectedProduct({
       code: product.code,
@@ -147,6 +149,11 @@ export default function AffiliateProductsManager({ products }: AffiliateProducts
 
     if (modalMode === 'create' && (!(imageFile instanceof File) || imageFile.size === 0)) {
       setError('Product image is required.')
+      return
+    }
+
+    if (contentLinkDrafts.some((link) => !link.trim())) {
+      setError('Content link cannot be empty. Fill it or remove the row.')
       return
     }
 
@@ -193,6 +200,14 @@ export default function AffiliateProductsManager({ products }: AffiliateProducts
     const formData = new FormData()
     formData.set('id', product.id)
     runRowAction(deleteAffiliateProduct, formData)
+  }
+
+  function updateContentLinkDraft(index: number, value: string) {
+    setContentLinkDrafts((currentDrafts) => currentDrafts.map((draft, draftIndex) => (draftIndex === index ? value : draft)))
+  }
+
+  function removeContentLinkDraft(index: number) {
+    setContentLinkDrafts((currentDrafts) => currentDrafts.filter((_, draftIndex) => draftIndex !== index))
   }
 
   return (
@@ -421,15 +436,52 @@ export default function AffiliateProductsManager({ products }: AffiliateProducts
               defaultValue={selectedProduct.destinationUrl}
               placeholder="https://..."
             />
-            <Textarea
-              autosize
-              label="Content links"
-              minRows={3}
-              name="contentLinks"
-              defaultValue={selectedProduct.contentLinks.map((link) => link.url).join('\n')}
-              placeholder="https://www.instagram.com/...
-https://www.tiktok.com/..."
-            />
+            <div className={styles.affiliateContentLinksEditor}>
+              <Group justify="space-between" align="center">
+                <div>
+                  <Text fw={700}>Content links</Text>
+                  <Text c="dimmed" size="sm">
+                    Link konten yang membahas atau mengarah ke produk ini.
+                  </Text>
+                </div>
+                <Button
+                  leftSection={<IconPlus size={15} />}
+                  onClick={() => setContentLinkDrafts((currentDrafts) => [...currentDrafts, ''])}
+                  type="button"
+                  variant="default"
+                >
+                  Add link
+                </Button>
+              </Group>
+              {contentLinkDrafts.length > 0 ? (
+                <div className={styles.affiliateContentLinksList}>
+                  {contentLinkDrafts.map((link, index) => (
+                    <Group align="flex-start" gap="xs" key={index} wrap="nowrap">
+                      <TextInput
+                        aria-label={`Content link ${index + 1}`}
+                        name="contentLinks"
+                        onChange={(event) => updateContentLinkDraft(index, event.currentTarget.value)}
+                        placeholder="https://www.instagram.com/..."
+                        value={link}
+                      />
+                      <ActionIcon
+                        aria-label={`Remove content link ${index + 1}`}
+                        color="red"
+                        onClick={() => removeContentLinkDraft(index)}
+                        type="button"
+                        variant="subtle"
+                      >
+                        <IconTrash size={17} />
+                      </ActionIcon>
+                    </Group>
+                  ))}
+                </div>
+              ) : (
+                <Text c="dimmed" size="sm">
+                  Belum ada content link.
+                </Text>
+              )}
+            </div>
             <Group grow>
               <Select
                 allowDeselect={false}

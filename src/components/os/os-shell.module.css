@@ -2046,6 +2046,24 @@
   clip-path: inset(50%);
 }
 
+.affiliateContentLinksEditor {
+  display: grid;
+  gap: 0.65rem;
+  padding: 0.85rem;
+  border: 1px solid #dfe5ec;
+  border-radius: 0.55rem;
+  background: #fbfcfe;
+}
+
+.affiliateContentLinksList {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.affiliateContentLinksList :global(.mantine-TextInput-root) {
+  flex: 1;
+}
+
 .productTitle {
   margin: 0;
   max-width: 24rem;
