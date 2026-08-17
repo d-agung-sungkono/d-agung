@@ -547,13 +547,14 @@ export default function ProductsTable({ products, snapshots }: ProductsTableProp
         <Text className={styles.productFilterLabel}>Periode Sekarang</Text>
         <Group className={styles.productToolbarActions} gap="xs" justify="flex-end">
           <Button
+            className={styles.neutralAction}
             leftSection={<IconRefresh size={18} stroke={1.8} />}
             onClick={resetProductsView}
             variant="default"
           >
             Atur ulang
           </Button>
-          <Button leftSection={<IconTestPipe size={18} stroke={1.8} />} loading={isPending} onClick={scrapeAllLinks} variant="default">
+          <Button className={styles.accentAction} leftSection={<IconTestPipe size={18} stroke={1.8} />} loading={isPending} onClick={scrapeAllLinks} variant="default">
             Scrape Produk
           </Button>
           <Select
@@ -567,7 +568,7 @@ export default function ProductsTable({ products, snapshots }: ProductsTableProp
             onChange={(value) => updateFilter(() => setStatusFilter(value ?? 'all'))}
             value={statusFilter}
           />
-          <Button leftSection={<IconPlus size={18} stroke={1.8} />} onClick={() => setIsAddOpen(true)}>
+          <Button className={styles.primaryAction} leftSection={<IconPlus size={18} stroke={1.8} />} onClick={() => setIsAddOpen(true)}>
             Tambah Produk
           </Button>
         </Group>
@@ -675,10 +676,10 @@ export default function ProductsTable({ products, snapshots }: ProductsTableProp
                               <Tooltip label={copyState === `sku-${product.id}` ? 'Tersalin' : 'Copy SKU'}>
                                 <ActionIcon
                                   aria-label={`Copy SKU ${product.sku}`}
-                                  color="gray"
+                                  className={styles.neutralIconAction}
                                   onClick={() => copyText(`sku-${product.id}`, product.sku)}
                                   size="xs"
-                                  variant="subtle"
+                                  variant="default"
                                 >
                                   <IconCopy size={13} stroke={1.9} />
                                 </ActionIcon>
@@ -763,6 +764,7 @@ export default function ProductsTable({ products, snapshots }: ProductsTableProp
                         <Tooltip label={isOpen ? 'Tutup' : 'Detail'}>
                           <Button
                             aria-label={isOpen ? 'Tutup detail' : 'Buka detail'}
+                            className={styles.neutralAction}
                             leftSection={isOpen ? <IconX size={18} stroke={1.8} /> : <IconEye size={18} stroke={1.8} />}
                             onClick={() => setOpenProductId(isOpen ? null : product.id)}
                             variant="default"
@@ -771,6 +773,7 @@ export default function ProductsTable({ products, snapshots }: ProductsTableProp
                           </Button>
                         </Tooltip>
                         <Button
+                          className={styles.accentAction}
                           leftSection={<IconEdit size={18} stroke={1.8} />}
                           onClick={() => openUpdateProductModal(product)}
                           variant="default"
@@ -881,10 +884,10 @@ export default function ProductsTable({ products, snapshots }: ProductsTableProp
             value={pageSize}
             w={110}
           />
-          <Button disabled={safePage <= 1} onClick={() => setPage((current) => Math.max(1, current - 1))} variant="default">
+          <Button className={styles.neutralAction} disabled={safePage <= 1} onClick={() => setPage((current) => Math.max(1, current - 1))} variant="default">
             Prev
           </Button>
-          <Button disabled={safePage >= pageCount} onClick={() => setPage((current) => Math.min(pageCount, current + 1))} variant="default">
+          <Button className={styles.neutralAction} disabled={safePage >= pageCount} onClick={() => setPage((current) => Math.min(pageCount, current + 1))} variant="default">
             Next
           </Button>
         </Group>
@@ -957,7 +960,7 @@ export default function ProductsTable({ products, snapshots }: ProductsTableProp
               {draftScrape?.products.length ?? 0} hasil siap disimpan
               {draftScrape?.failed.length ? ` · ${draftScrape.failed.length} gagal` : ''}
             </Text>
-            <Button leftSection={<IconRefresh size={14} stroke={1.8} />} loading={isPending} onClick={refreshDraftScrape} variant="default">
+            <Button className={styles.accentAction} leftSection={<IconRefresh size={14} stroke={1.8} />} loading={isPending} onClick={refreshDraftScrape} variant="default">
               Re-scrape
             </Button>
           </Group>
@@ -1011,6 +1014,7 @@ export default function ProductsTable({ products, snapshots }: ProductsTableProp
                             <Box>
                               <Text className={styles.productSku}>Link belum ada.</Text>
                               <Button
+                                className={styles.accentAction}
                                 leftSection={<IconEdit size={16} stroke={1.8} />}
                                 mt="xs"
                                 onClick={() => openUpdateProductModal(product)}
@@ -1032,10 +1036,10 @@ export default function ProductsTable({ products, snapshots }: ProductsTableProp
           <Group justify="space-between" mt="md">
             <Text className={styles.productSku}>{draftScrape?.scrapedAt ? formatDate(draftScrape.scrapedAt) : ''}</Text>
             <Group gap="xs">
-              <Button onClick={() => setIsScrapeOpen(false)} variant="default">
+              <Button className={styles.neutralAction} onClick={() => setIsScrapeOpen(false)} variant="default">
                 Tutup
               </Button>
-              <Button disabled={!hasDraftScrape} leftSection={<IconDeviceFloppy size={18} stroke={1.8} />} loading={isPending} onClick={saveDraftSnapshot}>
+              <Button className={styles.primaryAction} disabled={!hasDraftScrape} leftSection={<IconDeviceFloppy size={18} stroke={1.8} />} loading={isPending} onClick={saveDraftSnapshot}>
                 Save Snapshot
               </Button>
             </Group>
@@ -1063,7 +1067,7 @@ export default function ProductsTable({ products, snapshots }: ProductsTableProp
               style={{ flex: 1 }}
               value={updateJakmallUrl}
             />
-            <Button leftSection={<IconTestPipe size={16} stroke={1.8} />} loading={isPending} onClick={() => testUpdatedLink('Jakmall', updateJakmallUrl)} variant="default">
+            <Button className={styles.accentAction} leftSection={<IconTestPipe size={16} stroke={1.8} />} loading={isPending} onClick={() => testUpdatedLink('Jakmall', updateJakmallUrl)} variant="default">
               Test Scrape
             </Button>
           </Group>
@@ -1075,7 +1079,7 @@ export default function ProductsTable({ products, snapshots }: ProductsTableProp
               style={{ flex: 1 }}
               value={updateJaknoteUrl}
             />
-            <Button leftSection={<IconTestPipe size={16} stroke={1.8} />} loading={isPending} onClick={() => testUpdatedLink('Jaknote', updateJaknoteUrl)} variant="default">
+            <Button className={styles.accentAction} leftSection={<IconTestPipe size={16} stroke={1.8} />} loading={isPending} onClick={() => testUpdatedLink('Jaknote', updateJaknoteUrl)} variant="default">
               Test Scrape
             </Button>
           </Group>
@@ -1086,6 +1090,7 @@ export default function ProductsTable({ products, snapshots }: ProductsTableProp
           ) : null}
           <Group justify="flex-end" mt="md">
             <Button
+              className={styles.neutralAction}
               onClick={() => {
                 setUpdateProduct(null)
                 setLinkTestResult(null)
@@ -1094,7 +1099,7 @@ export default function ProductsTable({ products, snapshots }: ProductsTableProp
             >
               Batal
             </Button>
-            <Button loading={isPending} onClick={saveUpdatedLinks}>
+            <Button className={styles.primaryAction} loading={isPending} onClick={saveUpdatedLinks}>
               Simpan
             </Button>
           </Group>
@@ -1156,13 +1161,13 @@ function StackLikeProductModal({
           {testResult ? <Text className={styles.testResult}>{testResult}</Text> : null}
         </Box>
         <Group justify="flex-end" className={styles.productAddActions} gap="xs">
-          <Button disabled={!jakmallUrl} loading={isPending} onClick={searchProduct} variant="default">
+          <Button className={styles.accentAction} disabled={!jakmallUrl} loading={isPending} onClick={searchProduct} variant="default">
             Test Scrape
           </Button>
-          <Button disabled={!scrapedProduct} loading={isPending} onClick={saveSnapshot}>
+          <Button className={styles.primaryAction} disabled={!scrapedProduct} loading={isPending} onClick={saveSnapshot}>
             Simpan
           </Button>
-          <Button onClick={close} variant="default">
+          <Button className={styles.neutralAction} onClick={close} variant="default">
             Tutup
           </Button>
         </Group>
@@ -1184,6 +1189,7 @@ function StackLikeProductModal({
                 </Text>
               </Box>
               <Button
+                className={styles.neutralAction}
                 leftSection={<IconCopy size={17} stroke={1.8} />}
                 onClick={() => copyText('shopee-copy', scrapedProduct.shopeeCopy)}
                 size="xs"

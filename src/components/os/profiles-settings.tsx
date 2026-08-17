@@ -1,7 +1,23 @@
 'use client'
 
 import { useState, useTransition } from 'react'
-import { ActionIcon, Badge, Box, Button, Card, Group, Modal, Select, SimpleGrid, Stack, Text, TextInput, Tooltip } from '@mantine/core'
+import {
+  ActionIcon,
+  Badge,
+  Box,
+  Button,
+  Card,
+  Group,
+  Modal,
+  MultiSelect,
+  Select,
+  SimpleGrid,
+  Stack,
+  Text,
+  TextInput,
+  Tooltip,
+  type ComboboxItem,
+} from '@mantine/core'
 import {
   IconBrandFacebook,
   IconBrandInstagram,
@@ -17,23 +33,26 @@ import {
   IconExternalLink,
   IconPlus,
   IconTrash,
+  IconTopologyStar3,
   type Icon,
 } from '@tabler/icons-react'
+import Link from 'next/link'
 
 import { createUserSocmed, deleteUserSocmed, updateUserSocmed } from '@/app/os/(protected)/socmeds/actions'
-import type { AccountGroupOption, SocmedOption, UserSocmed } from '@/lib/os-settings'
+import type { BrandOption, SocmedOption, UserSocmed } from '@/lib/os-settings'
 
 import styles from './os-shell.module.css'
 
 type ProfilesSettingsProps = {
-  groups: AccountGroupOption[]
+  brands: BrandOption[]
+  initialBrandId?: string
   socmeds: SocmedOption[]
   userSocmeds: UserSocmed[]
 }
 
 type SocmedForm = {
   account: string
-  accountGroupId: string
+  brandIds: string[]
   id: string
   label: string
   linkedEmail: string
@@ -45,7 +64,7 @@ type SocmedForm = {
 
 const emptyForm: SocmedForm = {
   account: '',
-  accountGroupId: '',
+  brandIds: [],
   id: '',
   label: '',
   linkedEmail: '',
@@ -69,7 +88,9 @@ const platformIcons: Record<string, Icon> = {
 function buildFormData(form: SocmedForm) {
   const formData = new FormData()
   formData.set('account', form.account)
-  formData.set('accountGroupId', form.accountGroupId)
+  for (const brandId of form.brandIds) {
+    formData.append('brandIds', brandId)
+  }
   formData.set('id', form.id)
   formData.set('label', form.label)
   formData.set('linkedEmail', form.linkedEmail)
@@ -80,42 +101,51 @@ function buildFormData(form: SocmedForm) {
   return formData
 }
 
-export default function ProfilesSettings({ groups, socmeds, userSocmeds }: ProfilesSettingsProps) {
+export default function ProfilesSettings({ brands, initialBrandId, socmeds, userSocmeds }: ProfilesSettingsProps) {
   const [isPending, startTransition] = useTransition()
   const [isOpen, setIsOpen] = useState(false)
   const [copyState, setCopyState] = useState<string | null>(null)
-  const [selectedGroupId, setSelectedGroupId] = useState('all')
+  const hasInitialBrand = Boolean(initialBrandId && brands.some((brand) => brand.id === initialBrandId))
+  const [selectedBrandId, setSelectedBrandId] = useState(hasInitialBrand ? initialBrandId ?? 'all' : 'all')
   const [form, setForm] = useState<SocmedForm>({
     ...emptyForm,
     socmedId: socmeds[0]?.id ?? '',
   })
   const isEditing = Boolean(form.id)
   const visibleSocmeds =
-    selectedGroupId === 'all'
+    selectedBrandId === 'all'
       ? userSocmeds
-      : userSocmeds.filter((profile) => profile.accountGroupId === selectedGroupId)
-  const groupCards = [
+      : selectedBrandId === 'unassigned'
+        ? userSocmeds.filter((profile) => profile.brandIds.length === 0)
+        : userSocmeds.filter((profile) => profile.brandIds.includes(selectedBrandId))
+  const brandCards = [
     {
       count: userSocmeds.length,
       id: 'all',
-      meta: `${groups.length} groups`,
+      meta: `${brands.filter((brand) => brand.status === 'ACTIVE').length} active brands`,
       name: 'All Social Medias',
     },
-    ...groups.map((group) => {
-      const accounts = userSocmeds.filter((profile) => profile.accountGroupId === group.id)
+    ...brands.map((brand) => {
+      const accounts = userSocmeds.filter((profile) => profile.brandIds.includes(brand.id))
       return {
         count: accounts.length,
-        id: group.id,
+        id: brand.id,
         meta: `${new Set(accounts.map((profile) => profile.platform)).size} platforms`,
-        name: group.name,
+        name: brand.name,
       }
     }),
+    {
+      count: userSocmeds.filter((profile) => profile.brandIds.length === 0).length,
+      id: 'unassigned',
+      meta: 'belum terhubung ke brand',
+      name: 'Unassigned',
+    },
   ]
   const socmedOptions = socmeds.map((socmed) => ({ label: socmed.name, value: socmed.id }))
-  const groupOptions = [
-    { label: 'No group', value: 'none' },
-    ...groups.map((group) => ({ label: group.name, value: group.id })),
-  ]
+  const brandOptions: ComboboxItem[] = brands.map((brand) => ({
+    label: brand.status === 'ACTIVE' ? brand.name : `${brand.name} (${brand.status})`,
+    value: brand.id,
+  }))
 
   async function copyProfileUrl(profile: UserSocmed) {
     await navigator.clipboard.writeText(profile.url)
@@ -126,6 +156,7 @@ export default function ProfilesSettings({ groups, socmeds, userSocmeds }: Profi
   function openCreateModal() {
     setForm({
       ...emptyForm,
+      brandIds: selectedBrandId !== 'all' && selectedBrandId !== 'unassigned' ? [selectedBrandId] : [],
       socmedId: socmeds[0]?.id ?? '',
     })
     setIsOpen(true)
@@ -134,7 +165,7 @@ export default function ProfilesSettings({ groups, socmeds, userSocmeds }: Profi
   function openEditModal(profile: UserSocmed) {
     setForm({
       account: profile.account,
-      accountGroupId: profile.accountGroupId ?? '',
+      brandIds: profile.brandIds,
       id: profile.id,
       label: profile.label,
       linkedEmail: profile.linkedEmail ?? '',
@@ -148,22 +179,17 @@ export default function ProfilesSettings({ groups, socmeds, userSocmeds }: Profi
 
   function saveSocmed() {
     startTransition(async () => {
-      const normalizedForm = {
-        ...form,
-        accountGroupId: form.accountGroupId === 'none' ? '' : form.accountGroupId,
-      }
-
       if (isEditing) {
-        await updateUserSocmed(buildFormData(normalizedForm))
+        await updateUserSocmed(buildFormData(form))
       } else {
-        await createUserSocmed(buildFormData(normalizedForm))
+        await createUserSocmed(buildFormData(form))
       }
 
       setIsOpen(false)
     })
   }
 
-  function deleteSocmed(profile: UserSocmed) {
+  function removeSocmed(profile: UserSocmed) {
     startTransition(async () => {
       const formData = new FormData()
       formData.set('id', profile.id)
@@ -176,46 +202,79 @@ export default function ProfilesSettings({ groups, socmeds, userSocmeds }: Profi
       <Box component="section" className={styles.pageHeader}>
         <Box>
           <Text className={styles.breadcrumb}>Agung OS / Social Medias</Text>
-          <Text component="h2" className={styles.pageTitle}>Social Medias</Text>
+          <Text component="h2" className={styles.pageTitle}>Social Media Registry</Text>
           <Text className={styles.pageDescription}>
-            Platform accounts used to map content, publishing targets, and future embeds.
+            Registry untuk account social media yang sudah jelas konteks brand-nya. Entry point utamanya tetap dari Brand.
           </Text>
         </Box>
-        <Button leftSection={<IconPlus size={18} stroke={1.8} />} loading={isPending} onClick={openCreateModal}>
-          Add Social Media Account
-        </Button>
+        <Group gap="sm" className={styles.pageActions}>
+          <Button
+            className={styles.neutralAction}
+            component={Link}
+            href="/os/brands"
+            leftSection={<IconTopologyStar3 size={18} stroke={1.8} />}
+            variant="default"
+          >
+            Go to Brands
+          </Button>
+          <Button
+            className={styles.primaryAction}
+            disabled={brands.length === 0}
+            leftSection={<IconPlus size={18} stroke={1.8} />}
+            loading={isPending}
+            onClick={openCreateModal}
+          >
+            Register Social Account
+          </Button>
+        </Group>
       </Box>
 
+      <Card className={styles.brandFlowCallout} padding="md" radius="sm" withBorder>
+        <Text className={styles.compactTitle}>Flow yang dipakai sekarang</Text>
+        <Text className={styles.muted}>
+          Tentukan dulu brand yang sedang di-handle, lalu daftarkan social account ke brand itu. Halaman ini dipakai untuk registry, audit, dan maintenance account.
+        </Text>
+      </Card>
+
       <SimpleGrid cols={{ base: 1, sm: 2, lg: 4 }} spacing="xs" className={styles.groupCardGrid}>
-        {groupCards.map((group) => (
+        {brandCards.map((brand) => (
           <Card
-            aria-pressed={selectedGroupId === group.id}
+            aria-pressed={selectedBrandId === brand.id}
             className={styles.groupCard}
             component="button"
-            data-active={selectedGroupId === group.id}
-            key={group.id}
-            onClick={() => setSelectedGroupId(group.id)}
+            data-active={selectedBrandId === brand.id}
+            key={brand.id}
+            onClick={() => setSelectedBrandId(brand.id)}
             padding="sm"
             radius="sm"
             withBorder
           >
-            <Text className={styles.groupCardLabel}>{group.name}</Text>
-            <Text className={styles.groupCardCount}>{group.count}</Text>
-            <Text className={styles.groupCardMeta}>{group.meta}</Text>
+            <Text className={styles.groupCardLabel}>{brand.name}</Text>
+            <Text className={styles.groupCardCount}>{brand.count}</Text>
+            <Text className={styles.groupCardMeta}>{brand.meta}</Text>
           </Card>
         ))}
       </SimpleGrid>
 
       <Box component="section" className={styles.panel}>
         <Group justify="space-between" align="flex-start" className={styles.panelHeader}>
-          <Box>
+          <Box className={styles.panelIntro}>
             <Text component="h3" className={styles.panelTitle}>Social Media Accounts</Text>
-            <Text className={styles.muted}>Each account is linked to a master platform and an account group.</Text>
+            <Text className={styles.muted}>Each account is mapped to a platform and must be connected directly to one or more brands.</Text>
           </Box>
         </Group>
 
-        <Stack gap="xs">
-          {visibleSocmeds.map((profile) => {
+        {brands.length === 0 ? (
+          <Card className={styles.emptyState} padding="md" radius="sm" withBorder>
+            <Text className={styles.compactTitle}>Belum ada brand.</Text>
+            <Text className={styles.muted}>Buat brand dulu supaya social account bisa diregistrasikan dengan konteks yang jelas.</Text>
+            <Button component={Link} className={styles.accentAction} href="/os/brands" mt="md" variant="default">
+              Open Brands
+            </Button>
+          </Card>
+        ) : (
+          <Stack gap="xs">
+            {visibleSocmeds.map((profile) => {
             const PlatformIcon = platformIcons[profile.platform]
 
             return (
@@ -234,16 +293,29 @@ export default function ProfilesSettings({ groups, socmeds, userSocmeds }: Profi
                       </Group>
                       <Text className={styles.muted}>
                         {profile.platform} · @{profile.account}
-                        {profile.groupName ? ` · ${profile.groupName}` : ''}
                       </Text>
                       <Text className={styles.profileMeta}>
                         Email: {profile.linkedEmail ?? '-'} · WA: {profile.linkedWhatsapp ?? '-'}
                       </Text>
+                      <Group gap={6} mt={8}>
+                        {profile.brandNames.length > 0 ? (
+                          profile.brandNames.map((brandName) => (
+                            <Badge className={styles.badge} key={brandName} variant="light">
+                              {brandName}
+                            </Badge>
+                          ))
+                        ) : (
+                          <Badge className={styles.badge} data-status="PAUSED" variant="light">
+                            No Brand
+                          </Badge>
+                        )}
+                      </Group>
                     </Box>
-                    <Group gap="xs" wrap="nowrap">
+                    <Group gap="xs" wrap="nowrap" className={styles.listActionGroup}>
                       <Tooltip label={copyState === profile.id ? 'Copied' : 'Copy URL'}>
                         <ActionIcon
                           aria-label={copyState === profile.id ? 'Copied profile URL' : 'Copy profile URL'}
+                          className={styles.neutralIconAction}
                           onClick={() => copyProfileUrl(profile)}
                           variant="default"
                         >
@@ -251,17 +323,17 @@ export default function ProfilesSettings({ groups, socmeds, userSocmeds }: Profi
                         </ActionIcon>
                       </Tooltip>
                       <Tooltip label="Edit">
-                        <ActionIcon aria-label="Edit social account" disabled={isPending} onClick={() => openEditModal(profile)} variant="default">
+                        <ActionIcon aria-label="Edit social account" className={styles.accentIconAction} disabled={isPending} onClick={() => openEditModal(profile)} variant="default">
                           <IconEdit size={18} stroke={1.8} />
                         </ActionIcon>
                       </Tooltip>
                       <Tooltip label="Delete">
-                        <ActionIcon aria-label="Delete social account" color="red" disabled={isPending} onClick={() => deleteSocmed(profile)} variant="light">
+                        <ActionIcon aria-label="Delete social account" className={styles.dangerIconAction} disabled={isPending} onClick={() => removeSocmed(profile)} variant="light">
                           <IconTrash size={18} stroke={1.8} />
                         </ActionIcon>
                       </Tooltip>
                       <Tooltip label="Open">
-                        <ActionIcon aria-label="Open social profile" component="a" href={profile.url} rel="noreferrer" target="_blank" variant="default">
+                        <ActionIcon aria-label="Open social profile" className={styles.accentIconAction} component="a" href={profile.url} rel="noreferrer noopener" target="_blank" variant="default">
                           <IconExternalLink size={18} stroke={1.8} />
                         </ActionIcon>
                       </Tooltip>
@@ -271,18 +343,25 @@ export default function ProfilesSettings({ groups, socmeds, userSocmeds }: Profi
               </Card>
             )
           })}
-        </Stack>
+          </Stack>
+        )}
 
-        {visibleSocmeds.length === 0 ? (
+        {brands.length > 0 && visibleSocmeds.length === 0 ? (
           <Card className={styles.emptyState} padding="md" radius="sm" withBorder>
-            <Text className={styles.compactTitle}>No social medias in this group.</Text>
-            <Text className={styles.muted}>Add an account or choose another group.</Text>
+            <Text className={styles.compactTitle}>Belum ada social account di view ini.</Text>
+            <Text className={styles.muted}>Pilih brand lain atau registrasikan account baru dengan context brand yang tepat.</Text>
           </Card>
         ) : null}
       </Box>
 
-      <Modal opened={isOpen} onClose={() => setIsOpen(false)} title={isEditing ? 'Edit Social Media Account' : 'Add Social Media Account'} centered>
-        <Stack gap="sm">
+      <Modal
+        centered
+        classNames={{ body: styles.osModalBody, content: styles.osModalContent, header: styles.osModalHeader, title: styles.osModalTitle }}
+        opened={isOpen}
+        onClose={() => setIsOpen(false)}
+        title={isEditing ? 'Edit Social Media Account' : 'Add Social Media Account'}
+      >
+        <Stack gap="sm" className={styles.modalSection}>
           <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="sm">
             <Select
               data={socmedOptions}
@@ -291,38 +370,40 @@ export default function ProfilesSettings({ groups, socmeds, userSocmeds }: Profi
               value={form.socmedId}
             />
             <Select
-              data={groupOptions}
-              label="Account Group"
-              onChange={(value) => setForm((current) => ({ ...current, accountGroupId: value === 'none' ? '' : value ?? '' }))}
-              value={form.accountGroupId || 'none'}
+              data={[
+                { label: 'Active', value: 'active' },
+                { label: 'Archived', value: 'archived' },
+              ]}
+              label="Status"
+              onChange={(value) => setForm((current) => ({ ...current, status: value ?? 'active' }))}
+              value={form.status}
             />
           </SimpleGrid>
+          <MultiSelect
+            data={brandOptions}
+            label="Brands"
+            onChange={(value) => setForm((current) => ({ ...current, brandIds: value }))}
+            placeholder="Connect to one or more brands"
+            required
+            value={form.brandIds}
+          />
           <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="sm">
             <TextInput
               label="Account"
-              onChange={(event) => {
-                const { value } = event.currentTarget
-                setForm((current) => ({ ...current, account: value }))
-              }}
-              placeholder="das.agung"
+              onChange={(event) => setForm((current) => ({ ...current, account: event.currentTarget.value }))}
+              placeholder="dagungsungkono"
               value={form.account}
             />
             <TextInput
               label="Label"
-              onChange={(event) => {
-                const { value } = event.currentTarget
-                setForm((current) => ({ ...current, label: value }))
-              }}
-              placeholder="Personal Brand"
+              onChange={(event) => setForm((current) => ({ ...current, label: event.currentTarget.value }))}
+              placeholder="D.Agung"
               value={form.label}
             />
           </SimpleGrid>
           <TextInput
             label="Profile URL"
-            onChange={(event) => {
-              const { value } = event.currentTarget
-              setForm((current) => ({ ...current, url: value }))
-            }}
+            onChange={(event) => setForm((current) => ({ ...current, url: event.currentTarget.value }))}
             placeholder="https://..."
             type="url"
             value={form.url}
@@ -330,38 +411,23 @@ export default function ProfilesSettings({ groups, socmeds, userSocmeds }: Profi
           <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="sm">
             <TextInput
               label="Linked Email"
-              onChange={(event) => {
-                const { value } = event.currentTarget
-                setForm((current) => ({ ...current, linkedEmail: value }))
-              }}
+              onChange={(event) => setForm((current) => ({ ...current, linkedEmail: event.currentTarget.value }))}
               placeholder="Optional"
               type="email"
               value={form.linkedEmail}
             />
             <TextInput
               label="Linked WhatsApp"
-              onChange={(event) => {
-                const { value } = event.currentTarget
-                setForm((current) => ({ ...current, linkedWhatsapp: value }))
-              }}
+              onChange={(event) => setForm((current) => ({ ...current, linkedWhatsapp: event.currentTarget.value }))}
               placeholder="Optional"
               value={form.linkedWhatsapp}
             />
           </SimpleGrid>
-          <Select
-            data={[
-              { label: 'Active', value: 'active' },
-              { label: 'Archived', value: 'archived' },
-            ]}
-            label="Status"
-            onChange={(value) => setForm((current) => ({ ...current, status: value ?? 'active' }))}
-            value={form.status}
-          />
           <Group justify="flex-end">
-            <Button disabled={isPending} onClick={() => setIsOpen(false)} variant="default">
+            <Button className={styles.neutralAction} disabled={isPending} onClick={() => setIsOpen(false)} variant="default">
               Cancel
             </Button>
-            <Button loading={isPending} onClick={saveSocmed}>
+            <Button className={styles.primaryAction} loading={isPending} onClick={saveSocmed}>
               Save Account
             </Button>
           </Group>

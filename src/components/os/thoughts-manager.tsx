@@ -154,13 +154,15 @@ export default function ThoughtsManager({ thoughts }: ThoughtsManagerProps) {
             A capture inbox for product ideas, operating notes, and content angles before they become tasks.
           </Text>
         </Box>
-        <Button leftSection={<IconPlus size={18} stroke={1.8} />} onClick={openCreateModal}>
-          Capture Thought
-        </Button>
+        <Group className={styles.pageActions}>
+          <Button className={styles.primaryAction} leftSection={<IconPlus size={18} stroke={1.8} />} onClick={openCreateModal}>
+            Capture Thought
+          </Button>
+        </Group>
       </Box>
 
       <Box component="section" className={styles.panel}>
-        <SimpleGrid cols={{ base: 1, sm: 2, lg: 4 }} spacing="xs" className={styles.contentToolbar}>
+        <SimpleGrid cols={{ base: 1, sm: 2, lg: 4 }} spacing="xs" className={`${styles.contentToolbar} ${styles.toolbarPanel}`}>
           <TextInput
             onChange={(event) => {
               const { value } = event.currentTarget
@@ -181,6 +183,7 @@ export default function ThoughtsManager({ thoughts }: ThoughtsManagerProps) {
             value={status}
           />
           <Button
+            className={styles.neutralAction}
             leftSection={<IconRefresh size={18} stroke={1.8} />}
             onClick={() => {
               setQuery('')
@@ -210,19 +213,19 @@ export default function ThoughtsManager({ thoughts }: ThoughtsManagerProps) {
                 </Badge>
               </Group>
 
-              <Group gap="xs">
+              <Group gap="xs" className={styles.listActionGroup}>
                 <Tooltip label="Edit">
-                  <ActionIcon aria-label="Edit thought" onClick={() => openEditModal(thought)} variant="default">
+                  <ActionIcon aria-label="Edit thought" className={styles.accentIconAction} onClick={() => openEditModal(thought)} variant="default">
                     <IconEdit size={18} stroke={1.8} />
                   </ActionIcon>
                 </Tooltip>
                 <Tooltip label={thought.status === 'archived' ? 'Reopen' : 'Archive'}>
-                  <ActionIcon aria-label={thought.status === 'archived' ? 'Reopen thought' : 'Archive thought'} onClick={() => toggleArchive(thought)} variant="default">
+                  <ActionIcon aria-label={thought.status === 'archived' ? 'Reopen thought' : 'Archive thought'} className={styles.neutralIconAction} onClick={() => toggleArchive(thought)} variant="default">
                     <IconArchive size={18} stroke={1.8} />
                   </ActionIcon>
                 </Tooltip>
                 <Tooltip label="Delete">
-                  <ActionIcon aria-label="Delete thought" color="red" onClick={() => deleteThought(thought.id)} variant="light">
+                  <ActionIcon aria-label="Delete thought" className={styles.dangerIconAction} onClick={() => deleteThought(thought.id)} variant="light">
                     <IconTrash size={18} stroke={1.8} />
                   </ActionIcon>
                 </Tooltip>
@@ -248,17 +251,23 @@ export default function ThoughtsManager({ thoughts }: ThoughtsManagerProps) {
             value={pageSize}
             w={110}
           />
-          <Button disabled={safePage <= 1} onClick={() => setPage((current) => Math.max(1, current - 1))} variant="default">
+          <Button className={styles.neutralAction} disabled={safePage <= 1} onClick={() => setPage((current) => Math.max(1, current - 1))} variant="default">
             Prev
           </Button>
-          <Button disabled={safePage >= pageCount} onClick={() => setPage((current) => Math.min(pageCount, current + 1))} variant="default">
+          <Button className={styles.neutralAction} disabled={safePage >= pageCount} onClick={() => setPage((current) => Math.min(pageCount, current + 1))} variant="default">
             Next
           </Button>
         </Group>
       </Box>
 
-      <Modal opened={isModalOpen} onClose={() => setIsModalOpen(false)} title={editingId ? 'Edit Thought' : 'Capture Thought'} centered>
-        <Stack gap="sm">
+      <Modal
+        classNames={{ body: styles.osModalBody, content: styles.osModalContent, header: styles.osModalHeader, title: styles.osModalTitle }}
+        opened={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        title={editingId ? 'Edit Thought' : 'Capture Thought'}
+        centered
+      >
+        <Stack gap="sm" className={styles.modalSection}>
           <TextInput
             label="Title"
             onChange={(event) => {
@@ -299,10 +308,10 @@ export default function ThoughtsManager({ thoughts }: ThoughtsManagerProps) {
             />
           </SimpleGrid>
           <Group justify="flex-end">
-            <Button onClick={() => setIsModalOpen(false)} variant="default">
+            <Button className={styles.neutralAction} onClick={() => setIsModalOpen(false)} variant="default">
               Cancel
             </Button>
-            <Button onClick={saveThought}>Save Thought</Button>
+            <Button className={styles.primaryAction} onClick={saveThought}>Save Thought</Button>
           </Group>
         </Stack>
       </Modal>

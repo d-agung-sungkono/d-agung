@@ -90,6 +90,33 @@
   color: rgba(17, 17, 17, 0.35);
 }
 
+.sectionNav {
+  margin-top: 1.08rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.8rem 1.05rem;
+  align-items: center;
+  font-size: 0.72rem;
+  font-weight: 650;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.sectionNavActive {
+  color: rgba(17, 17, 17, 0.9);
+}
+
+.sectionNavLink {
+  border-bottom: 1px solid rgba(47, 105, 94, 0.26);
+  color: rgba(47, 105, 94, 0.82);
+  transition: border-color 180ms ease, color 180ms ease;
+}
+
+.sectionNavLink:hover {
+  border-color: rgba(47, 105, 94, 0.72);
+  color: #2f695e;
+}
+
 .mapSpotlight {
   margin-top: clamp(1.35rem, 2.7vw, 2.15rem);
 }
@@ -173,5 +200,10 @@
 
   .title {
     line-height: 1;
+  }
+
+  .sectionNav {
+    gap: 0.62rem 0.82rem;
+    font-size: 0.68rem;
   }
 }

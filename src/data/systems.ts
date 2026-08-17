@@ -2,14 +2,14 @@ import type { SystemItem } from '../types/system'
 
 export const systems: SystemItem[] = [
   {
-    slug: 'umkm-kit',
+    slug: 'warungkit',
     title: 'WarungKit',
     summary:
       'A practical operating layer for UMKM: catalog, orders, and daily flow in one place.',
     status: 'running',
     year: '2026',
     featured: true,
-    productUrl: 'https://warungkit.netlify.app',
+    productUrl: 'https://warungkit.com',
     productLabel: 'Visit WarungKit',
   },
   {
@@ -43,7 +43,7 @@ export const systems: SystemItem[] = [
       'UMKM laundry landing page with service catalog, machine usage monitoring, and delivery cost checking.',
     status: 'running',
     year: '2025',
-    productUrl: 'https://laviumhub.netlify.app',
+    productUrl: 'https://laviumhub.com',
     productLabel: 'Visit LaviumHub',
   },
 ]

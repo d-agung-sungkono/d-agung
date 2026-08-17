@@ -113,8 +113,7 @@ type ProductRow = {
   previous_discount_percent: string | null
   previous_stock_available_count: number | null
   previous_run_number: number | null
-  primary_image_base64: string | null
-  primary_image_mime_type: string | null
+  has_primary_image: boolean
   status: string
   supplier_links: ProductRowSupplierLink[] | null
 }
@@ -247,8 +246,7 @@ export async function getProductsData() {
         op.description,
         op.variant,
         op.currency,
-        encode(op.primary_image, 'base64') AS primary_image_base64,
-        op.primary_image_mime_type,
+        (op.primary_image IS NOT NULL) AS has_primary_image,
         op.status,
         CASE WHEN current_run.id IS NOT NULL THEN latest.id ELSE fallback_latest.id END AS latest_snapshot_id,
         CASE WHEN current_run.id IS NOT NULL THEN current_run.started_at ELSE fallback_latest.scraped_at END AS latest_scraped_at,
@@ -498,10 +496,7 @@ LEFT JOIN LATERAL (
       discountPercent: row.latest_discount_percent ? Number(row.latest_discount_percent) : null,
         id: row.id,
         name: row.title,
-        primaryImageUrl:
-          row.primary_image_base64 && row.primary_image_mime_type
-            ? `data:${row.primary_image_mime_type};base64,${row.primary_image_base64}`
-            : null,
+        primaryImageUrl: row.has_primary_image ? `/os/products/image/${row.id}` : null,
         originalPrice: row.latest_original_price,
       previousDiscountAmount: row.previous_discount_amount,
       previousDiscountPercent: row.previous_discount_percent ? Number(row.previous_discount_percent) : null,

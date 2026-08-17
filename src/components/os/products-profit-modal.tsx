@@ -117,7 +117,7 @@ export default function ProductsProfitModal() {
 
   return (
     <>
-      <Button leftSection={<IconCalculator size={18} stroke={1.8} />} onClick={() => setIsOpen(true)} variant="default">
+      <Button className={styles.accentAction} leftSection={<IconCalculator size={18} stroke={1.8} />} onClick={() => setIsOpen(true)} variant="default">
         Kalkulasi Profit
       </Button>
 

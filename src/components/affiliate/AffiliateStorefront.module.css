@@ -1,0 +1,463 @@
+.storefront {
+  margin-top: clamp(1.8rem, 4vw, 3rem);
+}
+
+.toolbar {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 0.9rem;
+  align-items: end;
+}
+
+.searchForm {
+  min-width: 0;
+}
+
+.searchLabel {
+  display: block;
+  margin-bottom: 0.42rem;
+  font-size: 0.72rem;
+  font-weight: 650;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(17, 17, 17, 0.62);
+}
+
+.searchControl {
+  min-height: 3.05rem;
+  display: flex;
+  align-items: center;
+  gap: 0.62rem;
+  padding: 0 0.9rem;
+  border: 1px solid rgba(17, 17, 17, 0.16);
+  background: rgba(255, 255, 255, 0.78);
+}
+
+.searchControl svg {
+  flex: 0 0 auto;
+  color: rgba(17, 17, 17, 0.46);
+}
+
+.searchControl input {
+  width: 100%;
+  min-width: 0;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: rgba(17, 17, 17, 0.92);
+  font: inherit;
+}
+
+.searchControl input::placeholder {
+  color: rgba(17, 17, 17, 0.42);
+}
+
+.viewSwitcher {
+  display: inline-flex;
+  min-height: 3.05rem;
+  border: 1px solid rgba(17, 17, 17, 0.16);
+  background: rgba(255, 255, 255, 0.74);
+}
+
+.viewSwitcher a {
+  width: 5.2rem;
+  border: 0;
+  border-left: 1px solid rgba(17, 17, 17, 0.1);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.36rem;
+  background: transparent;
+  color: rgba(17, 17, 17, 0.64);
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.82rem;
+  transition: background 160ms ease, color 160ms ease;
+}
+
+.viewSwitcher a:first-child {
+  border-left: 0;
+}
+
+.viewSwitcher a:hover,
+.viewSwitcher .activeView {
+  background: #171717;
+  color: #ffffff;
+}
+
+.resultBar {
+  min-height: 2.7rem;
+  margin-top: 0.88rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  border-top: 1px solid rgba(17, 17, 17, 0.1);
+  color: rgba(17, 17, 17, 0.58);
+  font-size: 0.82rem;
+}
+
+.resultBar p {
+  margin: 0;
+}
+
+.resultBar a,
+.emptyState a {
+  color: rgba(17, 17, 17, 0.8);
+  border-bottom: 1px solid rgba(17, 17, 17, 0.32);
+}
+
+.productGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(11.8rem, 100%), 1fr));
+  gap: clamp(0.78rem, 1.6vw, 1.08rem);
+}
+
+.productList {
+  display: grid;
+  gap: 0.7rem;
+}
+
+.productCard {
+  min-width: 0;
+  border: 1px solid rgba(17, 17, 17, 0.12);
+  background: rgba(255, 255, 255, 0.82);
+}
+
+.productGrid .productCard {
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+}
+
+.productList .productCard {
+  min-height: 8rem;
+  display: grid;
+  grid-template-columns: 7.5rem minmax(0, 1fr) auto;
+  gap: 1rem;
+  align-items: center;
+  padding: 0.8rem;
+}
+
+.imageWrap {
+  background: #f4f1eb;
+  overflow: hidden;
+}
+
+.productGrid .imageWrap {
+  aspect-ratio: 1;
+}
+
+.productList .imageWrap {
+  width: 7.5rem;
+  aspect-ratio: 1;
+}
+
+.imageWrap img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.productInfo {
+  min-width: 0;
+  padding: 0.85rem 0.9rem 0;
+}
+
+.productList .productInfo {
+  padding: 0;
+}
+
+.productCode,
+.marketplace {
+  margin: 0;
+  font-size: 0.72rem;
+  font-weight: 650;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgba(17, 17, 17, 0.58);
+}
+
+.marketplace {
+  margin-top: 0.55rem;
+  color: #2f695e;
+}
+
+.contentLinks {
+  margin-top: 0.72rem;
+  display: grid;
+  gap: 0.42rem;
+}
+
+.contentLinksLabel {
+  margin: 0;
+  font-size: 0.66rem;
+  font-weight: 650;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgba(17, 17, 17, 0.46);
+}
+
+.contentLinkList {
+  min-width: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.34rem;
+}
+
+.contentLinkList a,
+.contentLinkMore {
+  min-width: 0;
+  min-height: 1.86rem;
+  max-width: 100%;
+  border: 1px solid rgba(47, 105, 94, 0.18);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.28rem;
+  background: rgba(47, 105, 94, 0.07);
+  color: #2f695e;
+  font-size: 0.72rem;
+  font-weight: 650;
+  line-height: 1.1;
+}
+
+.contentLinkList a {
+  padding: 0 0.48rem;
+}
+
+.contentLinkList a:hover {
+  border-color: rgba(47, 105, 94, 0.36);
+  background: rgba(47, 105, 94, 0.11);
+}
+
+.contentLinkList a svg {
+  flex: 0 0 auto;
+}
+
+.contentLinkList a span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.contentLinkMore {
+  padding: 0 0.42rem;
+  border-color: rgba(17, 17, 17, 0.1);
+  background: rgba(17, 17, 17, 0.04);
+  color: rgba(17, 17, 17, 0.58);
+}
+
+.productName {
+  margin: 0.38rem 0 0;
+  color: rgba(17, 17, 17, 0.92);
+  font-size: 1rem;
+  font-weight: 650;
+  line-height: 1.26;
+  overflow-wrap: anywhere;
+}
+
+.productActions {
+  display: grid;
+  gap: 0.55rem;
+  padding: 0.9rem;
+}
+
+.productList .productActions {
+  min-width: 9.5rem;
+  padding: 0;
+}
+
+.productActions a {
+  min-height: 2.65rem;
+  border: 1px solid rgba(17, 17, 17, 0.16);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.38rem;
+  background: #ffffff;
+  color: rgba(17, 17, 17, 0.82);
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.82rem;
+  font-weight: 650;
+  text-align: center;
+  transition: border-color 160ms ease, background 160ms ease, color 160ms ease;
+}
+
+.productActions a {
+  background: #171717;
+  color: #ffffff;
+}
+
+.productActions a:hover {
+  border-color: rgba(17, 17, 17, 0.38);
+}
+
+.emptyState {
+  min-height: 13rem;
+  border: 1px solid rgba(17, 17, 17, 0.12);
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: 0.72rem;
+  color: rgba(17, 17, 17, 0.68);
+}
+
+.emptyState p {
+  margin: 0;
+}
+
+.pagination {
+  margin-top: clamp(1rem, 2vw, 1.4rem);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.55rem;
+}
+
+.pagination a {
+  min-width: 2.45rem;
+  min-height: 2.45rem;
+  padding: 0 0.72rem;
+  border: 1px solid rgba(17, 17, 17, 0.14);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(17, 17, 17, 0.78);
+  font-size: 0.82rem;
+  font-weight: 650;
+}
+
+.pageNumbers {
+  display: inline-flex;
+  gap: 0.35rem;
+}
+
+.pagination .currentPage {
+  background: #171717;
+  color: #ffffff;
+}
+
+.pagination .disabledPage {
+  pointer-events: none;
+  opacity: 0.42;
+}
+
+@media (max-width: 760px) {
+  .storefront {
+    margin-top: 1.25rem;
+  }
+
+  .toolbar {
+    grid-template-columns: 1fr;
+    gap: 0.65rem;
+  }
+
+  .viewSwitcher {
+    width: 100%;
+  }
+
+  .viewSwitcher a {
+    width: 50%;
+  }
+
+  .productGrid {
+    grid-template-columns: repeat(auto-fill, minmax(min(9.25rem, 100%), 1fr));
+    gap: 0.62rem;
+  }
+
+  .productGrid .productInfo {
+    padding: 0.68rem 0.68rem 0;
+  }
+
+  .productGrid .productActions {
+    padding: 0.68rem;
+  }
+
+  .productGrid .productName {
+    font-size: 0.94rem;
+    line-height: 1.2;
+  }
+
+  .productList {
+    gap: 0.58rem;
+  }
+
+  .productList .productCard {
+    grid-template-columns: 4.55rem minmax(0, 1fr);
+    gap: 0.58rem;
+    align-items: start;
+    min-height: 0;
+    padding: 0.46rem;
+  }
+
+  .productList .imageWrap {
+    width: 4.55rem;
+  }
+
+  .productList .productActions {
+    grid-column: 1 / -1;
+    min-width: 0;
+  }
+
+  .productList .productName {
+    margin-top: 0.28rem;
+    font-size: 0.96rem;
+    line-height: 1.22;
+  }
+
+  .productList .marketplace {
+    margin-top: 0.42rem;
+  }
+
+  .productList .contentLinks {
+    margin-top: 0.5rem;
+  }
+
+  .productList .contentLinksLabel {
+    display: none;
+  }
+
+  .productList .contentLinkList {
+    gap: 0.26rem;
+  }
+
+  .productList .contentLinkList a,
+  .productList .contentLinkMore {
+    min-height: 1.66rem;
+    font-size: 0.68rem;
+  }
+
+  .productList .contentLinkList a {
+    max-width: min(100%, 12rem);
+    padding: 0 0.38rem;
+  }
+
+  .productList .productActions a {
+    min-height: 2.35rem;
+  }
+}
+
+@media (max-width: 420px) {
+  .productGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .resultBar {
+    align-items: flex-start;
+    flex-direction: column;
+    justify-content: center;
+    padding: 0.54rem 0;
+  }
+
+  .productList {
+    gap: 0.52rem;
+  }
+
+  .pagination {
+    justify-content: flex-start;
+    overflow-x: auto;
+    padding-bottom: 0.2rem;
+  }
+}

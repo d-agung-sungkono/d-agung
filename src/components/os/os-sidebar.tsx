@@ -5,7 +5,9 @@ import { usePathname } from 'next/navigation'
 import { ActionIcon, Tooltip } from '@mantine/core'
 import {
   IconArticle,
+  IconAffiliate,
   IconBrain,
+  IconBuildingStore,
   IconCalendar,
   IconHome,
   IconLogout,
@@ -16,12 +18,15 @@ import {
 
 import { logoutFromOs } from '@/app/os/actions'
 
+import OsNavPending from './os-nav-pending'
 import styles from './os-shell.module.css'
 
 const navigation = [
   { label: 'Home', href: '/os', icon: IconHome },
   { label: 'Today', href: '/os/today', icon: IconCalendar },
   { label: 'Contents', href: '/os/content', icon: IconArticle },
+  { label: 'Brands', href: '/os/brands', icon: IconBuildingStore },
+  { label: 'Affiliate', href: '/os/affiliate', icon: IconAffiliate },
   { label: 'Products', href: '/os/products', icon: IconPackage },
   { label: 'Thoughts', href: '/os/thoughts', icon: IconBrain },
   { label: 'Social Medias', href: '/os/socmeds', icon: IconShare2 },
@@ -48,6 +53,7 @@ export default function OsSidebar() {
               <span aria-hidden="true" className={styles.navIcon}>
                 <NavIcon size={17} stroke={1.8} />
               </span>
+              <OsNavPending />
               <span className={styles.navLabel}>{item.label}</span>
             </Link>
           )

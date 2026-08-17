@@ -240,14 +240,14 @@ export default function Hero({
                 key={item.label}
                 className={`${styles.railItem} ${item.isActive ? styles.railItemActive : ''}`}
               >
-                <a
+                <Link
                   href={item.href}
                   className={`${styles.railLink} ${item.isActive ? styles.railLinkActive : ''}`}
                   aria-current={item.isActive ? 'page' : undefined}
                 >
                   <span className={styles.railLabel}>{item.label}</span>
                   <span className={styles.railSubLabel}>{item.sublabel}</span>
-                </a>
+                </Link>
               </li>
             ))}
           </ul>
