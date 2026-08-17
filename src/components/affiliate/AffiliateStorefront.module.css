@@ -315,12 +315,16 @@
     line-height: 1.2;
   }
 
+  .productList {
+    margin-inline: -0.35rem;
+  }
+
   .productList .productCard {
     grid-template-columns: 4.7rem minmax(0, 1fr);
     gap: 0.68rem;
     align-items: start;
     min-height: 0;
-    padding: 0.56rem;
+    padding: 0.5rem;
   }
 
   .productList .imageWrap {
@@ -361,6 +365,7 @@
 
   .productList {
     gap: 0.55rem;
+    margin-inline: -0.45rem;
   }
 
   .pagination {
