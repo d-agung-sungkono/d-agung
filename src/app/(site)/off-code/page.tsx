@@ -1,6 +1,5 @@
 'use client'
 
-import Link from 'next/link'
 import { useState } from 'react'
 
 import TravelMap from '@/components/off-code/TravelMap'
@@ -27,11 +26,11 @@ export default function OffCodePage() {
           <p className={styles.intent}>
             Some are quiet. Some stay.
           </p>
-          <Link className={styles.productPicksCard} href="/affiliate" aria-label="Explore Product Picks">
+          <a className={styles.productPicksCard} href="/affiliate" aria-label="Explore Product Picks">
             <span className={styles.productPicksEyebrow}>Curated detour</span>
             <span className={styles.productPicksTitle}>Product Picks</span>
             <span className={styles.productPicksArrow}>Explore →</span>
-          </Link>
+          </a>
           <div className={styles.stats}>
             <button
               type="button"
