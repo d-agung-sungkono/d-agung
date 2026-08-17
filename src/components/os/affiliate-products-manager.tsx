@@ -11,6 +11,7 @@ import {
   Switch,
   Table,
   Text,
+  Textarea,
   TextInput,
   Tooltip,
 } from '@mantine/core'
@@ -50,6 +51,7 @@ const marketplaceOptions: Array<{ label: string; value: AffiliateMarketplace }> 
 
 const emptyProduct = {
   code: '',
+  contentLinks: [] as OsAffiliateProduct['contentLinks'],
   destinationUrl: '',
   id: '',
   isActive: true,
@@ -124,6 +126,7 @@ export default function AffiliateProductsManager({ products }: AffiliateProducts
     setModalMode('edit')
     setSelectedProduct({
       code: product.code,
+      contentLinks: product.contentLinks,
       destinationUrl: product.destinationUrl,
       id: product.id,
       isActive: product.isActive,
@@ -251,6 +254,7 @@ export default function AffiliateProductsManager({ products }: AffiliateProducts
                 <Table.Th>Name</Table.Th>
                 <Table.Th>Marketplace</Table.Th>
                 <Table.Th>Internal type</Table.Th>
+                <Table.Th>Content</Table.Th>
                 <Table.Th>Status</Table.Th>
                 <Table.Th>Updated</Table.Th>
                 <Table.Th ta="right">Actions</Table.Th>
@@ -280,6 +284,11 @@ export default function AffiliateProductsManager({ products }: AffiliateProducts
                   </Table.Td>
                   <Table.Td>{getMarketplaceLabel(product.marketplace)}</Table.Td>
                   <Table.Td>{getTypeLabel(product.type)}</Table.Td>
+                  <Table.Td>
+                    <Badge color={product.contentLinks.length > 0 ? 'blue' : 'gray'} variant="light">
+                      {product.contentLinks.length} links
+                    </Badge>
+                  </Table.Td>
                   <Table.Td>
                     <Badge color={product.isActive ? 'green' : 'gray'} variant="light">
                       {product.isActive ? 'Active' : 'Archived'}
@@ -332,7 +341,7 @@ export default function AffiliateProductsManager({ products }: AffiliateProducts
               ))}
               {filteredProducts.length === 0 ? (
                 <Table.Tr>
-                  <Table.Td colSpan={9}>
+                  <Table.Td colSpan={10}>
                     <Text c="dimmed" ta="center">
                       No affiliate products found.
                     </Text>
@@ -411,6 +420,15 @@ export default function AffiliateProductsManager({ products }: AffiliateProducts
               required
               defaultValue={selectedProduct.destinationUrl}
               placeholder="https://..."
+            />
+            <Textarea
+              autosize
+              label="Content links"
+              minRows={3}
+              name="contentLinks"
+              defaultValue={selectedProduct.contentLinks.map((link) => link.url).join('\n')}
+              placeholder="https://www.instagram.com/...
+https://www.tiktok.com/..."
             />
             <Group grow>
               <Select

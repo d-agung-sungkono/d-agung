@@ -6,11 +6,20 @@ import { query } from '@/lib/db'
 import { getOsUserId } from '@/lib/os-settings'
 
 export type OsAffiliateProduct = AffiliateProduct & {
+  contentLinks: AffiliateProductContentLink[]
   createdAt: string
   updatedAt: string
 }
 
+export type AffiliateProductContentLink = {
+  id: string
+  title: string | null
+  url: string
+  sortOrder: number
+}
+
 type AffiliateProductRow = {
+  content_links: AffiliateProductContentLink[] | null
   id: string
   code: string
   name: string
@@ -27,6 +36,7 @@ type AffiliateProductRow = {
 function mapAffiliateProductRow(row: AffiliateProductRow): OsAffiliateProduct {
   return {
     code: row.code,
+    contentLinks: row.content_links ?? [],
     createdAt: row.created_at,
     destinationUrl: row.destination_url,
     id: row.id,
@@ -55,9 +65,38 @@ export async function getOsAffiliateProducts() {
         is_active,
         sort_order,
         created_at,
-        updated_at
-      FROM os_affiliate_products
-      WHERE user_id = $1
+        updated_at,
+        content_links
+      FROM (
+        SELECT
+          oap.id,
+          oap.code,
+          oap.name,
+          oap.image,
+          oap.type,
+          oap.marketplace,
+          oap.destination_url,
+          oap.is_active,
+          oap.sort_order,
+          oap.created_at,
+          oap.updated_at,
+          COALESCE(content_links.links, '[]'::json) AS content_links
+        FROM os_affiliate_products oap
+        LEFT JOIN LATERAL (
+          SELECT json_agg(
+            json_build_object(
+              'id', oapcl.id,
+              'title', oapcl.title,
+              'url', oapcl.url,
+              'sortOrder', oapcl.sort_order
+            )
+            ORDER BY oapcl.sort_order, oapcl.created_at
+          ) AS links
+          FROM os_affiliate_product_content_links oapcl
+          WHERE oapcl.product_id = oap.id
+        ) content_links ON true
+        WHERE oap.user_id = $1
+      ) products
       ORDER BY is_active DESC, sort_order ASC, created_at DESC
     `,
     [userId]
@@ -81,7 +120,8 @@ export async function getPublicAffiliateProducts() {
         is_active,
         sort_order,
         created_at,
-        updated_at
+        updated_at,
+        '[]'::json AS content_links
       FROM os_affiliate_products
       WHERE user_id = $1
       ORDER BY is_active DESC, sort_order ASC, created_at DESC

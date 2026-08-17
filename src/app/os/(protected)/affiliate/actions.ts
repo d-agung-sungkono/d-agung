@@ -61,6 +61,23 @@ function validateUrl(value: string, fieldLabel: string) {
   }
 }
 
+function getContentLinks(formData: FormData) {
+  return Array.from(
+    new Set(
+      getText(formData, 'contentLinks')
+        .split('\n')
+        .map((value) => value.trim())
+        .filter(Boolean)
+    )
+  )
+}
+
+function validateContentLinks(urls: string[]) {
+  for (const url of urls) {
+    validateUrl(url, 'Content link')
+  }
+}
+
 async function getUploadedImage(formData: FormData) {
   const file = formData.get('imageFile')
 
@@ -91,12 +108,14 @@ async function getProductPayload(formData: FormData) {
   const sortOrder = getSortOrder(formData)
   const isActive = formData.get('isActive') === 'on'
   const uploadedImage = await getUploadedImage(formData)
+  const contentLinks = getContentLinks(formData)
 
   if (!code || !name || !destinationUrl) {
     throw new Error('Code, name, and destination URL are required.')
   }
 
   validateUrl(destinationUrl, 'Destination URL')
+  validateContentLinks(contentLinks)
 
   return {
     code,
@@ -106,6 +125,7 @@ async function getProductPayload(formData: FormData) {
     name,
     sortOrder,
     type,
+    contentLinks,
     uploadedImage,
   }
 }
@@ -113,6 +133,30 @@ async function getProductPayload(formData: FormData) {
 function revalidateAffiliate() {
   revalidatePath('/affiliate')
   revalidatePath('/os/affiliate')
+}
+
+async function syncContentLinks(productId: string, urls: string[]) {
+  await query('DELETE FROM os_affiliate_product_content_links WHERE product_id = $1', [productId])
+
+  if (urls.length === 0) {
+    return
+  }
+
+  await query(
+    `
+      INSERT INTO os_affiliate_product_content_links (
+        product_id,
+        url,
+        sort_order
+      )
+      SELECT $1, url, sort_order::integer
+      FROM unnest($2::text[]) WITH ORDINALITY AS content_link(url, sort_order)
+      ON CONFLICT (product_id, url) DO UPDATE SET
+        sort_order = EXCLUDED.sort_order,
+        updated_at = now()
+    `,
+    [productId, urls]
+  )
 }
 
 export async function createAffiliateProduct(formData: FormData) {
@@ -168,6 +212,7 @@ export async function createAffiliateProduct(formData: FormData) {
     )
   }
 
+  await syncContentLinks(result.rows[0].id, product.contentLinks)
   revalidateAffiliate()
 }
 
@@ -225,6 +270,7 @@ export async function updateAffiliateProduct(formData: FormData) {
     )
   }
 
+  await syncContentLinks(id, product.contentLinks)
   revalidateAffiliate()
 }
 
