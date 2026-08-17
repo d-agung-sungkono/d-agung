@@ -85,6 +85,7 @@ export default function AffiliateProductsManager({ products }: AffiliateProducts
   const [selectedProduct, setSelectedProduct] = useState(emptyProduct)
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [selectedImageFileName, setSelectedImageFileName] = useState('')
 
   const activeCount = products.filter((product) => product.isActive).length
   const archivedCount = products.length - activeCount
@@ -108,6 +109,7 @@ export default function AffiliateProductsManager({ products }: AffiliateProducts
 
   function openCreateModal() {
     setError(null)
+    setSelectedImageFileName('')
     setModalMode('create')
     setSelectedProduct({
       ...emptyProduct,
@@ -118,6 +120,7 @@ export default function AffiliateProductsManager({ products }: AffiliateProducts
 
   function openEditModal(product: OsAffiliateProduct) {
     setError(null)
+    setSelectedImageFileName('')
     setModalMode('edit')
     setSelectedProduct({
       code: product.code,
@@ -137,6 +140,12 @@ export default function AffiliateProductsManager({ products }: AffiliateProducts
     setError(null)
 
     const formData = new FormData(event.currentTarget)
+    const imageFile = formData.get('imageFile')
+
+    if (modalMode === 'create' && (!(imageFile instanceof File) || imageFile.size === 0)) {
+      setError('Product image is required.')
+      return
+    }
 
     startTransition(async () => {
       try {
@@ -361,13 +370,41 @@ export default function AffiliateProductsManager({ products }: AffiliateProducts
               />
             </Group>
             <TextInput label="Product name" name="name" required defaultValue={selectedProduct.name} />
-            <TextInput
-              accept="image/jpeg,image/png,image/webp,image/gif,image/svg+xml"
-              label={modalMode === 'edit' ? 'Replace image' : 'Upload image'}
-              name="imageFile"
-              required={modalMode === 'create'}
-              type="file"
-            />
+            <div className={styles.affiliateImageEditor}>
+              <div className={styles.affiliateImagePreview}>
+                {modalMode === 'edit' ? (
+                  <Image
+                    alt={selectedProduct.name || selectedProduct.code}
+                    height={112}
+                    unoptimized
+                    src={`/os/affiliate/image/${selectedProduct.id}`}
+                    width={112}
+                  />
+                ) : (
+                  <span>No image</span>
+                )}
+              </div>
+              <div className={styles.affiliateImageControls}>
+                <Text fw={700}>{modalMode === 'edit' ? 'Current image' : 'Product image'}</Text>
+                <Text c="dimmed" size="sm">
+                  {selectedImageFileName
+                    ? `${selectedImageFileName} selected. Save product to apply.`
+                    : modalMode === 'edit'
+                      ? 'Upload a replacement only when you want to change it.'
+                      : 'Upload an image before saving this product.'}
+                </Text>
+                <Button component="label" variant="default">
+                  {modalMode === 'edit' ? 'Ubah image' : 'Choose image'}
+                  <input
+                    accept="image/jpeg,image/png,image/webp,image/gif,image/svg+xml"
+                    className={styles.affiliateImageInput}
+                    name="imageFile"
+                    onChange={(event) => setSelectedImageFileName(event.currentTarget.files?.[0]?.name ?? '')}
+                    type="file"
+                  />
+                </Button>
+              </div>
+            </div>
             <TextInput
               label="Destination URL"
               name="destinationUrl"
