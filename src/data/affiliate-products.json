@@ -1,0 +1,145 @@
+[
+  {
+    "id": "affiliate-1",
+    "code": "AG001",
+    "name": "OTOHEROES Pompa Ban Elektrik",
+    "image": "/images/products/placeholder.svg",
+    "type": "affiliate",
+    "marketplace": "shopee",
+    "destinationUrl": "https://example.com/products/ag001",
+    "isActive": true,
+    "sortOrder": 1
+  },
+  {
+    "id": "affiliate-2",
+    "code": "AG002",
+    "name": "Torch Travel Pouch Organizer",
+    "image": "/images/products/placeholder.svg",
+    "type": "affiliate",
+    "marketplace": "tokopedia",
+    "destinationUrl": "https://example.com/products/ag002",
+    "isActive": true,
+    "sortOrder": 2
+  },
+  {
+    "id": "affiliate-3",
+    "code": "AG003",
+    "name": "Desk Lamp Adjustable LED",
+    "image": "/images/products/placeholder.svg",
+    "type": "dropship",
+    "marketplace": "shopee",
+    "destinationUrl": "https://example.com/products/ag003",
+    "isActive": true,
+    "sortOrder": 3
+  },
+  {
+    "id": "affiliate-4",
+    "code": "AG004",
+    "name": "Notebook Planner Harian",
+    "image": "/images/products/placeholder.svg",
+    "type": "owned",
+    "marketplace": "other",
+    "destinationUrl": "https://example.com/products/ag004",
+    "isActive": true,
+    "sortOrder": 4
+  },
+  {
+    "id": "affiliate-5",
+    "code": "AG005",
+    "name": "Wireless Mouse Silent Click",
+    "image": "/images/products/placeholder.svg",
+    "type": "affiliate",
+    "marketplace": "tokopedia",
+    "destinationUrl": "https://example.com/products/ag005",
+    "isActive": true,
+    "sortOrder": 5
+  },
+  {
+    "id": "affiliate-6",
+    "code": "AG006",
+    "name": "Cable Organizer Magnetic",
+    "image": "/images/products/placeholder.svg",
+    "type": "dropship",
+    "marketplace": "other",
+    "destinationUrl": "https://example.com/products/ag006",
+    "isActive": true,
+    "sortOrder": 6
+  },
+  {
+    "id": "affiliate-7",
+    "code": "AG007",
+    "name": "Tumbler Stainless Vacuum",
+    "image": "/images/products/placeholder.svg",
+    "type": "affiliate",
+    "marketplace": "shopee",
+    "destinationUrl": "https://example.com/products/ag007",
+    "isActive": true,
+    "sortOrder": 7
+  },
+  {
+    "id": "affiliate-8",
+    "code": "AG008",
+    "name": "Mini Tripod Creator Kit",
+    "image": "/images/products/placeholder.svg",
+    "type": "owned",
+    "marketplace": "tokopedia",
+    "destinationUrl": "https://example.com/products/ag008",
+    "isActive": true,
+    "sortOrder": 8
+  },
+  {
+    "id": "affiliate-9",
+    "code": "AG009",
+    "name": "Power Bank Compact 10000mAh",
+    "image": "/images/products/placeholder.svg",
+    "type": "affiliate",
+    "marketplace": "shopee",
+    "destinationUrl": "https://example.com/products/ag009",
+    "isActive": true,
+    "sortOrder": 9
+  },
+  {
+    "id": "affiliate-10",
+    "code": "AG010",
+    "name": "Portable Storage Case Gadget",
+    "image": "/images/products/placeholder.svg",
+    "type": "dropship",
+    "marketplace": "other",
+    "destinationUrl": "https://example.com/products/ag010",
+    "isActive": true,
+    "sortOrder": 10
+  },
+  {
+    "id": "affiliate-11",
+    "code": "AG011",
+    "name": "Bluetooth Speaker Mini",
+    "image": "/images/products/placeholder.svg",
+    "type": "affiliate",
+    "marketplace": "tokopedia",
+    "destinationUrl": "https://example.com/products/ag011",
+    "isActive": true,
+    "sortOrder": 11
+  },
+  {
+    "id": "affiliate-12",
+    "code": "AG012",
+    "name": "Phone Stand Foldable",
+    "image": "/images/products/placeholder.svg",
+    "type": "owned",
+    "marketplace": "shopee",
+    "destinationUrl": "https://example.com/products/ag012",
+    "isActive": true,
+    "sortOrder": 12
+  },
+  {
+    "id": "affiliate-13",
+    "code": "AG013",
+    "name": "Keyboard Cleaning Brush",
+    "image": "/images/products/placeholder.svg",
+    "type": "affiliate",
+    "marketplace": "other",
+    "destinationUrl": "https://example.com/products/ag013",
+    "isActive": true,
+    "sortOrder": 13
+  }
+]

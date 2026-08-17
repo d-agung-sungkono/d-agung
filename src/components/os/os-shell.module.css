@@ -1995,6 +1995,75 @@
   display: block;
 }
 
+.affiliateImageEditor {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.85rem;
+  border: 1px solid #dfe5ec;
+  border-radius: 0.55rem;
+  background: #fbfcfe;
+}
+
+.affiliateImagePreview {
+  width: 7rem;
+  height: 7rem;
+  flex: 0 0 auto;
+  overflow: hidden;
+  border: 1px solid #d9e0e8;
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  background: #f3f5f7;
+  color: rgba(31, 31, 31, 0.46);
+  font-size: 0.84rem;
+  font-weight: 700;
+}
+
+.affiliateImagePreview img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.affiliateImageControls {
+  display: grid;
+  gap: 0.4rem;
+  min-width: 0;
+}
+
+.affiliateImageControls button {
+  width: fit-content;
+}
+
+.affiliateImageInput {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  clip-path: inset(50%);
+}
+
+.affiliateContentLinksEditor {
+  display: grid;
+  gap: 0.65rem;
+  padding: 0.85rem;
+  border: 1px solid #dfe5ec;
+  border-radius: 0.55rem;
+  background: #fbfcfe;
+}
+
+.affiliateContentLinksList {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.affiliateContentLinksList :global(.mantine-TextInput-root) {
+  flex: 1;
+}
+
 .productTitle {
   margin: 0;
   max-width: 24rem;

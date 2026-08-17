@@ -5,6 +5,7 @@ import { usePathname } from 'next/navigation'
 import { ActionIcon, Tooltip } from '@mantine/core'
 import {
   IconArticle,
+  IconAffiliate,
   IconBrain,
   IconBuildingStore,
   IconCalendar,
@@ -25,6 +26,7 @@ const navigation = [
   { label: 'Today', href: '/os/today', icon: IconCalendar },
   { label: 'Contents', href: '/os/content', icon: IconArticle },
   { label: 'Brands', href: '/os/brands', icon: IconBuildingStore },
+  { label: 'Affiliate', href: '/os/affiliate', icon: IconAffiliate },
   { label: 'Products', href: '/os/products', icon: IconPackage },
   { label: 'Thoughts', href: '/os/thoughts', icon: IconBrain },
   { label: 'Social Medias', href: '/os/socmeds', icon: IconShare2 },

@@ -1,0 +1,9 @@
+<svg width="900" height="900" viewBox="0 0 900 900" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
+  <title id="title">Product placeholder</title>
+  <desc id="desc">Neutral product placeholder for affiliate storefront items.</desc>
+  <rect width="900" height="900" fill="#F4F1EB"/>
+  <rect x="108" y="108" width="684" height="684" rx="42" fill="#FFFFFF" stroke="#D6D0C6" stroke-width="4"/>
+  <path d="M260 586L365 466L438 540L506 444L650 586H260Z" fill="#2F695E"/>
+  <circle cx="596" cy="310" r="66" fill="#E7B85F"/>
+  <rect x="240" y="666" width="420" height="28" rx="14" fill="#191919" fill-opacity="0.16"/>
+</svg>
