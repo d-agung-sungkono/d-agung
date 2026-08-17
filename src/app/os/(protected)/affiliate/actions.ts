@@ -7,6 +7,7 @@ import { query } from '@/lib/db'
 import { getOsUserId } from '@/lib/os-settings'
 
 const maxImageSize = 5_000_000
+const placeholderImage = '/images/products/placeholder.svg'
 const allowedImageTypes = new Set(['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'image/svg+xml'])
 const productTypes = new Set<AffiliateProductType>(['affiliate', 'dropship', 'owned'])
 const marketplaces = new Set<AffiliateMarketplace>(['shopee', 'tokopedia', 'other'])
@@ -18,7 +19,11 @@ function getText(formData: FormData, key: string) {
 function getSortOrder(formData: FormData) {
   const rawValue = Number.parseInt(getText(formData, 'sortOrder'), 10)
 
-  return Number.isFinite(rawValue) ? rawValue : 0
+  if (!Number.isFinite(rawValue) || rawValue < 1) {
+    throw new Error('Sort order must be at least 1.')
+  }
+
+  return rawValue
 }
 
 function getProductType(formData: FormData) {
@@ -109,6 +114,7 @@ async function getProductPayload(formData: FormData) {
   const marketplace = getMarketplace(formData)
   const sortOrder = getSortOrder(formData)
   const isActive = formData.get('isActive') === 'on'
+  const removeImage = formData.get('removeImage') === 'true'
   const uploadedImage = await getUploadedImage(formData)
   const contentLinks = getContentLinks(formData)
 
@@ -128,6 +134,7 @@ async function getProductPayload(formData: FormData) {
     sortOrder,
     type,
     contentLinks,
+    removeImage,
     uploadedImage,
   }
 }
@@ -165,10 +172,6 @@ export async function createAffiliateProduct(formData: FormData) {
   const userId = await getOsUserId()
   const product = await getProductPayload(formData)
 
-  if (!product.uploadedImage) {
-    throw new Error('Product image is required.')
-  }
-
   const result = await query<{ id: string }>(
     `
       INSERT INTO os_affiliate_products (
@@ -185,13 +188,14 @@ export async function createAffiliateProduct(formData: FormData) {
         image_mime_type,
         image_uploaded_at
       )
-      VALUES ($1, $2, $3, '/images/products/placeholder.svg', $4, $5, $6, $7, $8, $9::bytea, $10, CASE WHEN $9::bytea IS NULL THEN NULL ELSE now() END)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10::bytea, $11, CASE WHEN $10::bytea IS NULL THEN NULL ELSE now() END)
       RETURNING id
     `,
     [
       userId,
       product.code,
       product.name,
+      placeholderImage,
       product.type,
       product.marketplace,
       product.destinationUrl,
@@ -222,6 +226,7 @@ export async function updateAffiliateProduct(formData: FormData) {
   const userId = await getOsUserId()
   const id = getText(formData, 'id')
   const product = await getProductPayload(formData)
+  const imagePath = product.uploadedImage ? `/affiliate/image/${id}` : undefined
 
   if (!id) {
     throw new Error('Product id is required.')
@@ -238,12 +243,29 @@ export async function updateAffiliateProduct(formData: FormData) {
         destination_url = $5,
         is_active = $6,
         sort_order = $7,
-        image_blob = COALESCE($8::bytea, image_blob),
-        image_mime_type = CASE WHEN $8::bytea IS NULL THEN image_mime_type ELSE $9 END,
-        image_uploaded_at = CASE WHEN $8::bytea IS NULL THEN image_uploaded_at ELSE now() END,
+        image = CASE
+          WHEN $8::boolean THEN $9
+          WHEN $10::bytea IS NOT NULL THEN $11
+          ELSE image
+        END,
+        image_blob = CASE
+          WHEN $8::boolean THEN NULL
+          WHEN $10::bytea IS NOT NULL THEN $10::bytea
+          ELSE image_blob
+        END,
+        image_mime_type = CASE
+          WHEN $8::boolean THEN NULL
+          WHEN $10::bytea IS NOT NULL THEN $12
+          ELSE image_mime_type
+        END,
+        image_uploaded_at = CASE
+          WHEN $8::boolean THEN NULL
+          WHEN $10::bytea IS NOT NULL THEN now()
+          ELSE image_uploaded_at
+        END,
         updated_at = now()
-      WHERE id = $10
-        AND user_id = $11
+      WHERE id = $13
+        AND user_id = $14
     `,
     [
       product.code,
@@ -253,24 +275,15 @@ export async function updateAffiliateProduct(formData: FormData) {
       product.destinationUrl,
       product.isActive,
       product.sortOrder,
+      product.removeImage,
+      placeholderImage,
       product.uploadedImage?.data ?? null,
+      imagePath ?? null,
       product.uploadedImage?.mimeType ?? null,
       id,
       userId,
     ]
   )
-
-  if (product.uploadedImage) {
-    await query(
-      `
-        UPDATE os_affiliate_products
-        SET image = $1, updated_at = now()
-        WHERE id = $2
-          AND user_id = $3
-      `,
-      [`/affiliate/image/${id}`, id, userId]
-    )
-  }
 
   await syncContentLinks(id, product.contentLinks)
   revalidateAffiliate()

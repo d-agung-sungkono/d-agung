@@ -52,11 +52,13 @@ const emptyProduct = {
   code: '',
   contentLinks: [] as OsAffiliateProduct['contentLinks'],
   destinationUrl: '',
+  hasImage: false,
   id: '',
+  image: '/images/products/placeholder.svg',
   isActive: true,
   marketplace: 'shopee' as AffiliateMarketplace,
   name: '',
-  sortOrder: 0,
+  sortOrder: 1,
   type: 'affiliate' as AffiliateProductType,
   updatedAt: '',
 }
@@ -88,6 +90,7 @@ export default function AffiliateProductsManager({ products }: AffiliateProducts
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [selectedImageFileName, setSelectedImageFileName] = useState('')
+  const [removeImage, setRemoveImage] = useState(false)
   const [contentLinkDrafts, setContentLinkDrafts] = useState<string[]>([])
 
   const activeCount = products.filter((product) => product.isActive).length
@@ -113,11 +116,12 @@ export default function AffiliateProductsManager({ products }: AffiliateProducts
   function openCreateModal() {
     setError(null)
     setSelectedImageFileName('')
+    setRemoveImage(false)
     setContentLinkDrafts([])
     setModalMode('create')
     setSelectedProduct({
       ...emptyProduct,
-      sortOrder: products.length + 1,
+      sortOrder: Math.max(products.length + 1, 1),
     })
     setIsModalOpen(true)
   }
@@ -125,13 +129,16 @@ export default function AffiliateProductsManager({ products }: AffiliateProducts
   function openEditModal(product: OsAffiliateProduct) {
     setError(null)
     setSelectedImageFileName('')
+    setRemoveImage(false)
     setContentLinkDrafts(product.contentLinks.map((link) => link.url))
     setModalMode('edit')
     setSelectedProduct({
       code: product.code,
       contentLinks: product.contentLinks,
       destinationUrl: product.destinationUrl,
+      hasImage: Boolean(product.hasImage),
       id: product.id,
+      image: product.image,
       isActive: product.isActive,
       marketplace: product.marketplace,
       name: product.name,
@@ -147,10 +154,10 @@ export default function AffiliateProductsManager({ products }: AffiliateProducts
     setError(null)
 
     const formData = new FormData(event.currentTarget)
-    const imageFile = formData.get('imageFile')
+    const sortOrder = Number.parseInt(String(formData.get('sortOrder') ?? ''), 10)
 
-    if (modalMode === 'create' && (!(imageFile instanceof File) || imageFile.size === 0)) {
-      setError('Product image is required.')
+    if (!Number.isFinite(sortOrder) || sortOrder < 1) {
+      setError('Sort order must be at least 1.')
       return
     }
 
@@ -282,7 +289,11 @@ export default function AffiliateProductsManager({ products }: AffiliateProducts
                         className={styles.productThumb}
                         height={64}
                         unoptimized
-                        src={`/os/affiliate/image/${product.id}?v=${encodeURIComponent(product.updatedAt)}`}
+                        src={
+                          product.hasImage
+                            ? `/os/affiliate/image/${product.id}?v=${encodeURIComponent(product.updatedAt)}`
+                            : product.image
+                        }
                         width={64}
                       />
                     </div>
@@ -386,43 +397,67 @@ export default function AffiliateProductsManager({ products }: AffiliateProducts
                 name="sortOrder"
                 required
                 type="number"
+                min={1}
                 defaultValue={String(selectedProduct.sortOrder)}
               />
             </Group>
             <TextInput label="Product name" name="name" required defaultValue={selectedProduct.name} />
             <div className={styles.affiliateImageEditor}>
+              {removeImage ? <input name="removeImage" type="hidden" value="true" /> : null}
               <div className={styles.affiliateImagePreview}>
-                {modalMode === 'edit' ? (
-                  <Image
-                    alt={selectedProduct.name || selectedProduct.code}
-                    height={112}
-                    unoptimized
-                    src={`/os/affiliate/image/${selectedProduct.id}?v=${encodeURIComponent(selectedProduct.updatedAt)}`}
-                    width={112}
-                  />
-                ) : (
-                  <span>No image</span>
-                )}
+                <Image
+                  alt={selectedProduct.name || selectedProduct.code || 'Product image placeholder'}
+                  height={112}
+                  unoptimized
+                  src={
+                    modalMode === 'edit' && selectedProduct.hasImage && !removeImage
+                      ? `/os/affiliate/image/${selectedProduct.id}?v=${encodeURIComponent(selectedProduct.updatedAt)}`
+                      : selectedProduct.image
+                  }
+                  width={112}
+                />
               </div>
               <div className={styles.affiliateImageControls}>
                 <Text fw={700}>{modalMode === 'edit' ? 'Current image' : 'Product image'}</Text>
                 <Text c="dimmed" size="sm">
-                  {selectedImageFileName
+                  {removeImage
+                    ? 'Image will be removed after saving.'
+                    : selectedImageFileName
                     ? `${selectedImageFileName} selected. Save product to apply.`
                     : modalMode === 'edit'
-                      ? 'Upload a replacement only when you want to change it.'
-                      : 'Upload an image before saving this product.'}
+                      ? selectedProduct.hasImage
+                        ? 'Upload a replacement only when you want to change it.'
+                        : 'No image yet. Placeholder is shown on public page.'
+                      : 'Optional. Placeholder is shown when empty.'}
                 </Text>
-                <Button component="label" variant="default">
-                  {modalMode === 'edit' ? 'Ubah image' : 'Choose image'}
-                  <input
-                    accept="image/jpeg,image/png,image/webp,image/gif,image/svg+xml"
-                    className={styles.affiliateImageInput}
-                    name="imageFile"
-                    onChange={(event) => setSelectedImageFileName(event.currentTarget.files?.[0]?.name ?? '')}
-                    type="file"
-                  />
-                </Button>
+                <Group gap="xs">
+                  <Button component="label" variant="default">
+                    {modalMode === 'edit' ? 'Ubah image' : 'Choose image'}
+                    <input
+                      accept="image/jpeg,image/png,image/webp,image/gif,image/svg+xml"
+                      className={styles.affiliateImageInput}
+                      name="imageFile"
+                      onChange={(event) => {
+                        setSelectedImageFileName(event.currentTarget.files?.[0]?.name ?? '')
+                        setRemoveImage(false)
+                      }}
+                      type="file"
+                    />
+                  </Button>
+                  {modalMode === 'edit' && selectedProduct.hasImage ? (
+                    <Button
+                      color="red"
+                      onClick={() => {
+                        setSelectedImageFileName('')
+                        setRemoveImage(true)
+                      }}
+                      type="button"
+                      variant="light"
+                    >
+                      Hapus image
+                    </Button>
+                  ) : null}
+                </Group>
               </div>
             </div>
             <TextInput

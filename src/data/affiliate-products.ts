@@ -9,6 +9,7 @@ export type AffiliateProduct = {
   name: string
   image: string
   contentLinks?: AffiliateProductContentLink[]
+  hasImage?: boolean
   type: AffiliateProductType
   marketplace: AffiliateMarketplace
   destinationUrl: string

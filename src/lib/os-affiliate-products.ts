@@ -22,6 +22,7 @@ type AffiliateProductRow = {
   code: string
   name: string
   image: string
+  has_image: boolean
   image_uploaded_at: string | null
   type: AffiliateProductType
   marketplace: AffiliateMarketplace
@@ -42,6 +43,7 @@ function mapAffiliateProductRow(row: AffiliateProductRow): OsAffiliateProduct {
     createdAt: row.created_at,
     destinationUrl: row.destination_url,
     id: row.id,
+    hasImage: row.has_image,
     image,
     isActive: row.is_active,
     marketplace: row.marketplace,
@@ -61,6 +63,7 @@ export async function getOsAffiliateProducts() {
         code,
         name,
         image,
+        has_image,
         image_uploaded_at,
         type,
         marketplace,
@@ -76,6 +79,7 @@ export async function getOsAffiliateProducts() {
           oap.code,
           oap.name,
           oap.image,
+          oap.image_blob IS NOT NULL AS has_image,
           oap.image_uploaded_at,
           oap.type,
           oap.marketplace,
@@ -118,6 +122,7 @@ export async function getPublicAffiliateProducts() {
         code,
         name,
         image,
+        has_image,
         image_uploaded_at,
         type,
         marketplace,
@@ -133,6 +138,7 @@ export async function getPublicAffiliateProducts() {
           oap.code,
           oap.name,
           oap.image,
+          oap.image_blob IS NOT NULL AS has_image,
           oap.image_uploaded_at,
           oap.type,
           oap.marketplace,
