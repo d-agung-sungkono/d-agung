@@ -2,11 +2,11 @@ import type { Metadata } from 'next'
 import { connection } from 'next/server'
 
 import AffiliateStorefront from '@/components/affiliate/AffiliateStorefront'
-import { fallbackAffiliateProducts, getPublicAffiliateProducts } from '@/lib/os-affiliate-products'
+import { fallbackAffiliateProducts, getPublicAffiliateProductsPage } from '@/lib/os-affiliate-products'
 
 import styles from './affiliate.module.css'
 
-const PAGE_SIZE = 12
+const PAGE_SIZE = 10
 
 type SearchValue = string | string[] | undefined
 
@@ -41,29 +41,36 @@ export default async function AffiliatePage({
   await connection()
 
   const params = await searchParams
-  let products = fallbackAffiliateProducts
-
-  try {
-    products = await getPublicAffiliateProducts()
-  } catch (error) {
-    console.error('Failed to load public affiliate products from CMS', error)
-  }
-
   const query = normalizeQuery(params.q)
-  const normalizedQuery = query.toLowerCase()
   const requestedPage = normalizePage(params.page)
   const viewMode = normalizeViewMode(params.view)
-  const filteredProducts = normalizedQuery
-    ? products.filter((product) => {
-        const code = product.code.toLowerCase()
-        const name = product.name.toLowerCase()
+  let activeProductCount = fallbackAffiliateProducts.length
+  let page = requestedPage
+  let products = fallbackAffiliateProducts
+  let totalProducts = fallbackAffiliateProducts.length
 
-        return code.includes(normalizedQuery) || name.includes(normalizedQuery)
-      })
-    : products
-  const totalPages = Math.max(1, Math.ceil(filteredProducts.length / PAGE_SIZE))
-  const page = Math.min(requestedPage, totalPages)
-  const visibleProducts = filteredProducts.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE)
+  try {
+    const productsPage = await getPublicAffiliateProductsPage({
+      limit: PAGE_SIZE,
+      page: requestedPage,
+      query,
+    })
+
+    activeProductCount = productsPage.activeProductCount
+    page = productsPage.page
+    products = productsPage.products
+    totalProducts = productsPage.totalProducts
+  } catch (error) {
+    console.error('Failed to load public affiliate products from CMS', error)
+    const filteredProducts = filterFallbackAffiliateProducts(query)
+    const totalPages = Math.max(1, Math.ceil(filteredProducts.length / PAGE_SIZE))
+
+    page = Math.min(requestedPage, totalPages)
+    products = filteredProducts.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE)
+    totalProducts = filteredProducts.length
+  }
+
+  const totalPages = Math.max(1, Math.ceil(totalProducts / PAGE_SIZE))
 
   return (
     <main className={styles.page}>
@@ -73,21 +80,36 @@ export default async function AffiliatePage({
           <h1 className={styles.title}>Produk Pilihan</h1>
           <p className={styles.intro}>Barang yang saya rekomendasikan untukmu!</p>
         </div>
-        <div className={styles.summary} aria-label={`${products.length} produk aktif`}>
-          <strong>{products.length}</strong>
+        <div className={styles.summary} aria-label={`${activeProductCount} produk aktif`}>
+          <strong>{activeProductCount}</strong>
           <span>Produk aktif</span>
         </div>
       </header>
 
       <AffiliateStorefront
-        products={visibleProducts}
+        products={products}
         query={query}
         page={page}
         totalPages={totalPages}
-        totalProducts={filteredProducts.length}
+        totalProducts={totalProducts}
         pageSize={PAGE_SIZE}
         viewMode={viewMode}
       />
     </main>
   )
+}
+
+function filterFallbackAffiliateProducts(searchQuery: string) {
+  const normalizedQuery = searchQuery.toLowerCase()
+
+  if (!normalizedQuery) {
+    return fallbackAffiliateProducts
+  }
+
+  return fallbackAffiliateProducts.filter((product) => {
+    const code = product.code.toLowerCase()
+    const name = product.name.toLowerCase()
+
+    return code.includes(normalizedQuery) || name.includes(normalizedQuery)
+  })
 }
