@@ -1,5 +1,6 @@
 'use client'
 
+import Link from 'next/link'
 import { useState } from 'react'
 
 import TravelMap from '@/components/off-code/TravelMap'
@@ -47,6 +48,9 @@ export default function OffCodePage() {
               {visitedCountries.length} overseas countries visited
             </button>
           </div>
+          <Link className={styles.productPicksLink} href="/affiliate">
+            Explore Product Picks →
+          </Link>
         </header>
 
         <div className={styles.mapSpotlight}>

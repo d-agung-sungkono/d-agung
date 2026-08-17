@@ -90,6 +90,24 @@
   color: rgba(17, 17, 17, 0.35);
 }
 
+.productPicksLink {
+  width: fit-content;
+  margin-top: 0.9rem;
+  border-bottom: 1px solid rgba(17, 17, 17, 0.28);
+  display: inline-flex;
+  color: rgba(17, 17, 17, 0.78);
+  font-size: 0.82rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  transition: border-color 180ms ease, color 180ms ease;
+}
+
+.productPicksLink:hover {
+  border-color: rgba(17, 17, 17, 0.72);
+  color: rgba(17, 17, 17, 0.94);
+}
+
 .mapSpotlight {
   margin-top: clamp(1.35rem, 2.7vw, 2.15rem);
 }
