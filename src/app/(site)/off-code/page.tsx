@@ -27,6 +27,11 @@ export default function OffCodePage() {
           <p className={styles.intent}>
             Some are quiet. Some stay.
           </p>
+          <Link className={styles.productPicksCard} href="/affiliate" aria-label="Explore Product Picks">
+            <span className={styles.productPicksEyebrow}>Curated detour</span>
+            <span className={styles.productPicksTitle}>Product Picks</span>
+            <span className={styles.productPicksArrow}>Explore →</span>
+          </Link>
           <div className={styles.stats}>
             <button
               type="button"
@@ -48,9 +53,6 @@ export default function OffCodePage() {
               {visitedCountries.length} overseas countries visited
             </button>
           </div>
-          <Link className={styles.productPicksLink} href="/affiliate">
-            Explore Product Picks →
-          </Link>
         </header>
 
         <div className={styles.mapSpotlight}>
