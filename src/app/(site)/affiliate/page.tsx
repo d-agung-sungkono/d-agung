@@ -29,10 +29,14 @@ function normalizePage(value: SearchValue) {
   return Number.isFinite(parsedPage) && parsedPage > 0 ? parsedPage : 1
 }
 
+function normalizeViewMode(value: SearchValue) {
+  return getSingleValue(value) === 'list' ? 'list' : 'grid'
+}
+
 export default async function AffiliatePage({
   searchParams,
 }: {
-  searchParams: Promise<{ q?: SearchValue; page?: SearchValue }>
+  searchParams: Promise<{ q?: SearchValue; page?: SearchValue; view?: SearchValue }>
 }) {
   await connection()
 
@@ -48,6 +52,7 @@ export default async function AffiliatePage({
   const query = normalizeQuery(params.q)
   const normalizedQuery = query.toLowerCase()
   const requestedPage = normalizePage(params.page)
+  const viewMode = normalizeViewMode(params.view)
   const filteredProducts = normalizedQuery
     ? products.filter((product) => {
         const code = product.code.toLowerCase()
@@ -81,6 +86,7 @@ export default async function AffiliatePage({
         totalPages={totalPages}
         totalProducts={filteredProducts.length}
         pageSize={PAGE_SIZE}
+        viewMode={viewMode}
       />
     </main>
   )

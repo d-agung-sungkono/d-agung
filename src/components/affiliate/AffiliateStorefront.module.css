@@ -59,7 +59,7 @@
   background: rgba(255, 255, 255, 0.74);
 }
 
-.viewSwitcher button {
+.viewSwitcher a {
   width: 5.2rem;
   border: 0;
   border-left: 1px solid rgba(17, 17, 17, 0.1);
@@ -75,11 +75,11 @@
   transition: background 160ms ease, color 160ms ease;
 }
 
-.viewSwitcher button:first-child {
+.viewSwitcher a:first-child {
   border-left: 0;
 }
 
-.viewSwitcher button:hover,
+.viewSwitcher a:hover,
 .viewSwitcher .activeView {
   background: #171717;
   color: #ffffff;
@@ -358,7 +358,7 @@
     width: 100%;
   }
 
-  .viewSwitcher button {
+  .viewSwitcher a {
     width: 50%;
   }
 

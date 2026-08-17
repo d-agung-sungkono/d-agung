@@ -1,8 +1,5 @@
-'use client'
-
 import { IconArticle, IconExternalLink, IconLayoutGrid, IconList, IconSearch } from '@tabler/icons-react'
 import Image from 'next/image'
-import { useMemo, useState } from 'react'
 
 import type { AffiliateMarketplace, AffiliateProduct } from '@/data/affiliate-products'
 
@@ -15,6 +12,7 @@ type AffiliateStorefrontProps = {
   totalPages: number
   totalProducts: number
   pageSize: number
+  viewMode: ViewMode
 }
 
 type ViewMode = 'grid' | 'list'
@@ -47,7 +45,7 @@ function getContentLinkLabel(product: AffiliateProduct, index: number) {
   return `Konten ${index + 1}`
 }
 
-function getAffiliateHref(query: string, page: number) {
+function getAffiliateHref(query: string, page: number, viewMode: ViewMode) {
   const params = new URLSearchParams()
 
   if (query) {
@@ -56,6 +54,10 @@ function getAffiliateHref(query: string, page: number) {
 
   if (page > 1) {
     params.set('page', String(page))
+  }
+
+  if (viewMode === 'list') {
+    params.set('view', viewMode)
   }
 
   const search = params.toString()
@@ -70,19 +72,12 @@ export default function AffiliateStorefront({
   totalPages,
   totalProducts,
   pageSize,
+  viewMode,
 }: AffiliateStorefrontProps) {
-  const [viewMode, setViewMode] = useState<ViewMode>('grid')
-
-  const countLabel = useMemo(() => {
-    if (totalProducts === 0) {
-      return 'Tidak ada produk'
-    }
-
-    const first = (page - 1) * pageSize + 1
-    const last = Math.min(page * pageSize, totalProducts)
-
-    return `${first}-${last} dari ${totalProducts} produk`
-  }, [page, pageSize, totalProducts])
+  const countLabel =
+    totalProducts === 0
+      ? 'Tidak ada produk'
+      : `${(page - 1) * pageSize + 1}-${Math.min(page * pageSize, totalProducts)} dari ${totalProducts} produk`
 
   return (
     <section className={styles.storefront} aria-label="Daftar produk pilihan">
@@ -91,6 +86,7 @@ export default function AffiliateStorefront({
           <label className={styles.searchLabel} htmlFor="affiliate-search">
             Cari Produk
           </label>
+          {viewMode === 'list' ? <input name="view" type="hidden" value="list" /> : null}
           <div className={styles.searchControl}>
             <IconSearch size={18} stroke={1.8} aria-hidden="true" />
             <input
@@ -104,32 +100,32 @@ export default function AffiliateStorefront({
         </form>
 
         <div className={styles.viewSwitcher} aria-label="Ubah tampilan produk">
-          <button
+          <a
             className={viewMode === 'grid' ? styles.activeView : undefined}
-            type="button"
-            onClick={() => setViewMode('grid')}
             aria-pressed={viewMode === 'grid'}
+            href={getAffiliateHref(query, page, 'grid')}
+            role="button"
             title="Grid"
           >
             <IconLayoutGrid size={18} stroke={1.8} aria-hidden="true" />
             <span>Grid</span>
-          </button>
-          <button
+          </a>
+          <a
             className={viewMode === 'list' ? styles.activeView : undefined}
-            type="button"
-            onClick={() => setViewMode('list')}
             aria-pressed={viewMode === 'list'}
+            href={getAffiliateHref(query, page, 'list')}
+            role="button"
             title="List"
           >
             <IconList size={18} stroke={1.8} aria-hidden="true" />
             <span>List</span>
-          </button>
+          </a>
         </div>
       </div>
 
       <div className={styles.resultBar}>
         <p>{countLabel}</p>
-        {query ? <a href="/affiliate">Reset pencarian</a> : null}
+        {query ? <a href={getAffiliateHref('', 1, viewMode)}>Reset pencarian</a> : null}
       </div>
 
       {products.length > 0 ? (
@@ -181,7 +177,11 @@ export default function AffiliateStorefront({
 
       {totalPages > 1 ? (
         <nav className={styles.pagination} aria-label="Pagination produk">
-          <a className={page <= 1 ? styles.disabledPage : undefined} href={getAffiliateHref(query, page - 1)} aria-disabled={page <= 1}>
+          <a
+            className={page <= 1 ? styles.disabledPage : undefined}
+            href={getAffiliateHref(query, page - 1, viewMode)}
+            aria-disabled={page <= 1}
+          >
             Prev
           </a>
           <div className={styles.pageNumbers}>
@@ -191,7 +191,7 @@ export default function AffiliateStorefront({
               return (
                 <a
                   className={pageNumber === page ? styles.currentPage : undefined}
-                  href={getAffiliateHref(query, pageNumber)}
+                  href={getAffiliateHref(query, pageNumber, viewMode)}
                   key={pageNumber}
                   aria-current={pageNumber === page ? 'page' : undefined}
                 >
@@ -202,7 +202,7 @@ export default function AffiliateStorefront({
           </div>
           <a
             className={page >= totalPages ? styles.disabledPage : undefined}
-            href={getAffiliateHref(query, page + 1)}
+            href={getAffiliateHref(query, page + 1, viewMode)}
             aria-disabled={page >= totalPages}
           >
             Next
