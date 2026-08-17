@@ -382,7 +382,6 @@
 
   .productList {
     gap: 0.58rem;
-    margin-inline: -0.68rem;
   }
 
   .productList .productCard {
@@ -454,7 +453,6 @@
 
   .productList {
     gap: 0.52rem;
-    margin-inline: -0.68rem;
   }
 
   .pagination {
