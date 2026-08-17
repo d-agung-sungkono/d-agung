@@ -17,6 +17,12 @@ export default function OffCodePage() {
       <section className={styles.section} aria-labelledby="off-code-title">
         <header className={styles.intro}>
           <p className={styles.kicker}>OFF CODE</p>
+          <nav className={styles.sectionNav} aria-label="OFF CODE sections">
+            <span className={styles.sectionNavActive}>Movement &amp; Memory</span>
+            <a className={styles.sectionNavLink} href="/affiliate">
+              Product Picks ↗
+            </a>
+          </nav>
           <h1 id="off-code-title" className={styles.title}>
             Movement & Memory.
           </h1>
@@ -26,11 +32,6 @@ export default function OffCodePage() {
           <p className={styles.intent}>
             Some are quiet. Some stay.
           </p>
-          <a className={styles.productPicksCard} href="/affiliate" aria-label="Explore Product Picks">
-            <span className={styles.productPicksEyebrow}>Curated detour</span>
-            <span className={styles.productPicksTitle}>Product Picks</span>
-            <span className={styles.productPicksArrow}>Explore →</span>
-          </a>
           <div className={styles.stats}>
             <button
               type="button"
