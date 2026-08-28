@@ -8,12 +8,7 @@ export default function SiteHomePage() {
     systems.find((system) => !system.featured) ??
     systems[0] ??
     null
-  const upcomingSystems = systems.filter(
-    (system) =>
-      system.slug !== featuredSystem?.slug &&
-      system.slug !== selectedSystem?.slug &&
-      (system.status === 'idea' || system.status === 'exploring' || system.status === 'in-progress')
-  )
+  const upcomingSystems = systems.filter((system) => system.slug === 'laviumhub')
 
   return (
     <Hero

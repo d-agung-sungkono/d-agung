@@ -16,25 +16,25 @@ type SystemDetailContent = {
 }
 
 const detailContentBySlug: Record<string, SystemDetailContent> = {
-  'umkm-kit': {
+  warungkit: {
     problem:
-      'There are two recurring friction points in UMKM operations. First, when too many features are introduced at once and paid from day one, teams often feel overwhelmed and end up paying for capabilities they do not actually use. Second, when businesses start from traditional or separated workflows, migration becomes heavy: catalog, orders, and reporting stay fragmented across chat, spreadsheets, and manual notes.',
+      'Independent businesses often have to stitch together a public website, contacts, orders, projects, invoices, files, and reminders across separate tools. Generic website builders solve the page, but not the business workflow behind it; operational tools solve the workflow, but rarely produce a public presence that feels ready to sell.',
     solution:
-      'WarungKit is designed to grow with the user. It starts from a focused core, then expands progressively through modules that can be adopted step by step, so teams can move from traditional workflows without operational shock or feature overload.',
+      'WarungKit is moving toward opinionated vertical products: a polished website in front, a business workspace behind it, and automation that removes repeated follow-up work. The immediate focus is a website engine that feels like filling in a business, not learning a builder, then adapting that engine for freelancers, creators, preorder sellers, affiliates, and other specific business types.',
     architecture:
-      'WarungKit is currently built as a monolithic fullstack application on Next.js, with Supabase as the primary database layer. This is the foundation: a stable base to move fast during launch, while keeping a clear path toward modular boundaries as usage deepens across different UMKM contexts.',
+      'The product direction is website first, management workflow second, automation third. Payments can stay external at the start through QRIS, bank transfer, or payment links, while AI is treated as a later advantage only when it improves a concrete workflow. The reusable core should emerge from repeated needs across real verticals.',
     impact:
-      'From this foundation, rollout will continue in practical increments: keep shipping useful modules, grow with real user behavior, and sustain long-term fit for daily UMKM operations.',
+      'The commercial direction is to sell clear outcomes from day one instead of staying in endless validation mode: publish the offer, show the price, collect waitlist or email demand while products are prepared, then refine from real customer usage and feedback.',
   },
   wriday: {
     problem:
-      'Writing in English can feel heavier than it should, especially for learners preparing for IELTS and academic writing formats. The ideas are there, but drafting speed, structure anxiety, and unclear feedback often turn practice into friction.',
+      'Wriday is still in a confusing exploration stage. The writing-practice space already has many products that help with prompts, rewriting, feedback, and learning loops, so the main question is whether this idea has a specific angle that is actually different enough.',
     solution:
-      'Wriday starts as a mini SaaS companion to make writing sessions feel lighter: focused prompts, rewrite support, and short iteration loops that keep momentum without making practice feel like a chore.',
+      'The current direction is not fixed yet. It may become a small writing companion, but the next step is to understand what should make it uniquely useful instead of becoming another generic writing tool.',
     impact:
-      'Still in idea stage, but the direction is clear: a practical writing layer people can return to often, where consistency beats pressure.',
+      'Still in idea stage. The value is intentionally being questioned first, especially around uniqueness, before deciding whether it deserves to become a real product.',
     architecture:
-      'Built as a compact surface first, then expanded into modular writing utilities as real usage patterns emerge.',
+      'No firm architecture yet. The technical shape should follow the validated product angle, not the other way around.',
   },
   'fasih-form-gear': {
     problem:
@@ -66,13 +66,13 @@ const detailContentBySlug: Record<string, SystemDetailContent> = {
   },
   laviumhub: {
     problem:
-      'Small laundry businesses often rely on manual updates for customer information, machine availability, and delivery estimates. This creates slow response time and inconsistent service communication.',
+      'LaviumHub is no longer just a small laundry presence that needs a simple information page. As the business becomes more serious and expands into multiple services, the brand needs a stronger public layer that can make customers understand the offer, trust the service, and see the business as more established.',
     solution:
-      'LaviumHub provides a practical UMKM landing page where customers can see available service types, check whether machines are currently in use, and estimate delivery pricing in one flow.',
+      'The website is positioned as an important branding asset: a polished home for the business, its service lines, operating information, and customer-facing touchpoints. It should make LaviumHub feel clearer, more credible, and ready to grow beyond a single laundry workflow.',
     impact:
-      'The platform gives the owner team a clearer operational touchpoint with customers, reducing repetitive manual explanations and improving service transparency.',
+      'For the business, the site becomes a serious trust signal. It supports scale by giving every service a clearer place to be explained, making customer communication more consistent, and helping the brand look as mature as the direction it is moving toward.',
     architecture:
-      'A focused, lightweight web experience designed around core operational widgets: service catalog, machine occupancy status, and delivery cost estimator.',
+      'A lightweight web foundation that can keep growing with the business: brand pages, service sections, customer contact flows, and practical operational widgets can be expanded without losing the core brand presentation.',
   },
 }
 
