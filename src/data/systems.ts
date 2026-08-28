@@ -5,7 +5,7 @@ export const systems: SystemItem[] = [
     slug: 'warungkit',
     title: 'WarungKit',
     summary:
-      'A practical operating layer for UMKM: catalog, orders, and daily flow in one place.',
+      'A vertical business engine that helps independent businesses publish a polished website, manage the work behind it, and grow through simple automation.',
     status: 'running',
     year: '2026',
     featured: true,
@@ -16,7 +16,7 @@ export const systems: SystemItem[] = [
     slug: 'wriday',
     title: 'Wriday',
     summary:
-      'Simple daily quiz that feels like a game, but quietly builds English writing consistency through bite-size practice and direct feedback.',
+      'An early writing-practice idea that is still being questioned because many similar tools already exist, and the unique angle is not clear yet.',
     status: 'exploring',
     year: '2026',
   },
@@ -40,7 +40,7 @@ export const systems: SystemItem[] = [
     slug: 'laviumhub',
     title: 'LaviumHub',
     summary:
-      'UMKM laundry landing page with service catalog, machine usage monitoring, and delivery cost checking.',
+      'Brand-first website for a laundry business that is becoming more serious, expanding into multiple services, and needs a stronger public presence.',
     status: 'running',
     year: '2025',
     productUrl: 'https://laviumhub.com',
