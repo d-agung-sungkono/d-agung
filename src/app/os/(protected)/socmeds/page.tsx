@@ -25,7 +25,6 @@ export default async function OsSocmedsPage({ searchParams }: OsSocmedsPageProps
       <>
         <section className={styles.pageHeader}>
           <div>
-            <p className={styles.breadcrumb}>Agung OS / Social Media</p>
             <h2 className={styles.pageTitle}>Social Media</h2>
             <p className={styles.pageDescription}>
               Platform accounts used to map content, publishing targets, and future embeds.

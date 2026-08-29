@@ -148,7 +148,6 @@ export default function ThoughtsManager({ thoughts }: ThoughtsManagerProps) {
     <>
       <Box component="section" className={styles.pageHeader}>
         <Box>
-          <Text className={styles.breadcrumb}>Agung OS / Thoughts</Text>
           <Text component="h2" className={styles.pageTitle}>Thoughts</Text>
           <Text className={styles.pageDescription}>
             A capture inbox for product ideas, operating notes, and content angles before they become tasks.
@@ -215,7 +214,7 @@ export default function ThoughtsManager({ thoughts }: ThoughtsManagerProps) {
 
               <Group gap="xs" className={styles.listActionGroup}>
                 <Tooltip label="Edit">
-                  <ActionIcon aria-label="Edit thought" className={styles.accentIconAction} onClick={() => openEditModal(thought)} variant="default">
+                  <ActionIcon aria-label="Edit thought" className={styles.editIconAction} onClick={() => openEditModal(thought)} variant="default">
                     <IconEdit size={18} stroke={1.8} />
                   </ActionIcon>
                 </Tooltip>
@@ -225,7 +224,7 @@ export default function ThoughtsManager({ thoughts }: ThoughtsManagerProps) {
                   </ActionIcon>
                 </Tooltip>
                 <Tooltip label="Delete">
-                  <ActionIcon aria-label="Delete thought" className={styles.dangerIconAction} onClick={() => deleteThought(thought.id)} variant="light">
+                  <ActionIcon aria-label="Delete thought" className={styles.dangerIconAction} onClick={() => deleteThought(thought.id)} variant="default">
                     <IconTrash size={18} stroke={1.8} />
                   </ActionIcon>
                 </Tooltip>

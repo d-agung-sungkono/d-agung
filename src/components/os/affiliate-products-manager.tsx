@@ -223,7 +223,6 @@ export default function AffiliateProductsManager({ products }: AffiliateProducts
     <>
       <section className={styles.pageHeader}>
         <div>
-          <p className={styles.breadcrumb}>Agung OS / Affiliate</p>
           <h2 className={styles.pageTitle}>Affiliate</h2>
           <p className={styles.pageDescription}>CMS untuk produk yang tampil di halaman publik /affiliate.</p>
         </div>
@@ -322,39 +321,41 @@ export default function AffiliateProductsManager({ products }: AffiliateProducts
                       <Tooltip label="Open product">
                         <ActionIcon
                           aria-label={`Open ${product.code}`}
+                          className={styles.accentIconAction}
                           component="a"
                           href={product.destinationUrl}
                           rel="noopener noreferrer"
                           target="_blank"
-                          variant="subtle"
+                          variant="default"
                         >
-                          <IconExternalLink size={17} />
+                          <IconExternalLink size={18} stroke={1.8} />
                         </ActionIcon>
                       </Tooltip>
                       <Tooltip label="Edit">
-                        <ActionIcon aria-label={`Edit ${product.code}`} onClick={() => openEditModal(product)} variant="subtle">
-                          <IconEdit size={17} />
+                        <ActionIcon aria-label={`Edit ${product.code}`} className={styles.editIconAction} onClick={() => openEditModal(product)} variant="default">
+                          <IconEdit size={18} stroke={1.8} />
                         </ActionIcon>
                       </Tooltip>
                       <Tooltip label={product.isActive ? 'Archive' : 'Restore'}>
                         <ActionIcon
                           aria-label={product.isActive ? `Archive ${product.code}` : `Restore ${product.code}`}
+                          className={styles.neutralIconAction}
                           disabled={isPending}
                           onClick={() => setProductActive(product, !product.isActive)}
-                          variant="subtle"
+                          variant="default"
                         >
-                          {product.isActive ? <IconArchive size={17} /> : <IconRefresh size={17} />}
+                          {product.isActive ? <IconArchive size={18} stroke={1.8} /> : <IconRefresh size={18} stroke={1.8} />}
                         </ActionIcon>
                       </Tooltip>
                       <Tooltip label="Delete">
                         <ActionIcon
                           aria-label={`Delete ${product.code}`}
-                          color="red"
+                          className={styles.dangerIconAction}
                           disabled={isPending}
                           onClick={() => deleteProduct(product)}
-                          variant="subtle"
+                          variant="default"
                         >
-                          <IconTrash size={17} />
+                          <IconTrash size={18} stroke={1.8} />
                         </ActionIcon>
                       </Tooltip>
                     </Group>
@@ -446,13 +447,13 @@ export default function AffiliateProductsManager({ products }: AffiliateProducts
                   </Button>
                   {modalMode === 'edit' && selectedProduct.hasImage ? (
                     <Button
-                      color="red"
+                      className={styles.dangerAction}
                       onClick={() => {
                         setSelectedImageFileName('')
                         setRemoveImage(true)
                       }}
                       type="button"
-                      variant="light"
+                      variant="default"
                     >
                       Hapus image
                     </Button>
@@ -497,12 +498,12 @@ export default function AffiliateProductsManager({ products }: AffiliateProducts
                       />
                       <ActionIcon
                         aria-label={`Remove content link ${index + 1}`}
-                        color="red"
+                        className={styles.dangerIconAction}
                         onClick={() => removeContentLinkDraft(index)}
                         type="button"
-                        variant="subtle"
+                        variant="default"
                       >
-                        <IconTrash size={17} />
+                        <IconTrash size={18} stroke={1.8} />
                       </ActionIcon>
                     </Group>
                   ))}

@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react'
 
 import styles from './os-shell.module.css'
 
-const formatter = new Intl.DateTimeFormat('id-ID', {
+const formatter = new Intl.DateTimeFormat('en-US', {
   dateStyle: 'full',
   timeStyle: 'medium',
   timeZone: 'Asia/Jakarta',

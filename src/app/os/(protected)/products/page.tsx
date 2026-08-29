@@ -22,7 +22,6 @@ export default async function OsProductsPage() {
     <>
       <section className={styles.pageHeader}>
         <div>
-          <p className={styles.breadcrumb}>Agung OS / Products</p>
           <h2 className={styles.pageTitle}>Products</h2>
           <p className={styles.pageDescription}>
             Product watchlist for commerce experiments, price changes, and stock signals.

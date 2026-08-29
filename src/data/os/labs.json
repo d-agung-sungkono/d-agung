@@ -1,0 +1,20 @@
+[
+  {
+    "id": "lab-quick-ui-fixes",
+    "title": "Quick UI fixes",
+    "body": "Small interface improvements that can be handled without opening a larger product cycle.",
+    "category": "Interface",
+    "priority": "medium",
+    "status": "open",
+    "createdAt": "2026-08-29T09:00:00+07:00"
+  },
+  {
+    "id": "lab-content-tools",
+    "title": "Content helper tools",
+    "body": "Small helpers for captions, scheduling checks, and content review flows.",
+    "category": "Content",
+    "priority": "low",
+    "status": "idea",
+    "createdAt": "2026-08-29T09:10:00+07:00"
+  }
+]

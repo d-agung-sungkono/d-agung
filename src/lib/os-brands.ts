@@ -5,10 +5,15 @@ import { getOsUserId } from '@/lib/os-settings'
 import type { BrandDetail, BrandSocialAccount, BrandStatus } from '@/lib/os-brands-schema'
 
 type BrandListRow = {
+  brand_color: string
   connected_social_accounts: string | number
   description: string | null
+  direction: string | null
+  has_image: boolean
   id: string
+  image_uploaded_at: Date | null
   image_url: string | null
+  next_development: string | null
   status: BrandStatus
   title: string
   updated_at: Date
@@ -16,10 +21,13 @@ type BrandListRow = {
 }
 
 type BrandDetailRow = {
+  brand_color: string
   created_at: Date
   description: string | null
   direction: string | null
+  has_image: boolean
   id: string
+  image_uploaded_at: Date | null
   image_url: string | null
   next_development: string | null
   status: BrandStatus
@@ -58,6 +66,15 @@ function mapConnectionRow(row: BrandConnectionRow): BrandSocialAccount {
   }
 }
 
+function getVersionedImageUrl(imageUrl: string | null, uploadedAt: Date | null, updatedAt: Date) {
+  if (!imageUrl) {
+    return null
+  }
+
+  const imageVersion = uploadedAt ?? updatedAt
+  return `${imageUrl}?v=${encodeURIComponent(imageVersion.toISOString())}`
+}
+
 export async function getBrandsData() {
   const userId = await getOsUserId()
   const [brandsResult, connectionOptionsResult] = await Promise.all([
@@ -66,10 +83,15 @@ export async function getBrandsData() {
         SELECT
           b.id,
           b.title,
+          b.brand_color,
           b.description,
           b.image_url,
+          b.image_blob IS NOT NULL AS has_image,
+          b.image_uploaded_at,
           b.website_url,
           b.status,
+          b.direction,
+          b.next_development,
           b.updated_at,
           COUNT(rel.id) AS connected_social_accounts
         FROM os_brands b
@@ -108,9 +130,13 @@ export async function getBrandsData() {
   return {
     brands: brandsResult.rows.map((row) => ({
       connectedSocialAccounts: toNumber(row.connected_social_accounts),
+      brandColor: row.brand_color,
       description: row.description,
+      direction: row.direction,
+      hasImage: row.has_image,
       id: row.id,
-      imageUrl: row.image_url,
+      imageUrl: getVersionedImageUrl(row.image_url, row.image_uploaded_at, row.updated_at),
+      nextDevelopment: row.next_development,
       status: row.status,
       title: row.title,
       updatedAt: row.updated_at.toISOString(),
@@ -127,8 +153,11 @@ export async function getBrandDetail(brandId: string) {
       SELECT
         id,
         title,
+        brand_color,
         description,
         image_url,
+        image_blob IS NOT NULL AS has_image,
+        image_uploaded_at,
         website_url,
         status,
         direction,
@@ -214,12 +243,14 @@ export async function getBrandDetail(brandId: string) {
     allConnectionOptions: allAccountsResult.rows.map(mapConnectionRow),
     brand: {
       connections: connectionsResult.rows.map(mapConnectionRow),
+      brandColor: brand.brand_color,
       contentActivity,
       createdAt: brand.created_at.toISOString(),
       description: brand.description,
       direction: brand.direction,
+      hasImage: brand.has_image,
       id: brand.id,
-      imageUrl: brand.image_url,
+      imageUrl: getVersionedImageUrl(brand.image_url, brand.image_uploaded_at, brand.updated_at),
       nextDevelopment: brand.next_development,
       status: brand.status,
       title: brand.title,
