@@ -133,7 +133,9 @@ export default function Hero({
 
       addSlide('Current Build', featuredSystem, 'currentBuild')
       addSlide('Selected System', selectedSystem, 'selected')
-      upcomingSystems.forEach((system) => addSlide('Upcoming', system, 'upcoming'))
+      upcomingSystems.forEach((system) =>
+        addSlide(system.status === 'running' ? 'Live Business' : 'Upcoming', system, 'upcoming')
+      )
       return results
     },
     [featuredSystem, selectedSystem, upcomingSystems]

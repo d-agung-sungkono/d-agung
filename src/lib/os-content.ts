@@ -12,6 +12,7 @@ export type ContentProfileOption = {
 }
 
 export type ContentPost = {
+  brandColor: string | null
   id: string
   title: string
   userSocmedId: string | null
@@ -27,6 +28,7 @@ export type ContentPost = {
 }
 
 export type ContentTarget = {
+  brandColor: string | null
   id: string
   name: string
   userSocmedId: string
@@ -53,6 +55,7 @@ type ProfileRow = {
 }
 
 type ContentPostRow = {
+  brand_color: string | null
   id: string
   title: string
   user_socmed_id: string | null
@@ -68,6 +71,7 @@ type ContentPostRow = {
 }
 
 type ContentTargetRow = {
+  brand_color: string | null
   id: string
   name: string
   user_socmed_id: string
@@ -140,6 +144,7 @@ export async function getContentData() {
         SELECT
           cp.id,
           cp.title,
+          brand.brand_color,
           cp.user_socmed_id,
           s.name AS platform,
           us.account,
@@ -154,6 +159,16 @@ export async function getContentData() {
         LEFT JOIN user_socmeds us ON us.id = cp.user_socmed_id
         LEFT JOIN socmeds s ON s.id = us.socmed_id
         LEFT JOIN account_groups ag ON ag.id = us.account_group_id
+        LEFT JOIN LATERAL (
+          SELECT b.brand_color
+          FROM os_brand_social_media_accounts rel
+          INNER JOIN os_brands b ON b.id = rel.brand_id
+          WHERE rel.user_socmed_id = us.id
+            AND b.user_id = cp.user_id
+            AND b.status = 'ACTIVE'
+          ORDER BY b.title ASC
+          LIMIT 1
+        ) brand ON true
         WHERE cp.user_id = $1
         ORDER BY cp.scheduled_at DESC, cp.created_at DESC
       `,
@@ -164,6 +179,7 @@ export async function getContentData() {
         SELECT
           ct.id,
           ct.name,
+          brand.brand_color,
           ct.user_socmed_id,
           s.name AS platform,
           us.account,
@@ -179,6 +195,16 @@ export async function getContentData() {
         INNER JOIN user_socmeds us ON us.id = ct.user_socmed_id
         INNER JOIN socmeds s ON s.id = us.socmed_id
         LEFT JOIN account_groups ag ON ag.id = us.account_group_id
+        LEFT JOIN LATERAL (
+          SELECT b.brand_color
+          FROM os_brand_social_media_accounts rel
+          INNER JOIN os_brands b ON b.id = rel.brand_id
+          WHERE rel.user_socmed_id = us.id
+            AND b.user_id = ct.user_id
+            AND b.status = 'ACTIVE'
+          ORDER BY b.title ASC
+          LIMIT 1
+        ) brand ON true
         WHERE ct.user_id = $1
         ORDER BY ct.status, ct.start_date, ct.name
       `,
@@ -188,6 +214,7 @@ export async function getContentData() {
 
   const posts = postsResult.rows.map((row) => ({
     account: row.account ?? '-',
+    brandColor: row.brand_color,
     groupName: row.group_name,
     id: row.id,
     label: row.label ?? 'Unmapped Account',
@@ -225,6 +252,7 @@ export async function getContentData() {
     targets: targetsResult.rows.map((row) => {
       const target = {
         account: row.account,
+        brandColor: row.brand_color,
         cadenceDays: row.cadence_days,
         groupName: row.group_name,
         id: row.id,

@@ -3,10 +3,14 @@ export const brandStatuses = ['ACTIVE', 'PAUSED', 'ARCHIVED'] as const
 export type BrandStatus = (typeof brandStatuses)[number]
 
 export type BrandListItem = {
+  brandColor: string
   connectedSocialAccounts: number
   description: string | null
+  direction: string | null
+  hasImage: boolean
   id: string
   imageUrl: string | null
+  nextDevelopment: string | null
   status: BrandStatus
   title: string
   updatedAt: string
@@ -25,6 +29,7 @@ export type BrandConnectionOption = {
 export type BrandSocialAccount = BrandConnectionOption
 
 export type BrandDetail = {
+  brandColor: string
   connections: BrandSocialAccount[]
   contentActivity: {
     planned: number
@@ -34,6 +39,7 @@ export type BrandDetail = {
   createdAt: string
   description: string | null
   direction: string | null
+  hasImage: boolean
   id: string
   imageUrl: string | null
   nextDevelopment: string | null

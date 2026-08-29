@@ -21,7 +21,6 @@ export default async function OsBrandsPage() {
       <>
         <section className={styles.pageHeader}>
           <div>
-            <p className={styles.breadcrumb}>Agung OS / Brands</p>
             <h2 className={styles.pageTitle}>Brands</h2>
             <p className={styles.pageDescription}>Dokumentasi hal-hal yang sedang saya handle.</p>
           </div>

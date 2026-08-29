@@ -453,7 +453,7 @@ export default function ContentList({ content, profiles, targets }: ContentListP
           <Text className={styles.muted}>Manage drafts, schedules, links, and published posts from DB.</Text>
         </Box>
         <Group gap="xs" className={styles.pageActions}>
-          <Button className={styles.accentAction} leftSection={<IconPlus size={18} stroke={1.8} />} loading={isPending} onClick={openCreateScheduleModal} variant="default">
+          <Button className={styles.primaryAction} leftSection={<IconPlus size={18} stroke={1.8} />} loading={isPending} onClick={openCreateScheduleModal}>
             Add Schedule
           </Button>
           <Button className={styles.primaryAction} leftSection={<IconPlus size={18} stroke={1.8} />} loading={isPending} onClick={openCreateModal}>
@@ -479,13 +479,13 @@ export default function ContentList({ content, profiles, targets }: ContentListP
               </Box>
               <Group gap={4} wrap="nowrap">
                 <Tooltip label="Edit schedule">
-                  <ActionIcon aria-label="Edit schedule" className={styles.accentIconAction} disabled={isPending} onClick={() => openEditScheduleModal(target)} variant="default">
-                    <IconEdit size={17} stroke={1.8} />
+                  <ActionIcon aria-label="Edit schedule" className={styles.editIconAction} disabled={isPending} onClick={() => openEditScheduleModal(target)} variant="default">
+                    <IconEdit size={18} stroke={1.8} />
                   </ActionIcon>
                 </Tooltip>
                 <Tooltip label="Delete schedule">
-                  <ActionIcon aria-label="Delete schedule" className={styles.dangerIconAction} disabled={isPending} onClick={() => removeSchedule(target)} variant="light">
-                    <IconTrash size={17} stroke={1.8} />
+                  <ActionIcon aria-label="Delete schedule" className={styles.dangerIconAction} disabled={isPending} onClick={() => removeSchedule(target)} variant="default">
+                    <IconTrash size={18} stroke={1.8} />
                   </ActionIcon>
                 </Tooltip>
               </Group>
@@ -576,12 +576,12 @@ export default function ContentList({ content, profiles, targets }: ContentListP
                   </Tooltip>
                 ) : null}
                 <Tooltip label="Edit">
-                  <ActionIcon aria-label="Edit content" className={styles.accentIconAction} disabled={isPending} onClick={() => openEditModal(item)} variant="default">
+                  <ActionIcon aria-label="Edit content" className={styles.editIconAction} disabled={isPending} onClick={() => openEditModal(item)} variant="default">
                     <IconEdit size={18} stroke={1.8} />
                   </ActionIcon>
                 </Tooltip>
                 <Tooltip label="Delete">
-                  <ActionIcon aria-label="Delete content" className={styles.dangerIconAction} disabled={isPending} onClick={() => removeContent(item)} variant="light">
+                  <ActionIcon aria-label="Delete content" className={styles.dangerIconAction} disabled={isPending} onClick={() => removeContent(item)} variant="default">
                     <IconTrash size={18} stroke={1.8} />
                   </ActionIcon>
                 </Tooltip>

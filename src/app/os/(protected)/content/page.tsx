@@ -19,7 +19,6 @@ export default async function OsContentPage() {
     <>
       <section className={styles.pageHeader}>
         <div>
-          <p className={styles.breadcrumb}>Agung OS / Contents</p>
           <h2 className={styles.pageTitle}>Contents</h2>
           <p className={styles.pageDescription}>
             Drafts, scheduled posts, and publishing assets for personal brand and commerce channels.
