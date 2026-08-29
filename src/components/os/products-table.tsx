@@ -678,10 +678,9 @@ export default function ProductsTable({ products, snapshots }: ProductsTableProp
                                   aria-label={`Copy SKU ${product.sku}`}
                                   className={styles.neutralIconAction}
                                   onClick={() => copyText(`sku-${product.id}`, product.sku)}
-                                  size="xs"
                                   variant="default"
                                 >
-                                  <IconCopy size={13} stroke={1.9} />
+                                  <IconCopy size={18} stroke={1.8} />
                                 </ActionIcon>
                               </Tooltip>
                             </Group>
@@ -773,7 +772,7 @@ export default function ProductsTable({ products, snapshots }: ProductsTableProp
                           </Button>
                         </Tooltip>
                         <Button
-                          className={styles.accentAction}
+                          className={styles.editAction}
                           leftSection={<IconEdit size={18} stroke={1.8} />}
                           onClick={() => openUpdateProductModal(product)}
                           variant="default"
@@ -1014,8 +1013,8 @@ export default function ProductsTable({ products, snapshots }: ProductsTableProp
                             <Box>
                               <Text className={styles.productSku}>Link belum ada.</Text>
                               <Button
-                                className={styles.accentAction}
-                                leftSection={<IconEdit size={16} stroke={1.8} />}
+                                className={styles.editAction}
+                                leftSection={<IconEdit size={18} stroke={1.8} />}
                                 mt="xs"
                                 onClick={() => openUpdateProductModal(product)}
                                 size="xs"
@@ -1190,7 +1189,7 @@ function StackLikeProductModal({
               </Box>
               <Button
                 className={styles.neutralAction}
-                leftSection={<IconCopy size={17} stroke={1.8} />}
+                leftSection={<IconCopy size={18} stroke={1.8} />}
                 onClick={() => copyText('shopee-copy', scrapedProduct.shopeeCopy)}
                 size="xs"
                 variant="default"

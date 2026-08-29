@@ -21,7 +21,6 @@ export default async function OsAffiliatePage() {
       <>
         <section className={styles.pageHeader}>
           <div>
-            <p className={styles.breadcrumb}>Agung OS / Affiliate</p>
             <h2 className={styles.pageTitle}>Affiliate</h2>
             <p className={styles.pageDescription}>CMS untuk produk yang tampil di halaman publik /affiliate.</p>
           </div>

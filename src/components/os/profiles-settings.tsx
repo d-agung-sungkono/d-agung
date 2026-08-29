@@ -201,7 +201,6 @@ export default function ProfilesSettings({ brands, initialBrandId, socmeds, user
     <>
       <Box component="section" className={styles.pageHeader}>
         <Box>
-          <Text className={styles.breadcrumb}>Agung OS / Social Medias</Text>
           <Text component="h2" className={styles.pageTitle}>Social Media Registry</Text>
           <Text className={styles.pageDescription}>
             Registry untuk account social media yang sudah jelas konteks brand-nya. Entry point utamanya tetap dari Brand.
@@ -273,77 +272,73 @@ export default function ProfilesSettings({ brands, initialBrandId, socmeds, user
             </Button>
           </Card>
         ) : (
-          <Stack gap="xs">
+          <SimpleGrid cols={{ base: 1, md: 2, xl: 3 }} spacing="sm">
             {visibleSocmeds.map((profile) => {
-            const PlatformIcon = platformIcons[profile.platform]
+              const PlatformIcon = platformIcons[profile.platform]
 
-            return (
-              <Card className={styles.profileItem} key={profile.id} padding="sm" radius="sm" withBorder>
-                <Box className={styles.profileBrand} data-platform={profile.platform}>
-                  {PlatformIcon ? <PlatformIcon size={28} stroke={1.7} /> : profile.platform.slice(0, 2)}
-                </Box>
-                <Box className={styles.profileBody}>
-                  <Group justify="space-between" align="flex-start" gap="sm">
-                    <Box>
-                      <Group gap="xs" wrap="nowrap" className={styles.profileTitleRow}>
-                        <Text className={styles.compactTitle}>{profile.label}</Text>
-                        <Badge className={styles.badge} data-status={profile.status} variant="light">
-                          {profile.status}
-                        </Badge>
-                      </Group>
-                      <Text className={styles.muted}>
-                        {profile.platform} · @{profile.account}
-                      </Text>
-                      <Text className={styles.profileMeta}>
-                        Email: {profile.linkedEmail ?? '-'} · WA: {profile.linkedWhatsapp ?? '-'}
-                      </Text>
-                      <Group gap={6} mt={8}>
-                        {profile.brandNames.length > 0 ? (
-                          profile.brandNames.map((brandName) => (
-                            <Badge className={styles.badge} key={brandName} variant="light">
-                              {brandName}
-                            </Badge>
-                          ))
-                        ) : (
-                          <Badge className={styles.badge} data-status="PAUSED" variant="light">
-                            No Brand
-                          </Badge>
-                        )}
-                      </Group>
-                    </Box>
-                    <Group gap="xs" wrap="nowrap" className={styles.listActionGroup}>
-                      <Tooltip label={copyState === profile.id ? 'Copied' : 'Copy URL'}>
-                        <ActionIcon
-                          aria-label={copyState === profile.id ? 'Copied profile URL' : 'Copy profile URL'}
-                          className={styles.neutralIconAction}
-                          onClick={() => copyProfileUrl(profile)}
-                          variant="default"
-                        >
-                          {copyState === profile.id ? <IconCheck size={18} stroke={1.8} /> : <IconCopy size={18} stroke={1.8} />}
-                        </ActionIcon>
-                      </Tooltip>
-                      <Tooltip label="Edit">
-                        <ActionIcon aria-label="Edit social account" className={styles.accentIconAction} disabled={isPending} onClick={() => openEditModal(profile)} variant="default">
-                          <IconEdit size={18} stroke={1.8} />
-                        </ActionIcon>
-                      </Tooltip>
-                      <Tooltip label="Delete">
-                        <ActionIcon aria-label="Delete social account" className={styles.dangerIconAction} disabled={isPending} onClick={() => removeSocmed(profile)} variant="light">
-                          <IconTrash size={18} stroke={1.8} />
-                        </ActionIcon>
-                      </Tooltip>
-                      <Tooltip label="Open">
-                        <ActionIcon aria-label="Open social profile" className={styles.accentIconAction} component="a" href={profile.url} rel="noreferrer noopener" target="_blank" variant="default">
-                          <IconExternalLink size={18} stroke={1.8} />
-                        </ActionIcon>
-                      </Tooltip>
+              return (
+                <Card className={styles.profileItem} key={profile.id} padding="sm" radius="sm" withBorder>
+                  <Box className={styles.profileBrand} data-platform={profile.platform}>
+                    {PlatformIcon ? <PlatformIcon size={28} stroke={1.7} /> : profile.platform.slice(0, 2)}
+                  </Box>
+                  <Box className={styles.profileBody}>
+                    <Group gap="xs" wrap="nowrap" className={styles.profileTitleRow}>
+                      <Text className={styles.compactTitle}>{profile.label}</Text>
+                      <Badge className={styles.badge} data-status={profile.status} variant="light">
+                        {profile.status}
+                      </Badge>
                     </Group>
+                    <Text className={styles.muted}>
+                      {profile.platform} · @{profile.account}
+                    </Text>
+                    <Text className={styles.profileMeta}>
+                      Email: {profile.linkedEmail ?? '-'} · WA: {profile.linkedWhatsapp ?? '-'}
+                    </Text>
+                    <Group gap={6} mt={8}>
+                      {profile.brandNames.length > 0 ? (
+                        profile.brandNames.map((brandName) => (
+                          <Badge className={styles.badge} key={brandName} variant="light">
+                            {brandName}
+                          </Badge>
+                        ))
+                      ) : (
+                        <Badge className={styles.badge} data-status="PAUSED" variant="light">
+                          No Brand
+                        </Badge>
+                      )}
+                    </Group>
+                  </Box>
+                  <Group gap="xs" wrap="nowrap" className={styles.listActionGroup}>
+                    <Tooltip label={copyState === profile.id ? 'Copied' : 'Copy URL'}>
+                      <ActionIcon
+                        aria-label={copyState === profile.id ? 'Copied profile URL' : 'Copy profile URL'}
+                        className={styles.neutralIconAction}
+                        onClick={() => copyProfileUrl(profile)}
+                        variant="default"
+                      >
+                        {copyState === profile.id ? <IconCheck size={18} stroke={1.8} /> : <IconCopy size={18} stroke={1.8} />}
+                      </ActionIcon>
+                    </Tooltip>
+                    <Tooltip label="Edit">
+                      <ActionIcon aria-label="Edit social account" className={styles.editIconAction} disabled={isPending} onClick={() => openEditModal(profile)} variant="default">
+                        <IconEdit size={18} stroke={1.8} />
+                      </ActionIcon>
+                    </Tooltip>
+                    <Tooltip label="Delete">
+                      <ActionIcon aria-label="Delete social account" className={styles.dangerIconAction} disabled={isPending} onClick={() => removeSocmed(profile)} variant="default">
+                        <IconTrash size={18} stroke={1.8} />
+                      </ActionIcon>
+                    </Tooltip>
+                    <Tooltip label="Open">
+                      <ActionIcon aria-label="Open social profile" className={styles.accentIconAction} component="a" href={profile.url} rel="noreferrer noopener" target="_blank" variant="default">
+                        <IconExternalLink size={18} stroke={1.8} />
+                      </ActionIcon>
+                    </Tooltip>
                   </Group>
-                </Box>
-              </Card>
-            )
-          })}
-          </Stack>
+                </Card>
+              )
+            })}
+          </SimpleGrid>
         )}
 
         {brands.length > 0 && visibleSocmeds.length === 0 ? (
@@ -390,20 +385,29 @@ export default function ProfilesSettings({ brands, initialBrandId, socmeds, user
           <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="sm">
             <TextInput
               label="Account"
-              onChange={(event) => setForm((current) => ({ ...current, account: event.currentTarget.value }))}
+              onChange={(event) => {
+                const { value } = event.currentTarget
+                setForm((current) => ({ ...current, account: value }))
+              }}
               placeholder="dagungsungkono"
               value={form.account}
             />
             <TextInput
               label="Label"
-              onChange={(event) => setForm((current) => ({ ...current, label: event.currentTarget.value }))}
+              onChange={(event) => {
+                const { value } = event.currentTarget
+                setForm((current) => ({ ...current, label: value }))
+              }}
               placeholder="D.Agung"
               value={form.label}
             />
           </SimpleGrid>
           <TextInput
             label="Profile URL"
-            onChange={(event) => setForm((current) => ({ ...current, url: event.currentTarget.value }))}
+            onChange={(event) => {
+              const { value } = event.currentTarget
+              setForm((current) => ({ ...current, url: value }))
+            }}
             placeholder="https://..."
             type="url"
             value={form.url}
@@ -411,14 +415,20 @@ export default function ProfilesSettings({ brands, initialBrandId, socmeds, user
           <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="sm">
             <TextInput
               label="Linked Email"
-              onChange={(event) => setForm((current) => ({ ...current, linkedEmail: event.currentTarget.value }))}
+              onChange={(event) => {
+                const { value } = event.currentTarget
+                setForm((current) => ({ ...current, linkedEmail: value }))
+              }}
               placeholder="Optional"
               type="email"
               value={form.linkedEmail}
             />
             <TextInput
               label="Linked WhatsApp"
-              onChange={(event) => setForm((current) => ({ ...current, linkedWhatsapp: event.currentTarget.value }))}
+              onChange={(event) => {
+                const { value } = event.currentTarget
+                setForm((current) => ({ ...current, linkedWhatsapp: value }))
+              }}
               placeholder="Optional"
               value={form.linkedWhatsapp}
             />

@@ -38,6 +38,10 @@ function buildScheduleEvents(targets: Awaited<ReturnType<typeof getContentData>>
           start,
           status: index === 0 ? 'planned' : 'draft',
           source: `${target.platform} Target`,
+          account: target.account,
+          brandColor: target.brandColor,
+          label: target.label,
+          notes: target.notes,
           overdue,
         }
       })
@@ -68,6 +72,11 @@ export default async function OsTodayPage() {
       start: item.scheduledAt,
       status: item.status,
       source: item.platform,
+      account: item.account,
+      brandColor: item.brandColor,
+      label: item.label,
+      notes: item.notes,
+      url: item.url,
     })),
   ]
 
@@ -75,13 +84,12 @@ export default async function OsTodayPage() {
     <>
       <section className={styles.pageHeader}>
         <div>
-          <p className={styles.breadcrumb}>Agung OS / Today</p>
           <h2 className={styles.pageTitle}>Today</h2>
           <p className={styles.pageDescription}>
             A calendar view for the daily operating plan, publishing queue, and review blocks.
           </p>
         </div>
-        <Button leftSection={<IconPlus size={18} stroke={1.8} />} type="button">
+        <Button className={styles.primaryAction} leftSection={<IconPlus size={18} stroke={1.8} />} type="button">
           Add Activity
         </Button>
       </section>

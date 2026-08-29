@@ -4,13 +4,17 @@ import { redirect } from 'next/navigation'
 
 import { clearOsSession, createOsSession, validateOsCredentials } from '@/lib/os-auth'
 
-export async function loginToOs(formData: FormData) {
+type LoginState = {
+  error: 'invalid' | null
+}
+
+export async function loginToOs(_state: LoginState, formData: FormData): Promise<LoginState> {
   const username = String(formData.get('username') ?? '')
   const password = String(formData.get('password') ?? '')
   const user = await validateOsCredentials(username, password)
 
   if (!user) {
-    redirect('/os/login?error=invalid')
+    return { error: 'invalid' }
   }
 
   await createOsSession(user)

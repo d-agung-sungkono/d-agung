@@ -6,6 +6,10 @@ import { getDbPool } from '@/lib/db'
 import { brandStatuses, type BrandStatus } from '@/lib/os-brands-schema'
 import { getOsUserId } from '@/lib/os-settings'
 
+const allowedImageTypes = new Set(['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'image/svg+xml'])
+const maxImageSize = 5 * 1024 * 1024
+const defaultBrandColor = '#2563eb'
+
 function normalizeNullableValue(value: FormDataEntryValue | null) {
   const normalized = String(value ?? '').trim()
   return normalized || null
@@ -19,6 +23,16 @@ function assertValidStatus(value: string): asserts value is BrandStatus {
   if (!brandStatuses.includes(value as BrandStatus)) {
     throw new Error('Invalid brand status.')
   }
+}
+
+function normalizeBrandColor(value: FormDataEntryValue | null) {
+  const normalized = normalizeRequiredValue(value) || defaultBrandColor
+
+  if (!/^#[0-9A-Fa-f]{6}$/.test(normalized)) {
+    throw new Error('Brand color must be a valid hex color.')
+  }
+
+  return normalized.toLowerCase()
 }
 
 function normalizeOptionalUrl(value: FormDataEntryValue | null, fieldName: string) {
@@ -43,8 +57,30 @@ function normalizeOptionalUrl(value: FormDataEntryValue | null, fieldName: strin
   return parsedUrl.toString()
 }
 
+async function getUploadedLogo(formData: FormData) {
+  const file = formData.get('imageFile')
+
+  if (!(file instanceof File) || file.size === 0) {
+    return null
+  }
+
+  if (file.size > maxImageSize) {
+    throw new Error('Logo must be 5 MB or smaller.')
+  }
+
+  if (!allowedImageTypes.has(file.type)) {
+    throw new Error('Logo must be JPG, PNG, WebP, GIF, or SVG.')
+  }
+
+  return {
+    data: Buffer.from(await file.arrayBuffer()),
+    mimeType: file.type,
+  }
+}
+
 function revalidateBrands(brandId?: string) {
   revalidatePath('/os/brands')
+  revalidatePath('/os/today')
 
   if (brandId) {
     revalidatePath(`/os/brands/${brandId}`)
@@ -54,12 +90,14 @@ function revalidateBrands(brandId?: string) {
 export async function createBrand(formData: FormData) {
   const userId = await getOsUserId()
   const title = normalizeRequiredValue(formData.get('title'))
+  const brandColor = normalizeBrandColor(formData.get('brandColor'))
   const description = normalizeNullableValue(formData.get('description'))
   const imageUrl = normalizeOptionalUrl(formData.get('imageUrl'), 'Image URL')
   const websiteUrl = normalizeOptionalUrl(formData.get('websiteUrl'), 'Website URL')
   const status = normalizeRequiredValue(formData.get('status')) || 'ACTIVE'
   const direction = normalizeNullableValue(formData.get('direction'))
   const nextDevelopment = normalizeNullableValue(formData.get('nextDevelopment'))
+  const uploadedLogo = await getUploadedLogo(formData)
 
   if (!title) {
     throw new Error('Title is required.')
@@ -72,20 +110,49 @@ export async function createBrand(formData: FormData) {
       INSERT INTO os_brands (
         user_id,
         title,
+        brand_color,
         description,
         image_url,
         website_url,
         status,
         direction,
-        next_development
+        next_development,
+        image_blob,
+        image_mime_type,
+        image_uploaded_at
       )
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10::bytea, $11, CASE WHEN $10::bytea IS NULL THEN NULL ELSE now() END)
       RETURNING id
     `,
-    [userId, title, description, imageUrl, websiteUrl, status, direction, nextDevelopment]
+    [
+      userId,
+      title,
+      brandColor,
+      description,
+      imageUrl,
+      websiteUrl,
+      status,
+      direction,
+      nextDevelopment,
+      uploadedLogo?.data ?? null,
+      uploadedLogo?.mimeType ?? null,
+    ]
   )
 
   const brandId = result.rows[0]?.id
+
+  if (brandId && uploadedLogo) {
+    await getDbPool().query(
+      `
+        UPDATE os_brands
+        SET image_url = $1, updated_at = now()
+        WHERE id = $2
+          AND user_id = $3
+      `,
+      [`/os/brands/image/${brandId}`, brandId, userId]
+    )
+  }
+
   revalidateBrands(brandId)
 
   return { id: brandId }
@@ -95,12 +162,16 @@ export async function updateBrand(formData: FormData) {
   const userId = await getOsUserId()
   const brandId = normalizeRequiredValue(formData.get('id'))
   const title = normalizeRequiredValue(formData.get('title'))
+  const brandColor = normalizeBrandColor(formData.get('brandColor'))
   const description = normalizeNullableValue(formData.get('description'))
   const imageUrl = normalizeOptionalUrl(formData.get('imageUrl'), 'Image URL')
   const websiteUrl = normalizeOptionalUrl(formData.get('websiteUrl'), 'Website URL')
   const status = normalizeRequiredValue(formData.get('status')) || 'ACTIVE'
   const direction = normalizeNullableValue(formData.get('direction'))
   const nextDevelopment = normalizeNullableValue(formData.get('nextDevelopment'))
+  const removeImage = formData.get('removeImage') === 'true'
+  const uploadedLogo = await getUploadedLogo(formData)
+  const logoPath = uploadedLogo ? `/os/brands/image/${brandId}` : null
 
   if (!brandId || !title) {
     throw new Error('Brand id and title are required.')
@@ -113,17 +184,53 @@ export async function updateBrand(formData: FormData) {
       UPDATE os_brands
       SET
         title = $1,
-        description = $2,
-        image_url = $3,
-        website_url = $4,
-        status = $5,
-        direction = $6,
-        next_development = $7,
+        brand_color = $2,
+        description = $3,
+        image_url = CASE
+          WHEN $9::boolean THEN NULL
+          WHEN $10::bytea IS NOT NULL THEN $11
+          WHEN $4::text IS NOT NULL THEN $4
+          ELSE image_url
+        END,
+        website_url = $5,
+        status = $6,
+        direction = $7,
+        next_development = $8,
+        image_blob = CASE
+          WHEN $9::boolean THEN NULL
+          WHEN $10::bytea IS NOT NULL THEN $10::bytea
+          ELSE image_blob
+        END,
+        image_mime_type = CASE
+          WHEN $9::boolean THEN NULL
+          WHEN $10::bytea IS NOT NULL THEN $12
+          ELSE image_mime_type
+        END,
+        image_uploaded_at = CASE
+          WHEN $9::boolean THEN NULL
+          WHEN $10::bytea IS NOT NULL THEN now()
+          ELSE image_uploaded_at
+        END,
         updated_at = now()
-      WHERE id = $8
-        AND user_id = $9
+      WHERE id = $13
+        AND user_id = $14
     `,
-    [title, description, imageUrl, websiteUrl, status, direction, nextDevelopment, brandId, userId]
+    [
+      title,
+      brandColor,
+      description,
+      imageUrl,
+      websiteUrl,
+      status,
+      direction,
+      nextDevelopment,
+      removeImage,
+      uploadedLogo?.data ?? null,
+      logoPath,
+      uploadedLogo?.mimeType ?? null,
+      brandId,
+      userId,
+    ]
   )
 
   if (result.rowCount === 0) {

@@ -9,6 +9,7 @@ import {
   IconBrain,
   IconBuildingStore,
   IconCalendar,
+  IconFlask,
   IconHome,
   IconLogout,
   IconPackage,
@@ -28,6 +29,7 @@ const navigation = [
   { label: 'Brands', href: '/os/brands', icon: IconBuildingStore },
   { label: 'Affiliate', href: '/os/affiliate', icon: IconAffiliate },
   { label: 'Products', href: '/os/products', icon: IconPackage },
+  { label: 'Labs', href: '/os/labs', icon: IconFlask },
   { label: 'Thoughts', href: '/os/thoughts', icon: IconBrain },
   { label: 'Social Medias', href: '/os/socmeds', icon: IconShare2 },
 ] satisfies Array<{ href: string; icon: Icon; label: string }>
