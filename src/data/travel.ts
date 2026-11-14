@@ -13,6 +13,11 @@ export type VisitedCountry = {
 
 export const visitedProvinces: VisitedProvince[] = [
   {
+    province: 'Aceh',
+    cities: [],
+    note: 'Visited.',
+  },
+  {
     province: 'Sumatera Utara',
     cities: [],
     note: 'Visited.',
@@ -24,6 +29,11 @@ export const visitedProvinces: VisitedProvince[] = [
   },
   {
     province: 'Kepulauan Riau',
+    cities: [],
+    note: 'Visited.',
+  },
+  {
+    province: 'Jambi',
     cities: [],
     note: 'Visited.',
   },
