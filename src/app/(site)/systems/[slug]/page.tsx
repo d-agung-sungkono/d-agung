@@ -26,6 +26,23 @@ const detailContentBySlug: Record<string, SystemDetailContent> = {
     impact:
       'The commercial direction is to sell clear outcomes from day one instead of staying in endless validation mode: publish the offer, show the price, collect waitlist or email demand while products are prepared, then refine from real customer usage and feedback.',
   },
+  'query-flow': {
+    problem:
+      'Apache Superset provides a flexible SQL workspace, but recurring organizational workflows often need a more opinionated execution flow. In the current FASIH SQL Lab context, collections of SQL files must follow BPS business processes, handle large and potentially interrupted results, and produce consistently organized Excel outputs.',
+    solution:
+      'QueryFlow is an open-source Chrome extension designed as a companion for Apache Superset. Its current development is focused on FASIH SQL Lab: importing folders of SQL files, running selected queries individually or sequentially, applying region parameters, and exporting results according to BPS operational needs. Large results can be downloaded in checkpoints or split into separate workbooks using one or two result columns.',
+    impact:
+      'The project turns recurring SQL work into a more repeatable flow while keeping the operator in control of the active Superset session. FASIH and BPS workflows are the present implementation focus, while the open-source direction leaves room for adaptation to other Apache Superset environments. Collaboration is open through testing, issue reports, workflow proposals, and focused code contributions.',
+    architecture:
+      'Built with TypeScript, React, and Vite as a Chrome side-panel extension that works alongside Apache Superset. SQL source files remain unchanged, imported snapshots stay local in the browser, and queries run through the user\'s existing authenticated SQL Lab session without collecting login credentials. FASIH-specific behavior is developed around the business processes currently used at BPS.',
+    proof: [
+      {
+        type: 'link',
+        label: 'Source, documentation, and contributions on GitHub',
+        href: 'https://github.com/d-agung-sungkono/query-flow',
+      },
+    ],
+  },
   wriday: {
     problem:
       'Wriday is still in a confusing exploration stage. The writing-practice space already has many products that help with prompts, rewriting, feedback, and learning loops, so the main question is whether this idea has a specific angle that is actually different enough.',
@@ -109,6 +126,14 @@ export default async function SystemDetailPage({
             •
           </span>
           <span className={styles.year}>{system.year}</span>
+          {system.openForCollaboration ? (
+            <>
+              <span className={styles.dot} aria-hidden="true">
+                •
+              </span>
+              <span className={styles.status}>Open for collaboration</span>
+            </>
+          ) : null}
         </div>
       </header>
 

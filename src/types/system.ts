@@ -13,6 +13,7 @@ export type SystemItem = {
   status: SystemStatus
   year: string
   featured?: boolean
+  openForCollaboration?: boolean
   productUrl?: string
   productLabel?: string
   images?: SystemImage[]

@@ -40,6 +40,14 @@ export default function SystemsPage() {
                       <span className={styles.featured}>Featured</span>
                     </>
                   ) : null}
+                  {system.openForCollaboration ? (
+                    <>
+                      <span className={styles.dot} aria-hidden="true">
+                        •
+                      </span>
+                      <span className={styles.featured}>Open for collaboration</span>
+                    </>
+                  ) : null}
                 </div>
 
                 <h2 className={styles.systemTitle}>{system.title}</h2>
