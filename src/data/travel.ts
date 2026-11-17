@@ -13,28 +13,38 @@ export type VisitedCountry = {
 
 export const visitedProvinces: VisitedProvince[] = [
   {
+    province: 'Aceh',
+    cities: ['Langsa'],
+    note: 'Visited.',
+  },
+  {
     province: 'Sumatera Utara',
-    cities: [],
+    cities: ['Medan', 'Pakpak Bharat'],
     note: 'Visited.',
   },
   {
     province: 'Sumatera Selatan',
-    cities: [],
+    cities: ['OKI', 'Palembang'],
     note: 'Visited.',
   },
   {
     province: 'Kepulauan Riau',
-    cities: [],
+    cities: ['Tanjung Pinang'],
+    note: 'Visited.',
+  },
+  {
+    province: 'Jambi',
+    cities: ['Jambi'],
     note: 'Visited.',
   },
   {
     province: 'Jawa Barat',
-    cities: [],
+    cities: ['Bandung'],
     note: 'Visited.',
   },
   {
     province: 'Banten',
-    cities: [],
+    cities: ['Tangerang'],
     note: 'Visited.',
   },
   {
@@ -84,27 +94,27 @@ export const visitedProvinces: VisitedProvince[] = [
   },
   {
     province: 'Kalimantan Selatan',
-    cities: [],
+    cities: ['Banjarmasin'],
     note: 'Visited.',
   },
   {
     province: 'Sulawesi Barat',
-    cities: [],
+    cities: ['Mamuju'],
     note: 'Visited.',
   },
   {
     province: 'Sulawesi Tenggara',
-    cities: [],
+    cities: ['Kendari'],
     note: 'Visited.',
   },
   {
     province: 'Gorontalo',
-    cities: [],
+    cities: ['Gorontalo'],
     note: 'Visited.',
   },
   {
     province: 'Sulawesi Selatan',
-    cities: [],
+    cities: ['Makassar', 'Maros'],
     note: 'Visited.',
   },
 ]

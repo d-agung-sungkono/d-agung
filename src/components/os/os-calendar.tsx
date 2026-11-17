@@ -243,12 +243,12 @@ function CalendarEventModal({ event, onClose }: { event: OsCalendarEvent | null;
       {event ? (
         <Stack gap="md">
           <div className={styles.calendarDetailHeader} style={getBrandCalendarStyle(event.brandColor)}>
-            <Group justify="space-between" align="flex-start" gap="md" wrap="nowrap">
-              <div>
+            <Group className={styles.calendarDetailHeaderRow} justify="space-between" align="flex-start" gap="md" wrap="nowrap">
+              <div className={styles.calendarDetailHeaderCopy}>
                 <Text component="h3" className={styles.modalSectionTitle}>{event.title}</Text>
                 <Text className={styles.modalSectionHint}>{formatEventDateTime(event.start)}</Text>
               </div>
-              <Group gap="xs" wrap="nowrap">
+              <Group className={styles.calendarDetailHeaderMeta} gap="xs" wrap="nowrap">
                 <Badge className={styles.badge} data-status={event.status} variant="light">
                   {event.status}
                 </Badge>

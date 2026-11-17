@@ -2888,9 +2888,31 @@
 
 .calendarDetailHeader {
   padding: 0.85rem;
+  overflow: hidden;
   border: 1px solid var(--calendar-brand-border, #d7deea);
   border-radius: 0.55rem;
   background: var(--calendar-brand-bg, #fbfcfe);
+}
+
+.calendarDetailHeaderRow {
+  min-width: 0;
+}
+
+.calendarDetailHeaderCopy {
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+.calendarDetailHeaderCopy .modalSectionTitle,
+.calendarDetailHeaderCopy .modalSectionHint {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.calendarDetailHeaderMeta {
+  flex: 0 1 auto;
+  min-width: 0;
+  justify-content: flex-end;
 }
 
 .calendarDetailGrid {
@@ -2901,8 +2923,8 @@
 
 @media (max-width: 860px) {
   .shell {
-    grid-template-columns: 1fr;
-    grid-template-rows: 4rem auto minmax(0, 1fr);
+    grid-template-columns: 3.75rem minmax(0, 1fr);
+    grid-template-rows: 3.75rem minmax(0, 1fr);
   }
 
   .sidebar {
@@ -2910,26 +2932,37 @@
     z-index: 30;
     grid-column: 1;
     grid-row: 2;
-    height: auto;
-    flex-direction: row;
-    justify-content: space-between;
-    padding: 0.45rem 0.65rem;
-    border-right: 0;
-    border-bottom: 1px solid #e6e6e6;
+    height: 100%;
+    min-height: 0;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.42rem;
+    justify-content: flex-start;
+    padding: 0.65rem 0.45rem;
+    overflow: hidden;
+    border-right: 1px solid #e6e6e6;
+    border-bottom: 0;
+    border-radius: 0;
+    background: #ffffff;
+    box-shadow: none;
+    backdrop-filter: none;
   }
 
   .nav {
-    display: flex;
-    overflow-x: auto;
-    padding-bottom: 0.05rem;
+    display: grid;
+    min-width: 0;
+    overflow: visible;
+    justify-items: center;
+    gap: 0.25rem;
+    padding-bottom: 0;
   }
 
-  .navLink {
-    flex: 0 0 auto;
+  .navLink,
+  .logoutButton {
     justify-content: center;
-    width: 2.25rem;
-    height: 2.25rem;
-    min-width: 2.25rem;
+    width: 2.35rem;
+    height: 2.35rem;
+    min-width: 2.35rem;
     padding: 0;
     white-space: nowrap;
   }
@@ -2943,38 +2976,55 @@
   }
 
   .activeNavLink::before {
-    left: 50%;
-    top: calc(100% + 0.18rem);
-    width: 1.1rem;
-    height: 0.16rem;
-    transform: translateX(-50%);
+    left: -0.5rem;
+    top: 50%;
+    width: 0.16rem;
+    height: 1.1rem;
+    transform: translateY(-50%);
   }
 
   .logoutForm {
-    margin-top: 0;
-  }
-
-  .logoutButton {
-    width: 2.25rem;
-    height: 2.25rem;
-    justify-content: center;
+    margin-top: auto;
   }
 
   .header {
-    grid-column: 1;
+    grid-column: 1 / 3;
     grid-row: 1;
+    height: 3.75rem;
     padding: 0 0.75rem;
   }
 
+  .productMark {
+    width: 1.65rem;
+    height: 1.65rem;
+  }
+
+  .headerTitle {
+    flex: 0 1 auto;
+    min-width: 0;
+    overflow: hidden;
+    font-size: 0.95rem;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .headerBreadcrumb {
+    flex: 1 1 auto;
+    font-size: 0.72rem;
+    letter-spacing: 0.06em;
+  }
+
   .main {
-    grid-column: 1;
-    grid-row: 3;
+    grid-column: 2;
+    grid-row: 2;
     min-height: 0;
     overflow-y: auto;
   }
 
   .content {
-    padding: 1rem;
+    width: 100%;
+    max-width: none;
+    padding: 0.75rem;
   }
 
   .summaryGrid,
@@ -3070,6 +3120,91 @@
 }
 
 @media (max-width: 560px) {
+  .shell {
+    grid-template-columns: 1fr;
+    grid-template-rows: 3.65rem minmax(0, 1fr);
+    height: 100dvh;
+  }
+
+  .header {
+    padding: 0 0.85rem;
+  }
+
+  .topbarLeft {
+    width: 100%;
+  }
+
+  .workspaceName {
+    gap: 0.38rem;
+    width: 100%;
+  }
+
+  .sidebar {
+    position: fixed;
+    right: max(0.5rem, env(safe-area-inset-right));
+    bottom: max(0.45rem, env(safe-area-inset-bottom));
+    left: max(0.5rem, env(safe-area-inset-left));
+    grid-column: auto;
+    grid-row: auto;
+    height: auto;
+    max-height: 3.55rem;
+    flex-direction: row;
+    gap: 0.32rem;
+    justify-content: center;
+    padding: 0.32rem;
+    overflow: hidden;
+    border: 1px solid rgba(31, 31, 31, 0.12);
+    border-radius: 0.78rem;
+    background: rgba(255, 255, 255, 0.94);
+    box-shadow: 0 12px 32px rgba(15, 23, 42, 0.14);
+    backdrop-filter: blur(16px);
+  }
+
+  .nav {
+    display: flex;
+    overflow-x: auto;
+    overflow-y: hidden;
+    justify-items: start;
+    gap: 0.2rem;
+    scrollbar-width: none;
+  }
+
+  .nav::-webkit-scrollbar {
+    display: none;
+  }
+
+  .navLink,
+  .logoutButton {
+    flex: 0 0 auto;
+    width: 2.18rem;
+    height: 2.18rem;
+    min-width: 2.18rem;
+    border-radius: 0.44rem;
+  }
+
+  .activeNavLink::before {
+    left: 50%;
+    top: auto;
+    bottom: -0.32rem;
+    width: 1rem;
+    height: 0.14rem;
+    transform: translateX(-50%);
+  }
+
+  .logoutForm {
+    flex: 0 0 auto;
+    margin-top: 0;
+  }
+
+  .main {
+    grid-column: 1;
+    grid-row: 2;
+  }
+
+  .content {
+    padding: 0.65rem 0.65rem calc(4.45rem + env(safe-area-inset-bottom));
+  }
+
   .brandCard {
     grid-template-columns: 2.85rem minmax(0, 1fr);
   }
@@ -3104,11 +3239,120 @@
 
   .welcome {
     flex-direction: column;
+    gap: 0.7rem;
+    padding: 0.9rem;
+  }
+
+  .welcome > div {
+    min-width: 0;
+    width: 100%;
+  }
+
+  .welcomeTitle,
+  .pageTitle {
+    font-size: clamp(1.45rem, 10vw, 1.9rem);
+    overflow-wrap: anywhere;
+    text-wrap: wrap;
+  }
+
+  .welcomeText {
+    font-size: 0.88rem;
+    line-height: 1.5;
   }
 
   .liveClock {
+    width: 100%;
     max-width: 100%;
+    overflow: hidden;
+    font-size: 0.78rem;
     text-align: left;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .summaryGrid {
+    gap: 0.5rem;
+  }
+
+  .summaryCard {
+    min-height: 5.4rem;
+    padding: 0.7rem;
+  }
+
+  .panelHeader,
+  .targetTodayItem {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .targetTodayItem {
+    gap: 0.55rem;
+  }
+
+  .badge {
+    min-width: 0;
+  }
+
+  .calendarDetailHeaderRow {
+    align-items: stretch;
+    flex-direction: column;
+    gap: 0.65rem;
+  }
+
+  .calendarDetailHeaderMeta {
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  .calendarDetailHeaderCopy .modalSectionTitle,
+  .calendarDetailHeaderCopy .modalSectionHint {
     white-space: normal;
+  }
+
+  .calendarDetailGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 360px) {
+  .header {
+    padding: 0 0.7rem;
+  }
+
+  .productMark {
+    width: 1.5rem;
+    height: 1.5rem;
+  }
+
+  .workspaceName {
+    gap: 0.3rem;
+  }
+
+  .headerTitle {
+    font-size: 0.88rem;
+  }
+
+  .headerBreadcrumb {
+    font-size: 0.66rem;
+    letter-spacing: 0.04em;
+  }
+
+  .content {
+    padding-inline: 0.55rem;
+  }
+
+  .sidebar {
+    right: max(0.38rem, env(safe-area-inset-right));
+    bottom: max(0.38rem, env(safe-area-inset-bottom));
+    left: max(0.38rem, env(safe-area-inset-left));
+    max-height: 3.35rem;
+    padding: 0.28rem;
+  }
+
+  .navLink,
+  .logoutButton {
+    width: 2.05rem;
+    height: 2.05rem;
+    min-width: 2.05rem;
   }
 }

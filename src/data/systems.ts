@@ -13,6 +13,17 @@ export const systems: SystemItem[] = [
     productLabel: 'Visit WarungKit',
   },
   {
+    slug: 'query-flow',
+    title: 'QueryFlow',
+    summary:
+      'An open-source companion for Apache Superset, currently developed around FASIH SQL Lab and the operational workflows used at BPS.',
+    status: 'running',
+    year: '2026',
+    openForCollaboration: true,
+    productUrl: 'https://github.com/d-agung-sungkono/query-flow',
+    productLabel: 'Explore & contribute on GitHub',
+  },
+  {
     slug: 'wriday',
     title: 'Wriday',
     summary:
